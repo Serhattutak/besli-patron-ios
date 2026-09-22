@@ -45,6 +45,12 @@
     "plugins": [
       "expo-router"
     ],
-    "scheme": "abacusai1789939013"
+    "scheme": "abacusai1789939013",
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "efb521a5-73f6-4cbd-8357-025593741ce6"
+      }
+    }
   }
 }
