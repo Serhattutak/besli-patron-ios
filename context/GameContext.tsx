@@ -30,6 +30,8 @@ import {
   LIG_CONFIG, ligOlustur, ligHaftaSimule,
   type LigDurum, type LigHaftaSonucu,
 } from '@/services/leagueLogic';
+import { gunSonuReklamKontrol } from '@/services/adManager';
+import { sfx } from '@/services/soundManager';
 
 // NaN koruması: undefined/NaN/null gelen sayıları güvenli hale getirir
 function safeNum(value: unknown, fallback: number): number {
@@ -318,6 +320,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       pitches,
       gunlukGorevler: gorevIlerlet(state.gunlukGorevler, 'rezervasyon', rez),
     });
+    sfx('para');
     return null;
   }, [state, autoSave]);
 
@@ -363,6 +366,11 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
     const tomorrow = gunuHazirla(sonraki);
     autoSave(tomorrow);
+
+    // REKLAM: her 2 oyun gununde 1 gecis reklam (ozet ekrandan sonra)
+    sfx('para');
+    gunSonuReklamKontrol();
+
     return result;
   }, [state, autoSave]);
 

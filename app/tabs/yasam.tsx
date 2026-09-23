@@ -19,7 +19,6 @@ export default function YasamScreen() {
 
   const prestij = state?.prestij ?? 0;
 
-  // Config koruması: KIZ_ARKADAS_CONFIG / LIFE_ITEMS eksik veya bozuksa ekran çökmez
   const kizLevels = (KIZ_ARKADAS_CONFIG?.levels ?? []) as { emoji: string; label: string; cost: number; prestij: number }[];
   const kizRequiredPrestij = KIZ_ARKADAS_CONFIG?.requiredPrestij ?? 0;
   const lifeItems = LIFE_ITEMS ?? [];
@@ -39,14 +38,13 @@ export default function YasamScreen() {
     } else {
       const err = upgradeKizArkadas();
       if (err) showMsg(err, 'error');
-      else showMsg('İlişki ilerledi! ❤️');
+      else showMsg('Ela ilişkiyi ilerletti! ❤️');
     }
     setConfirmItem(null);
   };
 
   const kategoriler = ['ulasim', 'konut', 'luks'] as const;
 
-  // Kiz arkadas
   const kaSeviye = state?.kizArkdasSeviye ?? 0;
   const kaMaxed = kaSeviye >= kizLevels.length;
   const kaNextLevel = kaMaxed ? null : kizLevels[kaSeviye];
@@ -130,15 +128,15 @@ export default function YasamScreen() {
         );
       })}
 
-      {/* Kız Arkadaş */}
+      {/* Ela */}
       <View style={styles.section}>
         <Text style={[styles.sectionTitle, { fontFamily: font }]}>❤️ İlişki</Text>
         <View style={[styles.itemCard, kaPrestijLocked && styles.itemLocked]}>
           <View style={styles.itemHeader}>
             <Text style={styles.itemEmoji}>👩</Text>
             <View style={styles.itemInfo}>
-              <Text style={[styles.itemName, { fontFamily: font }]}>Kız Arkadaş</Text>
-              <Text style={[styles.itemDesc, { fontFamily: font }]}>Hayatına birini kat</Text>
+              <Text style={[styles.itemName, { fontFamily: font }]}>Ela 💕</Text>
+              <Text style={[styles.itemDesc, { fontFamily: font }]}>Hayatına Ela'yı kat</Text>
               {kaSeviye > 0 && (
                 <Text style={[styles.itemCurrentLevel, { fontFamily: font }]}>
                   {kizLevels[kaSeviye - 1]?.emoji ?? ''} {kizLevels[kaSeviye - 1]?.label ?? ''}
@@ -174,7 +172,7 @@ export default function YasamScreen() {
                 style={({ pressed }) => [styles.buyBtn, !kaCanBuy && styles.btnDisabled, pressed && kaCanBuy && styles.btnPressed]}
                 onPress={() => setConfirmItem({ type: 'kiz' })}
                 disabled={!kaCanBuy}
-                accessibilityLabel="Kız arkadaş ilerlet"
+                accessibilityLabel="Ela ile ilişkiyi ilerlet"
                 accessibilityRole="button"
               >
                 <Text style={[styles.buyBtnText, { fontFamily: font }]}>İlerlet</Text>

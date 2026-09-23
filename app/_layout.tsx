@@ -11,6 +11,9 @@ import * as SplashScreen from 'expo-splash-screen';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GameProvider } from '@/context/GameContext';
 import { Colors } from '@/constants/colors';
+import Ogretici from '@/components/Ogretici';
+import { sesBaslat } from '@/services/soundManager';
+import { reklamlariBaslat } from '@/services/adManager';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -84,6 +87,12 @@ export default function RootLayout() {
     return () => clearTimeout(timer);
   }, [fontsLoaded, fontError]);
 
+  // Ses ve reklam sistemini bir kez başlat
+  useEffect(() => {
+    sesBaslat();
+    reklamlariBaslat();
+  }, []);
+
   if (!fontsLoaded && !fontError) {
     return null;
   }
@@ -108,6 +117,8 @@ export default function RootLayout() {
             <Stack.Screen name="gameover" />
             <Stack.Screen name="+not-found" />
           </Stack>
+
+          <Ogretici />
         </GameProvider>
       </SafeAreaProvider>
     </ErrorBoundary>

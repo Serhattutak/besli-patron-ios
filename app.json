@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Besli Patron",
+    "name": "Beşli Patron",
     "slug": "abacusai-mobile-apps",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -8,8 +8,11 @@
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.abacusai.beslipatron.t1789939013",
-      "buildNumber": "1"
+      "bundleIdentifier": "com.sardurtechnologies.beslipatron",
+      "buildNumber": "1",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -19,7 +22,7 @@
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.abacusai.beslipatron.t1789939013",
+      "package": "com.sardurtechnologies.beslipatron",
       "versionCode": 1,
       "intentFilters": [
         {
@@ -43,7 +46,17 @@
       "output": "single"
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      [
+        "react-native-google-mobile-ads",
+        {
+          "androidAppId": "ca-app-pub-3940256099942544~3347511713",
+          "iosAppId": "ca-app-pub-3940256099942544~1458002511",
+          "userTrackingUsageDescription": "Reklam deneyimini iyileştirmek için kullanılır.",
+          "delayAppMeasurementInit": true
+        }
+      ],
+      "expo-iap"
     ],
     "scheme": "abacusai1789939013",
     "extra": {
