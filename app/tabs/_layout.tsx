@@ -5,11 +5,11 @@ import { View, Text, StyleSheet, Platform } from 'react-native';
 import { useFonts, SpaceMono_400Regular, SpaceMono_700Bold } from '@expo-google-fonts/space-mono';
 import * as SplashScreen from 'expo-splash-screen';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { GameProvider } from '@/context/GameContext';
-import { Colors } from '@/constants/colors';
-import Ogretici from '@/components/Ogretici';
-import { sesBaslat } from '@/services/soundManager';
-import { reklamlariBaslat } from '@/services/adManager';
+import { GameProvider } from '../../context/GameContext';
+import { Colors } from '../../constants/colors';
+import Ogretici from '../../components/Ogretici';
+import { sesBaslat } from '../../services/soundManager';
+import { reklamlariBaslat } from '../../services/adManager';
 
 SplashScreen.preventAutoHideAsync();
 

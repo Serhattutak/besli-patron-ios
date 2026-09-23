@@ -2,8 +2,8 @@ import React from 'react';
 import { View, Text, Pressable, StyleSheet, Platform } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useGame } from '@/context/GameContext';
-import { Colors } from '@/constants/colors';
+import { useGame } from '../context/GameContext';
+import { Colors } from '../constants/colors';
 
 export default function GameOverScreen() {
   const insets = useSafeAreaInsets();

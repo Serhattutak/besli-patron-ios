@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import type { GameState } from '@/types/game';
+import type { GameState } from '../types/game';
 
 const SAVE_KEY = 'beslipatron_save';
 

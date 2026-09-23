@@ -11,9 +11,9 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
-import { useGame } from '@/context/GameContext';
-import { odulluReklamIzle } from '@/services/adManager';
-import { sfx } from '@/services/soundManager';
+import { useGame } from '../context/GameContext';
+import { odulluReklamIzle } from '../services/adManager';
+import { sfx } from '../services/soundManager';
 
 export default function OdulluReklamButonu({ odulEnerji = 1 }: { odulEnerji?: number }) {
   const game = useGame() as any;

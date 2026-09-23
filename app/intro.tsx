@@ -2,8 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, Pressable, StyleSheet, Animated, Platform, Easing } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useGame } from '@/context/GameContext';
-import { Colors } from '@/constants/colors';
+import { useGame } from '../context/GameContext';
+import { Colors } from '../constants/colors';
 
 interface StoryScene {
   chapter: string;

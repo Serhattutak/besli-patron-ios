@@ -5,23 +5,23 @@ import React, { useState } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet, Modal,
 } from 'react-native';
-import { useGame } from '@/context/GameContext';
-import Saha2D from '@/components/Saha2D';
+import { useGame } from '../../context/GameContext';
+import Saha2D from '../../components/Saha2D';
 import {
   PITCH_DEFS, PITCH_UPGRADE_CONFIG, SAHA_TIP_BILGI, YILDIZ_SAHA,
   pitchUpgradeMaliyeti, insaatAsamalari,
   type YildizAsama, type PitchUpgradeDef,
-} from '@/constants/pitchConfig';
-import { UPGRADE_CONFIG, ENERJI_BAKIM, type UpgradeType } from '@/constants/gameConfig';
+} from '../../constants/pitchConfig';
+import { UPGRADE_CONFIG, ENERJI_BAKIM, type UpgradeType } from '../../constants/gameConfig';
 import {
   MAX_SPONSOR, SPONSORLAR, sponsorUygunMu, toplamSponsorGeliri,
   type SponsorAnlasma,
-} from '@/constants/sponsorConfig';
-import { RENK, FONT } from '@/constants/theme';
+} from '../../constants/sponsorConfig';
+import { RENK, FONT } from '../../constants/theme';
 import {
   sahaGunlukGideri, sahaGunlukPasifGelir,
-} from '@/services/gameLogic';
-import type { PitchState } from '@/types/game';
+} from '../../services/gameLogic';
+import type { PitchState } from '../../types/game';
 
 // GameContext'teki BAKIM_COST ile aynı değer (orada export edilmediği için burada da tanımlı)
 const BAKIM_UCRETI = 500;

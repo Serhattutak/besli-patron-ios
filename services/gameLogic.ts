@@ -1,7 +1,7 @@
 // ============================================
 // BEŞLİ PATRON — gameLogic.ts (TAM SÜRÜM + ÇOKLU SAHA + SEVİYELİ PERSONEL + OLAY ETKİLERİ)
 // ============================================
-import type { Reservation, DailyTask, GameState, LifeItem, CityData, StaffMember, TurnuvaResult, PitchState, SahaAsama, Upgrades } from '@/types/game';
+import type { Reservation, DailyTask, GameState, LifeItem, CityData, StaffMember, TurnuvaResult, PitchState, SahaAsama, Upgrades } from '../types/game';
 import {
   MUSTERI_TIPLERI, TIME_SLOTS, GOREV_HAVUZU,
   ENERJI_REZERVASYON, ENERJI_GUN_SONU, MAX_ENERJI,
@@ -10,8 +10,8 @@ import {
   LIFE_ITEMS, CITIES, STAFF_CONFIG, TURNUVA_CONFIG, MEMNUNIYET_CONFIG,
   KANTIN_CONFIG, OLAY_HAVUZU,
   type MusteriTipi,
-} from '@/constants/gameConfig';
-import { YILDIZ_SAHA, ISLETME_YERI, PITCH_DEFS, PITCH_UPGRADE_CONFIG, insaatAsamalari, type YildizAsama, type PitchUpgradeDef } from '@/constants/pitchConfig';
+} from '../constants/gameConfig';
+import { YILDIZ_SAHA, ISLETME_YERI, PITCH_DEFS, PITCH_UPGRADE_CONFIG, insaatAsamalari, type YildizAsama, type PitchUpgradeDef } from '../constants/pitchConfig';
 
 // NaN koruması: undefined/NaN/null gelen sayıları güvenli hale getirir
 function safeNum(value: unknown, fallback: number): number {

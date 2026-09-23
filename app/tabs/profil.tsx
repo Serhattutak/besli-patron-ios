@@ -9,14 +9,14 @@ import {
   Modal,
 } from 'react-native';
 import { router } from 'expo-router';
-import { useGame } from '@/context/GameContext';
-import { Colors } from '@/constants/colors';
+import { useGame } from '../../context/GameContext';
+import { Colors } from '../../constants/colors';
 import {
   JETON_ENERJI_COST,
   JETON_ENERJI_GAIN,
   MAX_ENERJI,
   CITIES,
-} from '@/constants/gameConfig';
+} from '../../constants/gameConfig';
 
 export default function ProfilScreen() {
   const {

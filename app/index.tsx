@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Redirect } from 'expo-router';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
-import { hasSavedGame } from '@/services/storage';
-import { Colors } from '@/constants/colors';
-import { useGame } from '@/context/GameContext';
+import { hasSavedGame } from '../services/storage';
+import { Colors } from '../constants/colors';
+import { useGame } from '../context/GameContext';
 
 export default function Index() {
   const { state, loading } = useGame();

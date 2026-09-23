@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, Pressable, ScrollView, StyleSheet, Platform, Modal } from 'react-native';
-import { useGame } from '@/context/GameContext';
-import { Colors } from '@/constants/colors';
-import { LIFE_ITEMS, KIZ_ARKADAS_CONFIG, type LifeItemConfig } from '@/constants/gameConfig';
+import { useGame } from '../../context/GameContext';
+import { Colors } from '../../constants/colors';
+import { LIFE_ITEMS, KIZ_ARKADAS_CONFIG, type LifeItemConfig } from '../../constants/gameConfig';
 
 const KATEGORI_LABELS: Record<string, { emoji: string; label: string }> = {
   ulasim: { emoji: '🚗', label: 'Ulaşım' },

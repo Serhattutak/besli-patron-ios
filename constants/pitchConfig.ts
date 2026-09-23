@@ -1,7 +1,7 @@
 // ============================================
 // BEŞLİ PATRON — Saha Yapılandırması (ÇOKLU SAHA)
 // ============================================
-import type { PitchDefinition, SahaTipi } from '@/types/game';
+import type { PitchDefinition, SahaTipi } from '../types/game';
 
 // === İNŞAAT AŞAMASI YAPISI ===
 export interface YildizAsama {

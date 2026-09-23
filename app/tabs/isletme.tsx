@@ -5,22 +5,22 @@ import React, { useState } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet, Modal,
 } from 'react-native';
-import { useGame } from '@/context/GameContext';
+import { useGame } from '../../context/GameContext';
 import {
   DAILY_KIRA, DAILY_ELEKTRIK_SU, UPGRADE_CONFIG,
   STAFF_CONFIG, TURNUVA_CONFIG, OLAY_HAVUZU, type UpgradeType,
-} from '@/constants/gameConfig';
-import { ISLETME_YERI, SAHA_TIP_BILGI } from '@/constants/pitchConfig';
+} from '../../constants/gameConfig';
+import { ISLETME_YERI, SAHA_TIP_BILGI } from '../../constants/pitchConfig';
 import {
   sahaGunlukGideri, sahaGunlukPasifGelir,
   KASIYER_ENERJI_INDIRIMI, TEMIZLIKCI_MEMNUNIYET_BONUSU,
   ANTRENOR_TURNUVA_BONUSU, GUVENLIK_TEKLIF_BONUSU,
-} from '@/services/gameLogic';
+} from '../../services/gameLogic';
 import {
   LIG_CONFIG, puandanSirala,
   type LigDurum, type LigHaftaSonucu,
-} from '@/services/leagueLogic';
-import type { PitchState, StaffMember, TurnuvaResult } from '@/types/game';
+} from '../../services/leagueLogic';
+import type { PitchState, StaffMember, TurnuvaResult } from '../../types/game';
 
 function para(n: number): string {
   return `${Math.round(n).toLocaleString('tr-TR')}₺`;

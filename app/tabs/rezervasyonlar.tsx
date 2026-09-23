@@ -5,11 +5,11 @@ import React, { useState } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
 } from 'react-native';
-import { useGame } from '@/context/GameContext';
-import { MAX_ENERJI } from '@/constants/gameConfig';
-import { SAHA_TIP_BILGI } from '@/constants/pitchConfig';
-import { rezervasyonEnerjiMaliyeti } from '@/services/gameLogic';
-import type { Reservation, PitchState } from '@/types/game';
+import { useGame } from '../../context/GameContext';
+import { MAX_ENERJI } from '../../constants/gameConfig';
+import { SAHA_TIP_BILGI } from '../../constants/pitchConfig';
+import { rezervasyonEnerjiMaliyeti } from '../../services/gameLogic';
+import type { Reservation, PitchState } from '../../types/game';
 
 function para(n: number): string {
   return `${Math.round(n).toLocaleString('tr-TR')}₺`;

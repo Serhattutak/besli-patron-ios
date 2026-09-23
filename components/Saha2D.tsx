@@ -4,8 +4,8 @@
 // ============================================
 import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { RENK, FONT } from '@/constants/theme';
-import { SPONSORLAR } from '@/constants/sponsorConfig';
+import { RENK, FONT } from '../constants/theme';
+import { SPONSORLAR } from '../constants/sponsorConfig';
 
 /* ---------- tipler ---------- */
 interface SimOyuncu {

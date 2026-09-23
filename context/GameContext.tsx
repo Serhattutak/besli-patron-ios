@@ -2,14 +2,14 @@
 // BEŞLİ PATRON — GameContext.tsx (ÇOKLU SAHA + SPONSORLAR + GÜVENLİK + LİG)
 // ============================================
 import React, { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
-import type { GameState, Reservation, DailyTask, PitchState, SahaAsama, Upgrades, TurnuvaResult, HavaTipi } from '@/types/game';
-import type { DayEndResult } from '@/services/gameLogic';
+import type { GameState, Reservation, DailyTask, PitchState, SahaAsama, Upgrades, TurnuvaResult, HavaTipi } from '../types/game';
+import type { DayEndResult } from '../services/gameLogic';
 import {
   createInitialState, processEndDay, migrateState,
   generateReservations, generatePitchReservations,
   siradakiAsama, simulateTurnuva, rezervasyonEnerjiMaliyeti,
-} from '@/services/gameLogic';
-import { saveGame, loadGame, deleteSave } from '@/services/storage';
+} from '../services/gameLogic';
+import { saveGame, loadGame, deleteSave } from '../services/storage';
 import {
   MAX_ENERJI, ENERJI_BAKIM,
   JETON_ENERJI_COST, JETON_ENERJI_GAIN,
@@ -18,20 +18,20 @@ import {
   STAFF_CONFIG, TURNUVA_CONFIG,
   MEMNUNIYET_CONFIG, OLAY_HAVUZU,
   INITIAL_SAHA_KALITESI,
-} from '@/constants/gameConfig';
+} from '../constants/gameConfig';
 import {
   YILDIZ_SAHA, ISLETME_YERI, PITCH_DEFS,
   PITCH_UPGRADE_CONFIG, pitchUpgradeMaliyeti,
-} from '@/constants/pitchConfig';
+} from '../constants/pitchConfig';
 import {
   MAX_SPONSOR, SPONSORLAR, sponsorUygunMu, toplamSponsorGeliri,
-} from '@/constants/sponsorConfig';
+} from '../constants/sponsorConfig';
 import {
   LIG_CONFIG, ligOlustur, ligHaftaSimule,
   type LigDurum, type LigHaftaSonucu,
-} from '@/services/leagueLogic';
-import { gunSonuReklamKontrol } from '@/services/adManager';
-import { sfx } from '@/services/soundManager';
+} from '../services/leagueLogic';
+import { gunSonuReklamKontrol } from '../services/adManager';
+import { sfx } from '../services/soundManager';
 
 // NaN koruması: undefined/NaN/null gelen sayıları güvenli hale getirir
 function safeNum(value: unknown, fallback: number): number {

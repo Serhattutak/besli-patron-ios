@@ -13,8 +13,8 @@ import {
   View,
 } from 'react-native';
 import { useIAP } from 'expo-iap';
-import { useGame } from '@/context/GameContext';
-import { sfx } from '@/services/soundManager';
+import { useGame } from '../context/GameContext';
+import { sfx } from '../services/soundManager';
 
 // BU ID'LER App Store Connect'te oluşturacağın ürünlerle HARFİ HARFİNE aynı olmalı.
 const PAKETLER = [
