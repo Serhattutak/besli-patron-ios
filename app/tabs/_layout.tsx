@@ -1,12 +1,27 @@
-import React from 'react';
+﻿import React from 'react';
 import { Tabs } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/colors';
 
-// Palet anahtarları güvenli şekilde okunur; tanımsızsa varsayılana düşer
+// Palet anahtarlarini guvenli oku; tanimsizsa varsayilana dus
 const palette = Colors as Record<string, string | undefined>;
-const accent = palette.primary ?? palette.accent ?? palette.textPrimary ?? '#F5A623';
-const surface = palette.surface ?? palette.card ?? palette.background ?? '#14142B';
+const accent = palette.accent ?? palette.primary ?? '#52B788';
+const surface = palette.surface ?? palette.card ?? '#14142B';
 const muted = palette.textSecondary ?? palette.textMuted ?? '#8E8E93';
+
+const IKONLAR: Record<string, keyof typeof Ionicons.glyphMap> = {
+  saha: 'football',
+  isletme: 'business',
+  yasam: 'home',
+  rezervasyonlar: 'call',
+  profil: 'person',
+};
+
+function ikonVer(ad: keyof typeof IKONLAR) {
+  return ({ color, size }: { color: string; size: number }) => (
+    <Ionicons name={IKONLAR[ad]} size={size} color={color} />
+  );
+}
 
 export default function TabsLayout() {
   return (
@@ -21,11 +36,11 @@ export default function TabsLayout() {
         },
       }}
     >
-      <Tabs.Screen name="saha" options={{ title: 'Saha' }} />
-      <Tabs.Screen name="isletme" options={{ title: 'İşletme' }} />
-      <Tabs.Screen name="yasam" options={{ title: 'Yaşam' }} />
-      <Tabs.Screen name="rezervasyonlar" options={{ title: 'Rezervasyonlar' }} />
-      <Tabs.Screen name="profil" options={{ title: 'Profil' }} />
+      <Tabs.Screen name="saha" options={{ title: 'Saha', tabBarIcon: ikonVer('saha') }} />
+      <Tabs.Screen name="isletme" options={{ title: 'İşletme', tabBarIcon: ikonVer('isletme') }} />
+      <Tabs.Screen name="yasam" options={{ title: 'Yaşam', tabBarIcon: ikonVer('yasam') }} />
+      <Tabs.Screen name="rezervasyonlar" options={{ title: 'Rezervasyonlar', tabBarIcon: ikonVer('rezervasyonlar') }} />
+      <Tabs.Screen name="profil" options={{ title: 'Profil', tabBarIcon: ikonVer('profil') }} />
     </Tabs>
   );
 }

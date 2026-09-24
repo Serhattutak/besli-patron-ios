@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+﻿import React, { useEffect } from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { View, Text, StyleSheet } from 'react-native';
@@ -12,6 +12,8 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GameProvider } from '../context/GameContext';
 import { Colors } from '../constants/colors';
 import Ogretici from '../components/Ogretici';
+import OyunHUD from '../components/OyunHUD';
+import OlayModal from '../components/OlayModal';
 import { sesBaslat } from '../services/soundManager';
 import { reklamlariBaslat } from '../services/adManager';
 
@@ -37,7 +39,7 @@ class ErrorBoundary extends React.Component<
     if (this.state.hasError) {
       return (
         <View style={ebStyles.container}>
-          <Text style={ebStyles.title}>Hata Oluştu</Text>
+          <Text style={ebStyles.title}>Hata Olustu</Text>
           <Text style={ebStyles.message}>{this.state.error}</Text>
         </View>
       );
@@ -87,7 +89,7 @@ export default function RootLayout() {
     return () => clearTimeout(timer);
   }, [fontsLoaded, fontError]);
 
-  // Ses ve reklam sistemini bir kez başlat
+  // Ses ve reklam sistemini bir kez baslat
   useEffect(() => {
     sesBaslat();
     reklamlariBaslat();
@@ -103,21 +105,27 @@ export default function RootLayout() {
         <GameProvider>
           <StatusBar style="light" />
 
-          <Stack
-            screenOptions={{
-              headerShown: false,
-              contentStyle: {
-                backgroundColor: Colors.background,
-              },
-            }}
-          >
-            <Stack.Screen name="index" />
-            <Stack.Screen name="intro" />
-            <Stack.Screen name="tabs" />
-            <Stack.Screen name="gameover" />
-            <Stack.Screen name="+not-found" />
-          </Stack>
+          <View style={{ flex: 1, backgroundColor: Colors.background }}>
+            {/* HUD en ustte yer kaplar - tum sekmeler otomatik altindan baslar */}
+            <OyunHUD />
 
+            <Stack
+              screenOptions={{
+                headerShown: false,
+                contentStyle: {
+                  backgroundColor: Colors.background,
+                },
+              }}
+            >
+              <Stack.Screen name="index" />
+              <Stack.Screen name="intro" />
+              <Stack.Screen name="tabs" />
+              <Stack.Screen name="gameover" />
+              <Stack.Screen name="+not-found" />
+            </Stack>
+          </View>
+
+          <OlayModal />
           <Ogretici />
         </GameProvider>
       </SafeAreaProvider>

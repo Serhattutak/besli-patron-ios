@@ -1,7 +1,7 @@
-// ============================================
+﻿// ============================================
 // BEŞLİ PATRON — app/tabs/saha.tsx (2D SAHA GÖRSELİ + ÇOKLU SAHA + SPONSORLAR + GÜN DÖNGÜSÜ)
 // ============================================
-import React, { useState } from 'react';
+import React, { useRef,  useState } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet, Modal,
 } from 'react-native';
@@ -102,6 +102,8 @@ export default function SahaScreen() {
   const [hata, setHata] = useState(false);
   const [canliIzle, setCanliIzle] = useState(true);
   const [gunSonu, setGunSonu] = useState<any>(null);
+  const scrollRef = useRef<ScrollView>(null);
+  const panelKonum = useRef(0);
 
   const sahaListesi = Object.values(state?.pitches ?? {}).filter(Boolean) as PitchState[];
   const aktif = state?.pitches?.[state.activePitchId ?? 'yildiz'] ?? sahaListesi[0];
@@ -247,7 +249,7 @@ export default function SahaScreen() {
 
   return (
     <View style={s.ekran}>
-      <ScrollView contentContainerStyle={s.icerik} showsVerticalScrollIndicator={false}>
+      <ScrollView ref={scrollRef} contentContainerStyle={s.icerik} showsVerticalScrollIndicator={false}>
 
         {/* === MESAJ === */}
         {mesaj ? (
@@ -271,8 +273,12 @@ export default function SahaScreen() {
               style={[s.sahaKart, k.aktifMi && s.sahaKartAktif, !k.sahip && s.sahaKartKilitli]}
               activeOpacity={0.8}
               onPress={() => {
-                if (k.sahip) aktifYap(k.id);
-                else bildir(null, `${k.ad} henüz satın alınmadı — aşağıdaki katalogdan arsa al.`);
+                if (k.sahip) {
+                  aktifYap(k.id);
+                  setTimeout(() => scrollRef.current?.scrollTo({ y: Math.max(0, panelKonum.current - 8), animated: true }), 60);
+                } else {
+                  bildir(null, `${k.ad} henüz satın alınmadı — aşağıdaki katalogdan arsa al.`);
+                }
               }}
             >
               <View style={s.sahaKartUst}>
@@ -314,7 +320,7 @@ export default function SahaScreen() {
         <Text style={s.ipucu}>Karta dokun → sahayı aktif yap; yönetim paneli o sahaya döner.</Text>
 
         {/* === AKTİF SAHA YÖNETİM PANELİ === */}
-        <View style={s.panel}>
+        <View style={s.panel} onLayout={e => { panelKonum.current = e.nativeEvent.layout.y; }}>
           <View style={s.panelBaslikSatir}>
             <Text style={s.panelBaslik}>{tipBilgi.emoji} {aktif.ad} — Yönetim</Text>
             <View style={[s.durumRozet, { backgroundColor: asamaRengi(aktif.asama ?? 0) }]}>
@@ -396,17 +402,7 @@ export default function SahaScreen() {
           ) : null}
 
           {/* Bakım (Yıldız) */}
-          {yildiz ? (
-            <View style={s.kutu}>
-              <Text style={s.kutuBaslik}>🧹 Günlük Bakım</Text>
-              <Text style={s.muted}>Bakım saha kalitesini korur; aksatırsan kalite düşer.</Text>
-              <TouchableOpacity style={s.butonYesil} onPress={bakimYap} activeOpacity={0.8}>
-                <Text style={s.butonBeyaz}>Bakım Yap — {para(BAKIM_UCRETI)} (⚡{ENERJI_BAKIM})</Text>
-              </TouchableOpacity>
-            </View>
-          ) : null}
-
-          {/* Yükseltme etkileri özeti */}
+{/* Yükseltme etkileri özeti */}
           <View style={s.etkiKutu}>
             <Text style={s.kutuBaslik}>📈 Yükseltme Etkileri</Text>
             <Text style={s.muted}>
