@@ -1,0 +1,3756 @@
+﻿
+===== constants\colors.ts =====
+export const Colors = {
+  primary: '#1A472A',
+  accent: '#52B788',
+  gold: '#FFD700',
+  jetonBlue: '#4A90D9',
+  background: '#0D1F15',
+  surface: '#142E1F',
+  surfaceLight: '#1A472A',
+  textPrimary: '#E8F5E9',
+  textSecondary: '#81C784',
+  danger: '#EF4444',
+  border: '#2D5A3D',
+  white: '#FFFFFF',
+  dark: '#2D2D2D',
+} as const;
+
+===== constants\gameConfig.ts =====
+// ============================================
+// BEŞLİ PATRON — Oyun Yapılandırması
+// ============================================
+
+// === TEMEL EKONOMİ ===
+export const INITIAL_NAKIT = 25000;
+export const INITIAL_ENERJI = 80;
+export const MAX_ENERJI = 100;
+export const INITIAL_SAHA_KALITESI = 4;
+export const INITIAL_GUN = 1;
+export const DAILY_KIRA = 3500;
+export const DAILY_ELEKTRIK_SU = 900;
+export const DAILY_GIDER = DAILY_KIRA + DAILY_ELEKTRIK_SU;
+export const ENERJI_REZERVASYON = 5;
+export const ENERJI_BAKIM = 10;
+export const ENERJI_UPGRADE = 15;
+export const ENERJI_GUN_SONU = 40;
+export const JETON_GOREV_ODUL = 50;
+export const JETON_ENERJI_COST = 20;
+export const JETON_ENERJI_GAIN = 30;
+export const IFLAS_GUN_LIMIT = 3;
+
+// === SAAT SLOTLARI (1 saatlik, 10:00 açılış — 02:00-03:00 son maç) ===
+// Zirve talep: 22:00-23:00. Talep eğrisi gameLogic.ts'te SLOT_TALEP ile eşleşir.
+export const TIME_SLOTS = [
+  { id: 'sabah1', label: 'Sabah', saat: '10:00-11:00' },
+  { id: 'sabah2', label: 'Sabah', saat: '11:00-12:00' },
+  { id: 'oglen1', label: 'Öğlen', saat: '12:00-13:00' },
+  { id: 'oglen2', label: 'Öğlen', saat: '13:00-14:00' },
+  { id: 'ikindi1', label: 'İkindi', saat: '14:00-15:00' },
+  { id: 'ikindi2', label: 'İkindi', saat: '15:00-16:00' },
+  { id: 'ikindi3', label: 'İkindi', saat: '16:00-17:00' },
+  { id: 'aksam1', label: 'Akşam', saat: '17:00-18:00' },
+  { id: 'aksam2', label: 'Akşam', saat: '18:00-19:00' },
+  { id: 'aksam3', label: 'Akşam', saat: '19:00-20:00' },
+  { id: 'gece1', label: 'Gece', saat: '20:00-21:00' },
+  { id: 'gece2', label: 'Gece', saat: '21:00-22:00' },
+  { id: 'gece3', label: 'Gece ★Zirve', saat: '22:00-23:00' },
+  { id: 'gece4', label: 'Gece', saat: '23:00-00:00' },
+  { id: 'gece5', label: 'Gece', saat: '00:00-01:00' },
+  { id: 'gece6', label: 'Gece', saat: '01:00-02:00' },
+  { id: 'gece7', label: 'Gece', saat: '02:00-03:00' },
+] as const;
+
+// === MÜŞTERİ TİPLERİ (saatlik fiyat bandı: 3.000₺ - 10.000₺) ===
+export const MUSTERI_TIPLERI = {
+  mahalle: {
+    emoji: '🏘️',
+    label: 'Mahalle Takımı',
+    isimler: ['Tuncay', 'Hasan Bey', 'Sefa', 'Kerem', 'Emre', 'Yusuf Abi', 'Mert'],
+    minFiyat: 3800,
+    maxFiyat: 5200,
+    minKisi: 6,
+    maxKisi: 12,
+    tercihSlotlar: ['aksam2', 'aksam3', 'gece1', 'gece2'],
+  },
+  ogrenci: {
+    emoji: '🎓',
+    label: 'Öğrenci Grubu',
+    isimler: ['Berk', 'Doruk', 'Emirhan', 'Yağız', 'Arda', 'Burak', 'Can'],
+    minFiyat: 3000,
+    maxFiyat: 4200,
+    minKisi: 4,
+    maxKisi: 10,
+    tercihSlotlar: ['oglen1', 'oglen2', 'ikindi1'],
+  },
+  ofis: {
+    emoji: '👔',
+    label: 'Ofis Ekibi',
+    isimler: ['Serdar Bey', 'Murat Bey', 'Tolga', 'Cem Bey', 'Ali Bey', 'Okan Bey', 'Hakan Bey'],
+    minFiyat: 5000,
+    maxFiyat: 7200,
+    minKisi: 5,
+    maxKisi: 10,
+    tercihSlotlar: ['oglen1', 'oglen2', 'aksam1'],
+  },
+  amator: {
+    emoji: '⚽',
+    label: 'Amatör Takım',
+    isimler: ['Beylikspor U21', 'Çekmeköy Gençlik', 'Sarıyer Atletik', 'Pendik Stars', 'Bağcılar FK', 'Üsküdar 1903', 'Kadıköy United'],
+    minFiyat: 5500,
+    maxFiyat: 8200,
+    minKisi: 10,
+    maxKisi: 20,
+    tercihSlotlar: ['aksam1', 'aksam2', 'aksam3', 'gece1', 'gece2', 'gece3'],
+  },
+  dogumGunu: {
+    emoji: '🎂',
+    label: 'Doğum Günü Grubu',
+    isimler: ['Cansu', 'Onur', 'Elif', 'Barış', 'Pınar', 'Ege', 'Derin'],
+    minFiyat: 4500,
+    maxFiyat: 6500,
+    minKisi: 3,
+    maxKisi: 8,
+    tercihSlotlar: ['aksam1', 'aksam2', 'gece1'],
+  },
+  yas50plus: {
+    emoji: '🧔',
+    label: '50+ Yaş Takımı',
+    isimler: ['Mehmet Bey', 'Ali Usta', 'İsmail Bey', 'Rıza Bey', 'Nurettin Bey', 'Şükrü Bey', 'Hüseyin Bey'],
+    minFiyat: 3200,
+    maxFiyat: 4500,
+    minKisi: 6,
+    maxKisi: 14,
+    tercihSlotlar: ['sabah1', 'sabah2', 'oglen1'],
+  },
+  kurumsal: {
+    emoji: '🏆',
+    label: 'Kurumsal Lig Takımı',
+    isimler: ['Vadi FC', 'Plaza United', 'Lojistikspor', 'Bankalar SK', 'Teknopark FK', 'Holdingspor', 'Startup United'],
+    minFiyat: 7500,
+    maxFiyat: 10000,
+    minKisi: 12,
+    maxKisi: 20,
+    tercihSlotlar: ['gece2', 'gece3', 'gece4'],
+  },
+} as const;
+
+export type MusteriTipi = keyof typeof MUSTERI_TIPLERI;
+
+// === YÜKSELTMELER ===
+export const UPGRADE_CONFIG = {
+  bakim: {
+    emoji: '🔧',
+    label: 'Saha Bakımı',
+    aciklama: '+1 Saha Kalitesi',
+    maxLevel: 3,
+    costs: [5000, 10000, 15000],
+    enerji: 10,
+    kaliteArtis: 1,
+  },
+  haliYenileme: {
+    emoji: '🟩',
+    label: 'Halı Yenileme',
+    aciklama: '+2 Saha Kalitesi',
+    maxLevel: 3,
+    costs: [40000, 60000, 80000],
+    enerji: 15,
+    kaliteArtis: 2,
+  },
+  aydinlatma: {
+    emoji: '💡',
+    label: 'Aydınlatma',
+    aciklama: 'Gece slotu açılır',
+    maxLevel: 3,
+    costs: [25000, 37500, 50000],
+    enerji: 15,
+    kaliteArtis: 0,
+  },
+  dusSoyunma: {
+    emoji: '🚿',
+    label: 'Duş/Soyunma',
+    aciklama: '+%15 fiyat primi',
+    maxLevel: 3,
+    costs: [30000, 45000, 60000],
+    enerji: 15,
+    kaliteArtis: 0,
+  },
+} as const;
+
+export type UpgradeType = keyof typeof UPGRADE_CONFIG;
+
+// === GÜNLÜK GÖREV HAVUZU ===
+export const GOREV_HAVUZU = [
+  { id: 'rez2', aciklama: '2 rezervasyon kabul et', hedefTip: 'rezervasyon' as const, hedef: 2 },
+  { id: 'rez3', aciklama: '3 rezervasyon kabul et', hedefTip: 'rezervasyon' as const, hedef: 3 },
+  { id: 'bakim', aciklama: 'Saha bakımı yap', hedefTip: 'bakim' as const, hedef: 1 },
+  { id: 'gelir20000', aciklama: 'Günlük gelirin 20.000₺\'yi geçsin', hedefTip: 'gelir' as const, hedef: 20000 },
+  { id: 'ogrenci', aciklama: 'Bir öğrenci grubunu kabul et', hedefTip: 'ogrenciKabul' as const, hedef: 1 },
+  { id: 'aksam', aciklama: 'Tüm akşam slotlarını doldur', hedefTip: 'aksamSlot' as const, hedef: 2 },
+] as const;
+
+// === HAVA DURUMU ===
+export const HAVA_TIPLERI = {
+  gunesli: { emoji: '☀️', label: 'Güneşli', rezEtki: 0, fiyatEtki: 1.0 },
+  yagmurlu: { emoji: '🌧️', label: 'Yağmurlu', rezEtki: -1, fiyatEtki: 1.05 },
+  ruzgarli: { emoji: '🌬️', label: 'Rüzgarlı', rezEtki: 0, fiyatEtki: 0.95 },
+  karli: { emoji: '❄️', label: 'Karlı', rezEtki: -2, fiyatEtki: 1.2 },
+} as const;
+
+// === KANTİN SİSTEMİ (7 kademe) ===
+export interface KantinLevel {
+  label: string;
+  cost: number;
+  musteriBasi: number;
+  menu: string[];
+  prestij: number;
+}
+
+export const KANTIN_CONFIG = {
+  label: 'Kantin',
+  emoji: '☕',
+  levels: [
+    { label: 'Su Tezgahı', cost: 4000, musteriBasi: 40, menu: ['Su (0.5 LT)'], prestij: 0 },
+    { label: 'Çay Ocağı', cost: 9000, musteriBasi: 80, menu: ['Su (0.5 LT)', 'Tavşan Kanı Çay'], prestij: 0 },
+    { label: 'Simit Tezgahı', cost: 16000, musteriBasi: 130, menu: ['Su (0.5 LT)', 'Tavşan Kanı Çay', 'Simit', 'Poğaça'], prestij: 5 },
+    { label: 'Tost Makinesi', cost: 25000, musteriBasi: 190, menu: ['Su', 'Çay', 'Simit', 'Karışık Tost', 'Kaşarlı Tost'], prestij: 10 },
+    { label: 'Türk Kahvesi Köşesi', cost: 40000, musteriBasi: 260, menu: ['Su', 'Çay', 'Tost', 'Türk Kahvesi (orta)', 'Menengiç Kahvesi'], prestij: 20 },
+    { label: 'Buzdolabı & Ayran', cost: 60000, musteriBasi: 340, menu: ['Su', 'Çay', 'Tost', 'Türk Kahvesi', 'Ayran', 'Limonata', 'Kola'], prestij: 30 },
+    { label: 'Tam Teşekküllü Kantin', cost: 90000, musteriBasi: 450, menu: ['Su', 'Çay', 'Tost', 'Türk Kahvesi', 'Ayran', 'Sucuklu Kaşarlı Tost', 'Çiğ Börek', 'Kum Fincanı'], prestij: 45 },
+  ] as KantinLevel[],
+};
+
+// === SPONSOR SİSTEMİ (6 kademe) ===
+export interface SponsorLevel {
+  label: string;
+  cost: number;
+  gunlukGelir: number;
+  prestij: number;
+  not: string;
+}
+
+export const SPONSOR_CONFIG = {
+  label: 'Sponsorlar',
+  emoji: '📢',
+  levels: [
+    { label: 'Çetin Börek', cost: 3000, gunlukGelir: 200, prestij: 8, not: 'Pano asar, maç sonrası börek ikram eder' },
+    { label: 'Demir Oto Lastik', cost: 8000, gunlukGelir: 500, prestij: 15, not: 'Forma yakalarına lastik firması logosu' },
+    { label: 'Akman Emlak', cost: 20000, gunlukGelir: 1200, prestij: 25, not: 'Saha kenarına "Kiralık Daire" tabelası' },
+    { label: 'Kervan Pide', cost: 45000, gunlukGelir: 2500, prestij: 40, not: 'Maç günü pide servisi, tribün dolar' },
+    { label: 'Yıldız Sigorta', cost: 90000, gunlukGelir: 5000, prestij: 60, not: 'Sakatlanan oyuncuya sigorta, mahallede efsane' },
+    { label: 'Mega Holding', cost: 200000, gunlukGelir: 12000, prestij: 90, not: 'Sahanın adı "Mega Arena" olur, TV kamerası gelir' },
+  ] as SponsorLevel[],
+};
+
+// === GÜNÜN OLAYI (20 olay havuzu) ===
+export interface OlaySans {
+  yuzde: number;
+  nakit?: number;
+  memnuniyet?: number;
+  prestij?: number;
+  basariliMesaj: string;
+  basarisizMesaj: string;
+}
+
+export interface OlayEtki {
+  nakit?: number;
+  memnuniyet?: number;
+  prestij?: number;
+  enerji?: number;
+  gelirCarpani?: number;
+  sans?: OlaySans;
+}
+
+export interface OlaySablon {
+  id: string;
+  emoji: string;
+  baslik: string;
+  aciklama: string;
+  secenekler: { label: string; aciklama: string; etki: OlayEtki }[];
+}
+
+export const OLAY_HAVUZU: OlaySablon[] = [
+  {
+    id: 'komsu_gurultu', emoji: '🏢', baslik: 'Komşu Apartman Şikayeti',
+    aciklama: 'Gece maçındaki tezahuratlar yukarıdaki daireleri sarsıyor. Apartman yöneticisi kapıda, kollarını kavuşturmuş.',
+    secenekler: [
+      { label: "Maçları 21:00'de bitir", aciklama: 'Bugünkü gelirin %20si gider, komşular memnun kalır', etki: { gelirCarpani: 0.8, memnuniyet: 6 } },
+      { label: 'Görmezden gel', aciklama: 'Kimse kanıt gösteremez... gösteremez mi?', etki: { sans: { yuzde: 50, nakit: -2000, memnuniyet: -4, basariliMesaj: 'Hiçbir şey olmamış gibi devam etti.', basarisizMesaj: 'Apartman dilekçe verdi: 2.000₺ ceza!' } } },
+    ],
+  },
+  {
+    id: 'top_yenile', emoji: '⚽', baslik: 'Toplar Kalsiyumlandı',
+    aciklama: 'Toplardan üçü yumurta gibi şişmiş, biri de görünmez olmuş. Kaleci arkadaşı şikayetçi.',
+    secenekler: [
+      { label: 'Yeni top takımı al (3.000₺)', aciklama: 'Müşteriler fark eder, memnuniyet artar', etki: { nakit: -3000, memnuniyet: 8, prestij: 2 } },
+      { label: 'Havasını şiş, idare et', aciklama: 'Top top değil, pepsi kutusu gibi', etki: { memnuniyet: -5 } },
+    ],
+  },
+  {
+    id: 'fenomen_vlogs', emoji: '📱', baslik: 'Krampon Vlogs Gelmiş',
+    aciklama: "Yerel fenomen 'sahanda son saniye' videosu çekmek istiyor. 40 bin takipçisi var.",
+    secenekler: [
+      { label: 'Ücretsiz davet et', aciklama: 'Adın duyulur, prestij kazanırsın', etki: { memnuniyet: 5, prestij: 6 } },
+      { label: 'Çekim ücreti iste (1.500₺)', aciklama: 'Para para para... ama fenomen kırılabilir', etki: { nakit: 1500, sans: { yuzde: 50, prestij: 4, basariliMesaj: 'Video tık rekoru kırdı, sahanın adı duyuldu!', basarisizMesaj: "Fenomen 'ben ücretsiz çekerim' deyip gitti." } } },
+    ],
+  },
+  {
+    id: 'boru_patladi', emoji: '🚿', baslik: 'Soyunma Odasında Sel',
+    aciklama: 'Sıcak su borusu patladı, soyunma odası mini su parkına döndü.',
+    secenekler: [
+      { label: 'Tesisatçıyı çağır (4.500₺)', aciklama: 'Usta yarın gelir, sıcak su geri döner', etki: { nakit: -4500, memnuniyet: 6 } },
+      { label: 'Kova koy, geç', aciklama: 'Müşteriler ıslak ayakla maç izler', etki: { nakit: -200, memnuniyet: -7 } },
+    ],
+  },
+  {
+    id: 'sigorta_atti', emoji: '💡', baslik: 'Gece Maçında Karanlık',
+    aciklama: 'Sigorta attı, 20:00 maçı karanlıkta kaldı. Top nerede, ayak nerede belli değil.',
+    secenekler: [
+      { label: 'Acil elektrikçi çağır (2.500₺)', aciklama: 'Işıklar açılır, herkes mutlu', etki: { nakit: -2500, memnuniyet: 5 } },
+      { label: 'Mum ışığında oynasınlar', aciklama: 'Atmosferik diye geçiştir', etki: { memnuniyet: -8, gelirCarpani: 0.85 } },
+    ],
+  },
+  {
+    id: 'mahalle_kupasi', emoji: '🏆', baslik: 'Mahalle Kupası Teklifi',
+    aciklama: 'Muhtar finali senin sahana almak istiyor. Tribün dolar, kasa da dolar.',
+    secenekler: [
+      { label: 'Kupayı düzenle', aciklama: 'Yorucusun ama gelir ve prestij artar', etki: { enerji: -12, memnuniyet: 7, prestij: 3, gelirCarpani: 1.3 } },
+      { label: 'Yoğunum, reddet', aciklama: 'Muhtar yüzünü buruşturup gider', etki: { memnuniyet: -3 } },
+    ],
+  },
+  {
+    id: 'hali_yikama_zam', emoji: '🧼', baslik: 'Halı Yıkamacı Zam İstiyor',
+    aciklama: 'Halı yıkama şirketi ekonomi bahaneyle zam peşinde.',
+    secenekler: [
+      { label: 'Zamı kabul et (1.800₺)', aciklama: 'Halı parlar, müşteri memnun', etki: { nakit: -1800, memnuniyet: 5 } },
+      { label: 'Bu yıl kendim yıkarım', aciklama: 'Sırtın ağırır ama kese ağrımaz', etki: { memnuniyet: -6, enerji: -5 } },
+    ],
+  },
+  {
+    id: 'sahaya_kopek', emoji: '🐕', baslik: 'Sahaya Misafir',
+    aciklama: "Komşunun köpeği Köpe, sahaya girip orta yuvarlağa yattı. Kalkmıyor.",
+    secenekler: [
+      { label: 'Mamayı kap, müşteri ol', aciklama: 'Köpe maskot olur, hikaye sosyal medyada döner', etki: { nakit: -300, memnuniyet: 4, prestij: 1 } },
+      { label: 'Kovacıyı ara', aciklama: 'Köpe alınır, birkaç müşteri üzülür', etki: { memnuniyet: -3 } },
+    ],
+  },
+  {
+    id: 'fatura_bombasi', emoji: '⚡', baslik: 'Fatura Bombası',
+    aciklama: 'Elektrik faturası tahmininin çok üstünde çıktı. Zarfı açmaya korkuyorsun.',
+    secenekler: [
+      { label: 'Anında öde (2.500₺)', aciklama: 'Kese ağrır, vicdan rahat kalır', etki: { nakit: -2500, memnuniyet: 2 } },
+      { label: 'Ertele', aciklama: 'Belki bu ay yırtarsın?', etki: { sans: { yuzde: 40, nakit: -4000, basariliMesaj: 'Ödeme kolaylığı tanındı, bu kez yırttın.', basarisizMesaj: 'Erteleme faizi geldi: 4.000₺ ödedin!' } } },
+    ],
+  },
+  {
+    id: 'yeni_rakip', emoji: '🆚', baslik: 'Karşı Sokakta Yeni Saha',
+    aciklama: 'LED ışıklı, kafeteryalı, tuvaleti bile parlayan bir saha açıldı. Müşteriler konuşuyor.',
+    secenekler: [
+      { label: 'Fiyat indirimi yap', aciklama: 'Bugünkü gelir %10 düşer, kalabalık sadık kalır', etki: { gelirCarpani: 0.9, memnuniyet: 6 } },
+      { label: 'Hiç umursama', aciklama: 'Biz buradayken onlar daha yoktu', etki: { sans: { yuzde: 40, memnuniyet: -6, basariliMesaj: 'Müşteriler sadık çıktı, kimse gitmedi.', basarisizMesaj: 'Üç eski müşteri rakip sahaya geçti!' } } },
+    ],
+  },
+  {
+    id: 'cocuk_akademisi', emoji: '🧒', baslik: 'Cumartesi Akademisi',
+    aciklama: 'Bir grup veli, çocuklar için haftalık futbol okulu istiyor. Geleceğin yıldızları belki buradan çıkar.',
+    secenekler: [
+      { label: 'Kur, sabahları onlara ayır', aciklama: 'Yatırım ve iyi duyulma', etki: { nakit: -2000, memnuniyet: 6, prestij: 5 } },
+      { label: 'Bize çocuk lazım değil', aciklama: 'Veliler başka kapılara yöneldi', etki: { memnuniyet: -2 } },
+    ],
+  },
+  {
+    id: 'elektrik_kesintisi', emoji: '🔌', baslik: 'Bölgede Kesinti',
+    aciklama: 'Belediye bakım için elektrikleri kesecek. Akşam saatleri tehlikede.',
+    secenekler: [
+      { label: 'Jeneratör kirala (3.500₺)', aciklama: 'Maçlar kesintisiz, herkes hayran', etki: { nakit: -3500, memnuniyet: 4 } },
+      { label: 'Gün ışığında oynayın', aciklama: 'Akşam gelirinin %20si gider', etki: { gelirCarpani: 0.8, memnuniyet: -4 } },
+    ],
+  },
+  {
+    id: 'pano_reklam', emoji: '🎨', baslik: 'Esnaf Reklam Panosu İstiyor',
+    aciklama: "Karşıdaki esnaf sahaya 'Çetin Börek' panosu asmak istiyor. Para öneriyor.",
+    secenekler: [
+      { label: 'Panoyu sat (2.000₺)', aciklama: 'Kazanç hızlı ama görüntü kirlenir', etki: { nakit: 2000, memnuniyet: -2 } },
+      { label: 'Saham temiz kalsın', aciklama: 'Estetik anlayışın takdir edilir', etki: { memnuniyet: 3, prestij: 1 } },
+    ],
+  },
+  {
+    id: 'sicak_dalgasi', emoji: '🔥', baslik: 'Kavurucu Sıcak',
+    aciklama: 'Termometre 38 dereceyi gösteriyor, saha tencere gibi. Oyuncular buharlaşıyor.',
+    secenekler: [
+      { label: 'Şemsiye + su ikramı (1.200₺)', aciklama: 'Müşteri serinler, memnuniyet artar', etki: { nakit: -1200, memnuniyet: 6 } },
+      { label: 'Sıcaksa içsinler', aciklama: 'Riskli ama bedava', etki: { sans: { yuzde: 50, memnuniyet: -5, basariliMesaj: 'Müşteriler dayandı, kimse kızmazdan gelmedi.', basarisizMesaj: 'İki maç yarıda kaldı, müşteri küfretti!' } } },
+    ],
+  },
+  {
+    id: 'ses_sistemi', emoji: '🔊', baslik: 'Tezahurat Sistemi Bozuldu',
+    aciklama: 'Hoparlörden yalnızca cızırtı çıkıyor. Gol atınca dili dolanıyor.',
+    secenekler: [
+      { label: 'Tamirat yaptır (1.500₺)', aciklama: 'Anonslar tekrar net', etki: { nakit: -1500, memnuniyet: 4 } },
+      { label: 'Cızırtı da atmosferdir', aciklama: 'Retro saha konsepti', etki: { memnuniyet: -3 } },
+    ],
+  },
+  {
+    id: 'hali_kopuk', emoji: '🟩', baslik: 'Halının Köşesi Koptu',
+    aciklama: "Kale önünde halı koptu, top oraya gidince 'öfff' diyor. Bilenler bilir.",
+    secenekler: [
+      { label: 'Usta + yapıştırıcı (2.200₺)', aciklama: 'Saha pürüzsüz olur', etki: { nakit: -2200, memnuniyet: 5 } },
+      { label: 'Koni koy, oradan oynamayın', aciklama: 'Müşteri kurallara alışmak zorunda', etki: { memnuniyet: -5 } },
+    ],
+  },
+  {
+    id: 'gazoz_sponsor', emoji: '🥤', baslik: 'Gazoz Firması Kapıda',
+    aciklama: "'Torpil Gazozu' bir günlük saha reklamı için teklif getirdi. Şişeler soğuk, teklif sıcak.",
+    secenekler: [
+      { label: 'Anlaşmayı imzala', aciklama: 'Nakit ve gazoz hediyesi', etki: { nakit: 2500, memnuniyet: 1, prestij: 2 } },
+      { label: 'Marka bizi küçük düşürür', aciklama: 'İlkeli duruş, saygınlık', etki: { memnuniyet: 2, prestij: 3 } },
+    ],
+  },
+  {
+    id: 'belediye_duzenleme', emoji: '🌳', baslik: 'Belediye Çevre Düzenlemesi',
+    aciklama: 'Belediye sahanın çevresine yasemin dikip boyalı yol çizmek istiyor. Personel istiyorlar.',
+    secenekler: [
+      { label: 'Destekle, elini taşın altına koy', aciklama: 'Saha çevresi güzellenir', etki: { enerji: -8, memnuniyet: 5, prestij: 3 } },
+      { label: 'Sahama dokunma', aciklama: 'Belediye ekibi başka sokağa döner', etki: { sans: { yuzde: 30, nakit: -1500, basariliMesaj: 'Belediye başka sokağa yöneldi, sorun yok.', basarisizMesaj: 'Kaldırım ihlali cezası: 1.500₺!' } } },
+    ],
+  },
+  {
+    id: 'akilli_kilit', emoji: '🔐', baslik: 'Akıllı Kilit Satıcısı',
+    aciklama: "Kapıya şifreli kilit takıyorlar: 'artık kasiyer tatile çıkar' diyorlar.",
+    secenekler: [
+      { label: 'Tak (4.000₺)', aciklama: 'Modernleşme, memnuniyet ve prestij', etki: { nakit: -4000, memnuniyet: 3, prestij: 2 } },
+      { label: 'Anahtarımız kâğıda yeter', aciklama: 'Geleneksel yöntem devam', etki: {} },
+    ],
+  },
+  {
+    id: 'viral_video', emoji: '🌠', baslik: 'Sosyal Medyada Viral',
+    aciklama: 'Sahadan bir gol videosu fenomen oldu. Hafta sonu akını bekleniyor, kapı kırılabilir.',
+    secenekler: [
+      { label: 'Ekstra gece seansı aç', aciklama: 'Enerji yakar ama gelir %35 artar', etki: { enerji: -10, memnuniyet: 3, gelirCarpani: 1.35 } },
+      { label: 'Sakin kalmaya devam', aciklama: 'Kontrollü büyüme', etki: { memnuniyet: 1 } },
+    ],
+  },
+];
+
+// === SEZON SİSTEMİ (30 gün) — yeni ekonomiye göre güncellendi ===
+export const SEZON_CONFIG = {
+  uzunluk: 30,
+  hedefTaban: 650000,
+  hedefArtis: 450000,
+  odulJeton: 200,
+  odulPrestij: 50,
+};
+
+// === SADIK MÜŞTERİ SİSTEMİ ===
+export const SADIK_CONFIG = {
+  sans: 0.5,
+  memnuniyetEsigi: 60,
+  fiyatPrim: 1.15,
+  redMemnuniyetCezasi: 5,
+};
+
+// === YAŞAM SİSTEMİ ===
+export interface LifeItemConfig {
+  id: string;
+  emoji: string;
+  label: string;
+  aciklama: string;
+  kategori: 'ulasim' | 'konut' | 'luks';
+  levels: { label: string; cost: number; prestij: number }[];
+  requiredPrestij: number;
+}
+
+export const LIFE_ITEMS: LifeItemConfig[] = [
+  {
+    id: 'bisiklet',
+    emoji: '🚲',
+    label: 'Bisiklet',
+    aciklama: 'Sahaya ulaşım kolaylaşır',
+    kategori: 'ulasim',
+    levels: [{ label: 'Bisiklet', cost: 3000, prestij: 5 }],
+    requiredPrestij: 0,
+  },
+  {
+    id: 'motosiklet',
+    emoji: '🏍️',
+    label: 'Motosiklet',
+    aciklama: 'Daha hızlı ulaşım',
+    kategori: 'ulasim',
+    levels: [
+      { label: 'Mondo 125 (İkinci El)', cost: 35000, prestij: 10 },
+      { label: 'Yamasa R1 (Sıfır, Kaçtı Abi!)', cost: 185000, prestij: 20 },
+    ],
+    requiredPrestij: 10,
+  },
+  {
+    id: 'araba',
+    emoji: '🚗',
+    label: 'Araba',
+    aciklama: 'Prestijli ulaşım',
+    kategori: 'ulasim',
+    levels: [
+      { label: 'Murat 131 (İkinci El)', cost: 120000, prestij: 15 },
+      { label: 'Şahin 1.6 (Boyasız, Değişensiz)', cost: 300000, prestij: 25 },
+      { label: 'Anka S4 (Sıfır Sedan)', cost: 750000, prestij: 40 },
+      { label: 'Renkot Megano GT', cost: 1200000, prestij: 50 },
+      { label: 'BMV 520i (Cam Tavan)', cost: 2200000, prestij: 60 },
+      { label: 'Merçedes E200 Klas', cost: 3500000, prestij: 72 },
+      { label: 'Porş Kayen Turbo', cost: 7000000, prestij: 85 },
+      { label: 'Rols Röys Fantom', cost: 20000000, prestij: 100 },
+    ],
+    requiredPrestij: 30,
+  },
+  {
+    id: 'ev_kira',
+    emoji: '🏚️',
+    label: 'Kiralık Daire',
+    aciklama: 'Kendi evin olsun',
+    kategori: 'konut',
+    levels: [
+      { label: '1+1 Kiralık (Asansörsüz)', cost: 15000, prestij: 5 },
+      { label: '2+1 Kiralık (Balkonlu)', cost: 40000, prestij: 8 },
+    ],
+    requiredPrestij: 0,
+  },
+  {
+    id: 'ev',
+    emoji: '🏠',
+    label: 'Evin',
+    aciklama: 'Evlilik taşının altına imza at',
+    kategori: 'konut',
+    levels: [
+      { label: '2+1 Satılık Daire (Krediyle)', cost: 250000, prestij: 20 },
+      { label: '3+2 Satılık Daire (Site İçi)', cost: 650000, prestij: 35 },
+      { label: 'Villa (Bahçeli, Havuzlu)', cost: 2000000, prestij: 55 },
+    ],
+    requiredPrestij: 25,
+  },
+  {
+    id: 'telefon',
+    emoji: '📱',
+    label: 'Telefon',
+    aciklama: 'Rezervasyonlar artık şık bir telefondan yönetiliyor',
+    kategori: 'luks',
+    levels: [
+      { label: 'Kelepir Telefon', cost: 6000, prestij: 2 },
+      { label: 'Bay Yenilik 12', cost: 28000, prestij: 6 },
+      { label: 'Elma Pro Max (256 GB)', cost: 72000, prestij: 12 },
+    ],
+    requiredPrestij: 5,
+  },
+  {
+    id: 'saat',
+    emoji: '⌚',
+    label: 'Kol Saati',
+    aciklama: 'Maç saati mi? Patron saati mi?',
+    kategori: 'luks',
+    levels: [
+      { label: 'Koleksiyon Saat', cost: 35000, prestij: 8 },
+      { label: 'Altın Kaplama Saat', cost: 150000, prestij: 20 },
+      { label: 'Rols Röys Kol Saati', cost: 900000, prestij: 40 },
+    ],
+    requiredPrestij: 20,
+  },
+];
+
+// === KIZ ARKADAŞ SİSTEMİ ===
+export const KIZ_ARKADAS_CONFIG = {
+  baslangicSeviye: 0,
+  maxSeviye: 10,
+  bulusmaCost: 2000,
+  bulusmaEnerji: 8,
+  bulusmaSeviyeArtis: 1,
+  hediyeCost: 7500,
+  hediyeSeviyeArtis: 2,
+  seviyeBasinaPrestij: 5,
+  evlilikSeviye: 10,
+  evlilikPrestij: 150,
+};
+
+// === ŞEHİRLER ===
+export interface CityConfig {
+  id: string;
+  ad: string;
+  emoji: string;
+  aciklama: string;
+  kiraGunluk: number;
+  elektrikSuGunluk: number;
+  fiyatCarpan: number;
+  requiredPrestij: number;
+}
+
+export const CITIES: CityConfig[] = [
+  { id: 'istanbul', ad: 'İstanbul', emoji: '🌉', aciklama: 'Her şeyin başladığı şehir. Kira yüksek, rekabet de yüksek.', kiraGunluk: 3500, elektrikSuGunluk: 900, fiyatCarpan: 1.0, requiredPrestij: 0 },
+  { id: 'ankara', ad: 'Ankara', emoji: '🏛️', aciklama: 'İşler burada yürür, kira bir tık hafifler.', kiraGunluk: 2800, elektrikSuGunluk: 750, fiyatCarpan: 0.9, requiredPrestij: 150 },
+  { id: 'izmir', ad: 'İzmir', emoji: '🌊', aciklama: 'Ege teridir ama sahayı deniz götürür.', kiraGunluk: 3000, elektrikSuGunluk: 800, fiyatCarpan: 0.95, requiredPrestij: 400 },
+  { id: 'antalya', ad: 'Antalya', emoji: '🌴', aciklama: 'Turist akını var, zirve saatler yaz kış dolu.', kiraGunluk: 3200, elektrikSuGunluk: 850, fiyatCarpan: 1.05, requiredPrestij: 800 },
+  { id: 'bursa', ad: 'Bursa', emoji: '🏔️', aciklama: 'İskender bahanesiyle maç sonrası ekip kaynamaz mı?', kiraGunluk: 2600, elektrikSuGunluk: 700, fiyatCarpan: 0.88, requiredPrestij: 1400 },
+];
+
+// === PERSONEL SİSTEMİ ===
+export interface StaffLevelConfig {
+  label: string;
+  maas: number;
+  etki: string;
+}
+
+export interface StaffConfig {
+  id: string;
+  ad: string;
+  emoji: string;
+  aciklama: string;
+  iseAlimUcreti: number;
+  levels: StaffLevelConfig[];
+}
+
+export const STAFF_CONFIG: StaffConfig[] = [
+  {
+    id: 'kasiyer',
+    ad: 'Kasiyer',
+    emoji: '🧾',
+    aciklama: 'Rezervasyon başına enerji maliyetini düşürür',
+    iseAlimUcreti: 3000,
+    levels: [
+      { label: 'Stajyer Kasiyer', maas: 500, etki: 'Rezervasyon enerjisi -2⚡' },
+      { label: 'Kıdemli Kasiyer', maas: 1200, etki: 'Rezervasyon enerjisi -2⚡, hızlı kayıt' },
+    ],
+  },
+  {
+    id: 'guvenlik',
+    ad: 'Güvenlik',
+    emoji: '🦺',
+    aciklama: 'Günü kazasız geçirir, müşteri kalabalığını artırır',
+    iseAlimUcreti: 4000,
+    levels: [
+      { label: 'Gece Güvenliği', maas: 800, etki: '+1 rezervasyon teklifi' },
+      { label: 'Koruma Ekibi', maas: 1800, etki: '+1 rezervasyon teklifi, kavgasız gece' },
+    ],
+  },
+  {
+    id: 'temizlikci',
+    ad: 'Temizlik Görevlisi',
+    emoji: '🧹',
+    aciklama: 'Sahayı tertemiz tutar, memnuniyeti yükseltir',
+    iseAlimUcreti: 2500,
+    levels: [
+      { label: 'Temizlik Görevlisi', maas: 450, etki: 'Günlük memnuniyet +2' },
+      { label: 'Ekip Şefi', maas: 1000, etki: 'Günlük memnuniyet +2, saha daha uzun dayanır' },
+    ],
+  },
+  {
+    id: 'antrenor',
+    ad: 'Antrenör',
+    emoji: '📣',
+    aciklama: 'Turnuvalarda şansını artırır',
+    iseAlimUcreti: 6000,
+    levels: [
+      { label: 'Gençlik Antrenörü', maas: 1500, etki: 'Turnuva şansı +10%' },
+      { label: 'Teknik Direktör', maas: 3200, etki: 'Turnuva şansı +10%, kupada kazanç artışı' },
+    ],
+  },
+];
+
+// === TURNUVA SİSTEMİ ===
+export const TURNUVA_CONFIG = {
+  aralikGun: 7,
+  minKalite: 5,
+  katilimBedeli: 5000,
+  turnuvaIsimleri: [
+    'Mahalle Kupası', 'Esnaf Turnuvası', 'Ramazan Kupası', 'Çim vs Halı Kupası',
+    'Bölge Şampiyonası', 'Kurumsal Lig Finali', 'Yıldızlar Turnuvası', 'Kış Kupası',
+  ],
+  sonuclar: {
+    birincilik: { kazanc: 60000, prestij: 30 },
+    ikincilik: { kazanc: 30000, prestij: 18 },
+    ucunculuk: { kazanc: 12000, prestij: 10 },
+    katilim: { kazanc: 0, prestij: 2 },
+  },
+} as const;
+
+// === MEMNUNİYET SİSTEMİ ===
+export const MEMNUNIYET_CONFIG = {
+  baslangic: 50,
+  minMemnuniyet: 10,
+  maxMemnuniyet: 100,
+  gunlukDusus: 3,
+  bakimBonus: 4,
+  temizlikciBonus: 2,
+  sadikMusteriEsik: 60,
+  sadikMusteriFiyatBonus: 0.15,
+  sahaKaliteBonus: (kalite: number): number => Math.max(0, kalite - 4),
+};
+
+// === DOSYA SONU — bu satırı görüyorsan dosya tam demektir ===
+
+===== app\tabs\profil.tsx =====
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Platform,
+  Modal,
+} from 'react-native';
+import { router } from 'expo-router';
+import { useGame } from '../../context/GameContext';
+import { Colors } from '../../constants/colors';
+import {
+  JETON_ENERJI_COST,
+  JETON_ENERJI_GAIN,
+  MAX_ENERJI,
+  CITIES,
+} from '../../constants/gameConfig';
+
+export default function ProfilScreen() {
+  const {
+    state,
+    useJeton,
+    manualSave,
+    resetGame,
+    unlockCity,
+    switchCity,
+    devHediye,
+  } = useGame();
+
+  const [message, setMessage] = useState('');
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [confirmCity, setConfirmCity] = useState<string | null>(null);
+  const [showDevPanel, setShowDevPanel] = useState(false);
+  const [futbolcuTik, setFutbolcuTik] = useState(0);
+
+  const font = Platform.select({
+    ios: 'SpaceMono',
+    android: 'SpaceMono',
+    web: 'SpaceMono, monospace',
+  });
+
+  const jeton = state?.jeton ?? 0;
+  const enerji = state?.enerji ?? 0;
+  const prestij = state?.prestij ?? 0;
+  const nakit = state?.nakit ?? 0;
+
+  const canUseJeton =
+    jeton >= (JETON_ENERJI_COST ?? 20) &&
+    enerji < (MAX_ENERJI ?? 100);
+
+  const showMsg = (msg: string) => {
+    setMessage(msg);
+    setTimeout(() => setMessage(''), 2500);
+  };
+
+  const handleFutbolcuTik = () => {
+    const yeniTik = futbolcuTik + 1;
+
+    if (yeniTik >= 5) {
+      setShowDevPanel(true);
+      setFutbolcuTik(0);
+      showMsg('Geliştirici paneli açıldı! 🧪');
+    } else {
+      setFutbolcuTik(yeniTik);
+    }
+  };
+
+  const handleUseJeton = () => {
+    const err = useJeton();
+
+    if (err) {
+      showMsg(err);
+    } else {
+      showMsg(`+${JETON_ENERJI_GAIN ?? 30} Enerji yüklendi!`);
+    }
+  };
+
+  const handleSave = async () => {
+    await manualSave();
+    showMsg('Oyun kaydedildi!');
+  };
+
+  const handleReset = async () => {
+    setShowResetConfirm(false);
+    await resetGame();
+    router.replace('/intro');
+  };
+
+  const handleCityAction = (cityId: string) => {
+    const cityData = state?.cities?.[cityId];
+
+    if (cityData?.unlocked) {
+      const err = switchCity(cityId);
+
+      if (err) {
+        showMsg(err);
+      } else {
+        showMsg('Şehir değiştirildi! 🏙️');
+      }
+    } else {
+      setConfirmCity(cityId);
+    }
+  };
+
+  const handleUnlockConfirm = () => {
+    if (!confirmCity) return;
+
+    const err = unlockCity(confirmCity);
+
+    if (err) {
+      showMsg(err);
+    } else {
+      showMsg('Şehir açıldı! 🎉');
+    }
+
+    setConfirmCity(null);
+  };
+
+  const handleGiftMoney = () => {
+    devHediye(1000000, 0, 0, false);
+    showMsg('+1.000.000₺ eklendi! 💰');
+  };
+
+  const handleGiftPrestige = () => {
+    devHediye(0, 100, 0, false);
+    showMsg('+100 prestij eklendi! ⭐');
+  };
+
+  const handleGiftJeton = () => {
+    devHediye(0, 0, 50, false);
+    showMsg('+50 jeton eklendi! 🔵');
+  };
+
+  const handleFillEnergy = () => {
+    devHediye(0, 0, 0, true);
+    showMsg('Enerji tamamen dolduruldu! ⚡');
+  };
+
+  const cityList = CITIES ?? [];
+  const confirmCityConfig = confirmCity
+    ? cityList.find((city: any) => city?.id === confirmCity)
+    : null;
+
+  return (
+    <>
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.content}
+      >
+        {message ? (
+          <View style={styles.messageBox}>
+            <Text style={[styles.messageText, { fontFamily: font }]}>
+              {message}
+            </Text>
+          </View>
+        ) : null}
+
+        <View style={styles.card}>
+          <View style={styles.avatarRow}>
+            <View style={styles.avatar}>
+              <View style={styles.avatarHead} />
+              <View style={styles.avatarBody} />
+            </View>
+
+            <View style={styles.charInfo}>
+              <Pressable onPress={handleFutbolcuTik}>
+                <Text style={[styles.charName, { fontFamily: font }]}>
+                  Eski Futbolcu
+                </Text>
+              </Pressable>
+
+              <Text style={[styles.charTitle, { fontFamily: font }]}>
+                Halısaha Patronu
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        <View style={styles.card}>
+          <Text style={[styles.cardTitle, { fontFamily: font }]}>
+            📊 İstatistikler
+          </Text>
+
+          <View style={styles.statRow}>
+            <Text style={[styles.statLabel, { fontFamily: font }]}>
+              📅 Toplam Gün
+            </Text>
+            <Text style={[styles.statValue, { fontFamily: font }]}>
+              {state?.gun ?? 1}
+            </Text>
+          </View>
+
+          <View style={styles.statRow}>
+            <Text style={[styles.statLabel, { fontFamily: font }]}>
+              💰 Nakit
+            </Text>
+            <Text style={[styles.statValueGold, { fontFamily: font }]}>
+              {nakit.toLocaleString('tr-TR')} ₺
+            </Text>
+          </View>
+
+          <View style={styles.statRow}>
+            <Text style={[styles.statLabel, { fontFamily: font }]}>
+              💵 Toplam Kazanç
+            </Text>
+            <Text style={[styles.statValueGold, { fontFamily: font }]}>
+              {(state?.toplamKazanc ?? 0).toLocaleString('tr-TR')} ₺
+            </Text>
+          </View>
+
+          <View style={styles.statRow}>
+            <Text style={[styles.statLabel, { fontFamily: font }]}>
+              🏟️ Saha Kalitesi
+            </Text>
+            <Text style={[styles.statValue, { fontFamily: font }]}>
+              {state?.sahaKalitesi ?? 4}/10
+            </Text>
+          </View>
+
+          <View style={styles.statRow}>
+            <Text style={[styles.statLabel, { fontFamily: font }]}>
+              ⚡ Enerji
+            </Text>
+            <Text style={[styles.statValue, { fontFamily: font }]}>
+              {enerji}/{MAX_ENERJI ?? 100}
+            </Text>
+          </View>
+
+          <View style={styles.statRow}>
+            <Text style={[styles.statLabel, { fontFamily: font }]}>
+              ⭐ Prestij
+            </Text>
+            <Text style={[styles.statValuePrestige, { fontFamily: font }]}>
+              {prestij}
+            </Text>
+          </View>
+
+          <View style={styles.statRow}>
+            <Text style={[styles.statLabel, { fontFamily: font }]}>
+              🔵 Jeton
+            </Text>
+            <Text style={[styles.statValue, { fontFamily: font }]}>
+              {jeton}
+            </Text>
+          </View>
+        </View>
+
+        <View style={styles.card}>
+          <Text style={[styles.cardTitle, { fontFamily: font }]}>
+            ⚡ Enerji ve Kayıt
+          </Text>
+
+          <Pressable
+            style={[
+              styles.actionButton,
+              !canUseJeton && styles.disabledButton,
+            ]}
+            onPress={handleUseJeton}
+            disabled={!canUseJeton}
+          >
+            <Text style={[styles.buttonText, { fontFamily: font }]}>
+              🔵 Jeton Kullan — +{JETON_ENERJI_GAIN ?? 30} Enerji
+            </Text>
+          </Pressable>
+
+          <Pressable style={styles.actionButton} onPress={handleSave}>
+            <Text style={[styles.buttonText, { fontFamily: font }]}>
+              💾 Oyunu Kaydet
+            </Text>
+          </Pressable>
+        </View>
+
+        <View style={styles.card}>
+          <Text style={[styles.cardTitle, { fontFamily: font }]}>
+            🏙️ Şehirler
+          </Text>
+
+          {cityList.map((city: any) => {
+            const cityData = state?.cities?.[city?.id];
+            const unlocked = cityData?.unlocked === true;
+            const active = state?.activeSehir === city?.id;
+            const unlockCost = Number(city?.unlockCost ?? 0);
+            const requiredPrestij = Number(
+              city?.requiredPrestij ?? city?.prestijCost ?? 0,
+            );
+
+            return (
+              <View key={city?.id} style={styles.cityRow}>
+                <View style={styles.cityInfo}>
+                  <Text style={[styles.cityName, { fontFamily: font }]}>
+                    {city?.emoji ?? '🏙️'} {city?.label ?? city?.id}
+                  </Text>
+
+                  {unlocked ? (
+                    <Text style={[styles.cityStatus, { fontFamily: font }]}>
+                      {active ? '✅ Aktif şehir' : '🔓 Açık'}
+                    </Text>
+                  ) : (
+                    <Text style={[styles.cityLocked, { fontFamily: font }]}>
+                      🔒 {unlockCost.toLocaleString('tr-TR')}₺ / ⭐{requiredPrestij}
+                    </Text>
+                  )}
+                </View>
+
+                <Pressable
+                  style={[
+                    styles.smallButton,
+                    active && styles.disabledButton,
+                  ]}
+                  onPress={() => handleCityAction(city?.id)}
+                  disabled={active}
+                >
+                  <Text style={[styles.smallButtonText, { fontFamily: font }]}>
+                    {active ? 'Aktif' : unlocked ? 'Geç' : 'Aç'}
+                  </Text>
+                </Pressable>
+              </View>
+            );
+          })}
+        </View>
+
+        <Pressable
+          style={styles.resetButton}
+          onPress={() => setShowResetConfirm(true)}
+        >
+          <Text style={[styles.resetButtonText, { fontFamily: font }]}>
+            🗑️ Oyunu Sıfırla
+          </Text>
+        </Pressable>
+      </ScrollView>
+
+      <Modal
+        visible={showDevPanel}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowDevPanel(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.devPanel}>
+            <Text style={[styles.devTitle, { fontFamily: font }]}>
+              🧪 Geliştirici Test Paneli
+            </Text>
+
+            <Text style={[styles.devDescription, { fontFamily: font }]}>
+              Kilitli özellikleri test etmek için kullanılır.
+            </Text>
+
+            <Pressable style={styles.devButton} onPress={handleGiftMoney}>
+              <Text style={[styles.devButtonText, { fontFamily: font }]}>
+                💰 +1.000.000₺
+              </Text>
+            </Pressable>
+
+            <Pressable style={styles.devButton} onPress={handleGiftPrestige}>
+              <Text style={[styles.devButtonText, { fontFamily: font }]}>
+                ⭐ +100 Prestij
+              </Text>
+            </Pressable>
+
+            <Pressable style={styles.devButton} onPress={handleGiftJeton}>
+              <Text style={[styles.devButtonText, { fontFamily: font }]}>
+                🔵 +50 Jeton
+              </Text>
+            </Pressable>
+
+            <Pressable style={styles.devButton} onPress={handleFillEnergy}>
+              <Text style={[styles.devButtonText, { fontFamily: font }]}>
+                ⚡ Enerjiyi Doldur
+              </Text>
+            </Pressable>
+
+            <Pressable
+              style={styles.closeButton}
+              onPress={() => setShowDevPanel(false)}
+            >
+              <Text style={[styles.closeButtonText, { fontFamily: font }]}>
+                Kapat
+              </Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        visible={showResetConfirm}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowResetConfirm(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.confirmPanel}>
+            <Text style={[styles.confirmTitle, { fontFamily: font }]}>
+              Oyunu sıfırlamak istiyor musun?
+            </Text>
+
+            <Text style={[styles.confirmText, { fontFamily: font }]}>
+              Tüm ilerleme silinecek. Bu işlem geri alınamaz.
+            </Text>
+
+            <View style={styles.confirmButtons}>
+              <Pressable
+                style={styles.cancelButton}
+                onPress={() => setShowResetConfirm(false)}
+              >
+                <Text style={[styles.buttonText, { fontFamily: font }]}>
+                  Vazgeç
+                </Text>
+              </Pressable>
+
+              <Pressable style={styles.dangerButton} onPress={handleReset}>
+                <Text style={[styles.buttonText, { fontFamily: font }]}>
+                  Sıfırla
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        visible={confirmCity !== null}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setConfirmCity(null)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.confirmPanel}>
+            <Text style={[styles.confirmTitle, { fontFamily: font }]}>
+              Şehir kilidi açılsın mı?
+            </Text>
+
+            <Text style={[styles.confirmText, { fontFamily: font }]}>
+              {confirmCityConfig?.label ?? 'Bu şehir'} için{' '}
+              {Number(confirmCityConfig?.unlockCost ?? 0).toLocaleString(
+                'tr-TR',
+              )}{' '}
+              ₺ ve ⭐
+              {Number(
+                confirmCityConfig?.requiredPrestij ??
+                  confirmCityConfig?.prestijCost ??
+                  0,
+              )}{' '}
+              prestij gereklidir.
+            </Text>
+
+            <View style={styles.confirmButtons}>
+              <Pressable
+                style={styles.cancelButton}
+                onPress={() => setConfirmCity(null)}
+              >
+                <Text style={[styles.buttonText, { fontFamily: font }]}>
+                  Vazgeç
+                </Text>
+              </Pressable>
+
+              <Pressable
+                style={styles.confirmButton}
+                onPress={handleUnlockConfirm}
+              >
+                <Text style={[styles.buttonText, { fontFamily: font }]}>
+                  Şehri Aç
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
+    </>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: Colors.background,
+  },
+  content: {
+    padding: 16,
+    paddingBottom: 40,
+  },
+  card: {
+    backgroundColor: Colors.card,
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 14,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  messageBox: {
+    backgroundColor: '#173F2A',
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 14,
+  },
+  messageText: {
+    color: '#FFFFFF',
+    textAlign: 'center',
+    fontSize: 13,
+  },
+  avatarRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  avatar: {
+    width: 66,
+    height: 66,
+    borderRadius: 33,
+    backgroundColor: '#26364D',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    overflow: 'hidden',
+    marginRight: 14,
+  },
+  avatarHead: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#E3A878',
+    marginBottom: 4,
+  },
+  avatarBody: {
+    width: 42,
+    height: 25,
+    borderTopLeftRadius: 18,
+    borderTopRightRadius: 18,
+    backgroundColor: '#D89B32',
+  },
+  charInfo: {
+    flex: 1,
+  },
+  charName: {
+    color: Colors.text,
+    fontSize: 20,
+    fontWeight: '700',
+  },
+  charTitle: {
+    color: Colors.textMuted,
+    fontSize: 13,
+    marginTop: 5,
+  },
+  cardTitle: {
+    color: Colors.text,
+    fontSize: 16,
+    fontWeight: '700',
+    marginBottom: 12,
+  },
+  statRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+  },
+  statLabel: {
+    color: Colors.textMuted,
+    fontSize: 13,
+  },
+  statValue: {
+    color: Colors.text,
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  statValueGold: {
+    color: '#F2C14E',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  statValuePrestige: {
+    color: '#B88CFF',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  actionButton: {
+    backgroundColor: Colors.primary,
+    borderRadius: 10,
+    padding: 13,
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  disabledButton: {
+    opacity: 0.45,
+  },
+  buttonText: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  cityRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+  },
+  cityInfo: {
+    flex: 1,
+    paddingRight: 8,
+  },
+  cityName: {
+    color: Colors.text,
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  cityStatus: {
+    color: '#65D391',
+    fontSize: 11,
+    marginTop: 3,
+  },
+  cityLocked: {
+    color: '#E6A04B',
+    fontSize: 11,
+    marginTop: 3,
+  },
+  smallButton: {
+    backgroundColor: Colors.primary,
+    borderRadius: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+  },
+  smallButtonText: {
+    color: '#FFFFFF',
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  resetButton: {
+    backgroundColor: '#642D35',
+    borderRadius: 12,
+    padding: 14,
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  resetButtonText: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.72)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 20,
+  },
+  devPanel: {
+    width: '100%',
+    maxWidth: 380,
+    backgroundColor: Colors.card,
+    borderRadius: 18,
+    padding: 20,
+    borderWidth: 2,
+    borderColor: '#E5A93D',
+  },
+  devTitle: {
+    color: '#E5A93D',
+    fontSize: 18,
+    fontWeight: '700',
+    textAlign: 'center',
+  },
+  devDescription: {
+    color: Colors.textMuted,
+    textAlign: 'center',
+    fontSize: 12,
+    marginTop: 8,
+    marginBottom: 16,
+  },
+  devButton: {
+    backgroundColor: '#2A3950',
+    borderRadius: 10,
+    padding: 14,
+    marginTop: 9,
+    alignItems: 'center',
+  },
+  devButtonText: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  closeButton: {
+    backgroundColor: '#642D35',
+    borderRadius: 10,
+    padding: 13,
+    marginTop: 18,
+    alignItems: 'center',
+  },
+  closeButtonText: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  confirmPanel: {
+    width: '100%',
+    maxWidth: 380,
+    backgroundColor: Colors.card,
+    borderRadius: 18,
+    padding: 20,
+  },
+  confirmTitle: {
+    color: Colors.text,
+    fontSize: 17,
+    fontWeight: '700',
+    textAlign: 'center',
+  },
+  confirmText: {
+    color: Colors.textMuted,
+    fontSize: 13,
+    lineHeight: 20,
+    textAlign: 'center',
+    marginTop: 12,
+  },
+  confirmButtons: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 20,
+  },
+  cancelButton: {
+    flex: 1,
+    backgroundColor: '#536174',
+    borderRadius: 10,
+    padding: 13,
+    alignItems: 'center',
+  },
+  dangerButton: {
+    flex: 1,
+    backgroundColor: '#A33A45',
+    borderRadius: 10,
+    padding: 13,
+    alignItems: 'center',
+  },
+  confirmButton: {
+    flex: 1,
+    backgroundColor: Colors.primary,
+    borderRadius: 10,
+    padding: 13,
+    alignItems: 'center',
+  },
+});
+
+===== app\tabs\saha.tsx =====
+// ============================================
+// BEŞLİ PATRON — app/tabs/saha.tsx (2D SAHA GÖRSELİ + ÇOKLU SAHA + SPONSORLAR + GÜN DÖNGÜSÜ)
+// ============================================
+import React, { useState } from 'react';
+import {
+  View, Text, ScrollView, TouchableOpacity, StyleSheet, Modal,
+} from 'react-native';
+import { useGame } from '../../context/GameContext';
+import Saha2D from '../../components/Saha2D';
+import {
+  PITCH_DEFS, PITCH_UPGRADE_CONFIG, SAHA_TIP_BILGI, YILDIZ_SAHA,
+  pitchUpgradeMaliyeti, insaatAsamalari,
+  type YildizAsama, type PitchUpgradeDef,
+} from '../../constants/pitchConfig';
+import { UPGRADE_CONFIG, ENERJI_BAKIM, type UpgradeType } from '../../constants/gameConfig';
+import {
+  MAX_SPONSOR, SPONSORLAR, sponsorUygunMu, toplamSponsorGeliri,
+  type SponsorAnlasma,
+} from '../../constants/sponsorConfig';
+import { RENK, FONT } from '../../constants/theme';
+import {
+  sahaGunlukGideri, sahaGunlukPasifGelir,
+} from '../../services/gameLogic';
+import type { PitchState } from '../../types/game';
+
+// GameContext'teki BAKIM_COST ile aynı değer (orada export edilmediği için burada da tanımlı)
+const BAKIM_UCRETI = 500;
+
+function para(n: number): string {
+  return `${Math.round(n).toLocaleString('tr-TR')}₺`;
+}
+
+function asamaEtiketi(asama: number): string {
+  if (asama <= 0) return '🌱 Arsa Yok';
+  if (asama === 1) return '🏠 Arsa Alındı';
+  if (asama < 5) return '🚧 İnşaat';
+  return '✅ Hizmette';
+}
+
+function asamaRengi(asama: number): string {
+  if (asama <= 0) return RENK.kilit;
+  if (asama === 1) return '#60A5FA';
+  if (asama < 5) return RENK.vurgu;
+  return RENK.basari;
+}
+
+// Sahadaki yükseltmelerin toplu etkisi — pitchConfig tanımlarından yerelde hesaplanır
+function etkiHesapla(up: Record<string, number>) {
+  let fiyat = 0, memnuniyet = 0, talep = 0, pasifGelir = 0, prestij = 0, enerjiIndirimi = 0, havaKoruma = false;
+  Object.entries(up ?? {}).forEach(([id, seviye]) => {
+    const d: PitchUpgradeDef | undefined = PITCH_UPGRADE_CONFIG[id];
+    if (!d || !seviye) return;
+    fiyat += (d.fiyatEki ?? 0) * seviye;
+    memnuniyet += (d.memnuniyetEki ?? 0) * seviye;
+    talep += (d.talepEki ?? 0) * seviye;
+    pasifGelir += (d.gunlukGelirEki ?? 0) * seviye;
+    prestij += (d.prestijEki ?? 0) * seviye;
+    enerjiIndirimi += (d.enerjiIndirimi ?? 0) * seviye;
+    if (d.havaKoruma) havaKoruma = true;
+  });
+  return { fiyat, memnuniyet, talep, pasifGelir, prestij, enerjiIndirimi, havaKoruma };
+}
+
+// Sponsor kartındaki şart satırları — sağlananlar ✅, eksikler ⬜
+function sponsorKosulSatirlari(sp: SponsorAnlasma, anaSahaAsama: number, anaSahaUp: Record<string, number>): string[] {
+  const satirlar: string[] = [];
+  if (sp.kosul.asama != null) {
+    satirlar.push(`${anaSahaAsama >= sp.kosul.asama ? '✅' : '⬜'} Ana saha aşama ${sp.kosul.asama}`);
+  }
+  if (sp.kosul.upgrade) {
+    const d = PITCH_UPGRADE_CONFIG[sp.kosul.upgrade.id];
+    const sev = anaSahaUp[sp.kosul.upgrade.id] ?? 0;
+    satirlar.push(`${sev >= sp.kosul.upgrade.seviye ? '✅' : '⬜'} ${d?.ad ?? sp.kosul.upgrade.id} Sv.${sp.kosul.upgrade.seviye}`);
+  }
+  if (satirlar.length === 0) satirlar.push('✅ Şart yok');
+  return satirlar;
+}
+
+// Kart ızgarasının satır verisi
+interface SahaKarti {
+  id: string;
+  ad: string;
+  emoji: string;
+  sahip: boolean;
+  asama: number;
+  kalite: number;
+  aktifMi: boolean;
+  toplamYatirim: number;
+  sahaTipi: string;
+}
+
+export default function SahaScreen() {
+  const {
+    state,
+    purchaseUpgrade, doMaintenance,
+    buyPitchArsa, insaatIlerlet, pitchUpgradeAl, setActivePitch,
+    imzaSponsor, iptalSponsor,
+    endDay,
+  } = useGame();
+
+  const [mesaj, setMesaj] = useState<string | null>(null);
+  const [hata, setHata] = useState(false);
+  const [canliIzle, setCanliIzle] = useState(true);
+  const [gunSonu, setGunSonu] = useState<any>(null);
+
+  const sahaListesi = Object.values(state?.pitches ?? {}).filter(Boolean) as PitchState[];
+  const aktif = state?.pitches?.[state.activePitchId ?? 'yildiz'] ?? sahaListesi[0];
+
+  // === SPONSORLAR (tesis genelinde) ===
+  const imzaliSponsorlar = (((state as any)?.sponsorlar ?? []) as string[]).filter(Boolean);
+  const anaSahaAsama = state?.pitches?.yildiz?.asama ?? 0;
+  const anaSahaUp = ((state?.upgrades ?? {}) as Record<string, number>);
+
+  // === TÜM SAHALAR (sahip olunanlar + kilitliler) ===
+  const yildizPitch = state?.pitches?.['yildiz'];
+  const toplamSaha = 1 + PITCH_DEFS.length;
+  const tumSahalar: SahaKarti[] = [];
+
+  tumSahalar.push({
+    id: 'yildiz',
+    ad: YILDIZ_SAHA.ad,
+    emoji: SAHA_TIP_BILGI.yildiz.emoji,
+    sahip: !!yildizPitch,
+    asama: yildizPitch?.asama ?? 0,
+    kalite: yildizPitch ? state.sahaKalitesi : 0,
+    aktifMi: aktif?.id === 'yildiz',
+    toplamYatirim: YILDIZ_SAHA.toplamMaliyet,
+    sahaTipi: 'yildiz',
+  });
+
+  PITCH_DEFS.forEach(d => {
+    const p = state?.pitches?.[d.id];
+    const tip = SAHA_TIP_BILGI[d.sahaTipi] ?? SAHA_TIP_BILGI.yildiz;
+    tumSahalar.push({
+      id: d.id,
+      ad: d.ad,
+      emoji: tip.emoji,
+      sahip: !!p,
+      asama: p?.asama ?? 0,
+      kalite: p ? (p.kalite ?? d.baslangicKalitesi) : 0,
+      aktifMi: aktif?.id === d.id,
+      toplamYatirim: d.arsaBedeli + d.insaatBedeli,
+      sahaTipi: d.sahaTipi,
+    });
+  });
+
+  const bildir = (sonuc: string | null, basari?: string) => {
+    if (sonuc) { setHata(true); setMesaj(sonuc); }
+    else if (basari) { setHata(false); setMesaj(basari); }
+  };
+
+  const aktifYap = (id: string) => {
+    setActivePitch(id);
+    const kart = tumSahalar.find(t => t.id === id);
+    setHata(false);
+    setMesaj(`Aktif saha: ${kart?.ad ?? id}`);
+  };
+
+  const arsaAl = (defId: string) => {
+    const d = PITCH_DEFS.find(x => x.id === defId);
+    const sonuc = buyPitchArsa(defId);
+    if (sonuc) bildir(sonuc);
+    else bildir(null, `${d?.ad ?? 'Saha'} arsası alındı! Şimdi inşaatı ilerlet — karta dokunup sahayı aktif et.`);
+  };
+
+  const insaatAdim = () => {
+    if (!aktif) return;
+    const siradaki = (aktif.asama ?? 0) + 1;
+    const sonuc = insaatIlerlet(aktif.id);
+    if (sonuc) bildir(sonuc);
+    else bildir(null, siradaki >= 5 ? '🎉 İnşaat tamamlandı — saha artık hizmette!' : 'İnşaat bir aşama ilerledi. 🚧');
+  };
+
+  const yukseltAl = (upgradeId: string) => {
+    if (!aktif) return;
+    const sonuc = pitchUpgradeAl(aktif.id, upgradeId);
+    if (sonuc) bildir(sonuc);
+    else bildir(null, 'Yükseltme tamamlandı! 💪');
+  };
+
+  const bakimYap = () => {
+    const sonuc = doMaintenance();
+    if (sonuc) bildir(sonuc);
+    else bildir(null, 'Saha bakımı yapıldı. ⚽');
+  };
+
+  const anaYukseltAl = (t: UpgradeType) => {
+    const sonuc = purchaseUpgrade(t);
+    if (sonuc) bildir(sonuc);
+    else bildir(null, 'Yükseltme tamamlandı! 💪');
+  };
+
+  const sponsorImzala = (id: string) => {
+    const sonuc = imzaSponsor(id);
+    if (sonuc) bildir(sonuc);
+    else bildir(null, 'Sponsor imzalandı! 💼 Peşin ödeme kasaya girdi, günlük gelir her gün yatacak.');
+  };
+
+  const sponsorFesih = (id: string) => {
+    const sonuc = iptalSponsor(id);
+    if (sonuc) bildir(sonuc);
+    else bildir(null, 'Anlaşma feshedildi — günlük gelir durdu.');
+  };
+
+  // === GÜNÜ BİTİR — gün döngüsü buradan döner ===
+  const gunuBitir = () => {
+    // Sponsor geliri gün kapanmadan hesaplanır (GameContext de aynı listeyi kullanır)
+    const sponsorGeliri = toplamSponsorGeliri(imzaliSponsorlar);
+    const sonuc = endDay();
+    if (!sonuc) {
+      bildir('Gün bitirilemedi — oyun durumu hazır değil.');
+      return;
+    }
+    setGunSonu({ sonuc, sponsorGeliri });
+  };
+
+  if (!aktif) {
+    return (
+      <View style={s.ekran}>
+        <Text style={s.muted}>Henüz sahan yok. Aşağıdan arsa al!</Text>
+      </View>
+    );
+  }
+
+  // === AKTİF SAHA PANELİ VERİLERİ ===
+  const yildiz = aktif.id === 'yildiz';
+  const tipBilgi = SAHA_TIP_BILGI[aktif.sahaTipi] ?? SAHA_TIP_BILGI.yildiz;
+  const acik = (aktif.asama ?? 0) >= 5;
+  const gosterilenKalite = yildiz ? state.sahaKalitesi : (aktif.kalite ?? 0);
+  const up: Record<string, number> = yildiz
+    ? ((state.upgrades ?? {}) as Record<string, number>)
+    : ((aktif.upgrades ?? {}) as Record<string, number>);
+  const etki = etkiHesapla(up);
+  const pasifGelir = acik ? sahaGunlukPasifGelir(aktif, state) : 0;
+  const gunlukGider = sahaGunlukGideri(aktif);
+  const def = PITCH_DEFS.find(d => d.id === aktif.id);
+  const insaatListesi: YildizAsama[] = yildiz
+    ? YILDIZ_SAHA.asamalar
+    : (def ? insaatAsamalari(def) : []);
+  const sonrakiAsama: YildizAsama | null = !acik && (aktif.asama ?? 0) >= 1
+    ? (insaatListesi.find(a => a.asama === (aktif.asama ?? 0) + 1) ?? null)
+    : null;
+  const insaatYuzde = Math.round(((aktif.asama ?? 0) / 5) * 100);
+
+  // Henüz alınmamış saha kataloğu
+  const katalog = PITCH_DEFS.filter(d => !state.pitches?.[d.id]);
+
+  return (
+    <View style={s.ekran}>
+      <ScrollView contentContainerStyle={s.icerik} showsVerticalScrollIndicator={false}>
+
+        {/* === MESAJ === */}
+        {mesaj ? (
+          <View style={hata ? s.mesajHata : s.mesajOk}>
+            <Text style={s.mesajYazi}>{mesaj}</Text>
+          </View>
+        ) : null}
+
+        {/* === GÜNÜ BİTİR — GÜN DÖNGÜSÜ BURADAN DÖNER === */}
+        <TouchableOpacity style={s.gunBitirButon} onPress={gunuBitir} activeOpacity={0.85}>
+          <Text style={s.gunBitirYazi}>🌙 GÜNÜ BİTİR — Gün {state?.gun ?? 1}</Text>
+          <Text style={s.gunBitirAlt}>Gelir/gider hesaplanır · Sponsor gelirleri kasaya yatar</Text>
+        </TouchableOpacity>
+
+        {/* === TÜM SAHALAR — HER EKLENEN BURADA GÖRÜNÜR === */}
+        <Text style={s.baslik}>🏟️ Sahalarım ({sahaListesi.length}/{toplamSaha})</Text>
+        <View style={s.sahaIzgara}>
+          {tumSahalar.map(k => (
+            <TouchableOpacity
+              key={k.id}
+              style={[s.sahaKart, k.aktifMi && s.sahaKartAktif, !k.sahip && s.sahaKartKilitli]}
+              activeOpacity={0.8}
+              onPress={() => {
+                if (k.sahip) aktifYap(k.id);
+                else bildir(null, `${k.ad} henüz satın alınmadı — aşağıdaki katalogdan arsa al.`);
+              }}
+            >
+              <View style={s.sahaKartUst}>
+                <Text style={s.sahaKartEmoji}>{k.sahip ? k.emoji : '🔒'}</Text>
+                {k.aktifMi ? (
+                  <View style={s.aktifRozet}>
+                    <Text style={s.aktifRozetYazi}>AKTİF</Text>
+                  </View>
+                ) : null}
+              </View>
+
+              {/* Kartın içinde 2D mini saha */}
+              <Saha2D
+                mini
+                asama={k.asama}
+                kalite={k.kalite}
+                sahaTipi={k.sahaTipi}
+                canli={false}
+              />
+
+              <Text style={s.sahaKartAd} numberOfLines={1}>{k.ad}</Text>
+              <Text style={[s.sahaKartDurum, { color: asamaRengi(k.asama) }]}>
+                {k.sahip ? asamaEtiketi(k.asama) : 'Kilitli'}
+              </Text>
+              {k.sahip && k.asama < 5 ? (
+                <View style={s.miniBar}>
+                  <View style={[s.miniBarDolgu, { width: `${Math.max(10, (k.asama / 5) * 100)}%` }]} />
+                </View>
+              ) : null}
+              {k.sahip && k.asama >= 5 ? (
+                <Text style={s.sahaKartAlt}>⭐ {k.kalite}/10 kalite</Text>
+              ) : null}
+              {!k.sahip ? (
+                <Text style={s.sahaKartAlt}>Yatırım: {para(k.toplamYatirim)}</Text>
+              ) : null}
+            </TouchableOpacity>
+          ))}
+        </View>
+        <Text style={s.ipucu}>Karta dokun → sahayı aktif yap; yönetim paneli o sahaya döner.</Text>
+
+        {/* === AKTİF SAHA YÖNETİM PANELİ === */}
+        <View style={s.panel}>
+          <View style={s.panelBaslikSatir}>
+            <Text style={s.panelBaslik}>{tipBilgi.emoji} {aktif.ad} — Yönetim</Text>
+            <View style={[s.durumRozet, { backgroundColor: asamaRengi(aktif.asama ?? 0) }]}>
+              <Text style={s.durumRozetYazi}>{asamaEtiketi(aktif.asama ?? 0)}</Text>
+            </View>
+          </View>
+
+          {/* === 2D BÜYÜK SAHA + CANLI MAÇ === */}
+          <Saha2D
+            asama={aktif.asama ?? 0}
+            kalite={gosterilenKalite}
+            sahaTipi={aktif.sahaTipi ?? 'yildiz'}
+            canli={canliIzle && acik}
+            upgrades={up}
+          />
+          <View style={s.canliSatir}>
+            <TouchableOpacity style={s.canliButon} onPress={() => setCanliIzle(v => !v)} activeOpacity={0.8}>
+              <Text style={s.canliButonYazi}>{canliIzle ? '⏸ Duraklat' : '▶️ Maçı İzle'}</Text>
+            </TouchableOpacity>
+            <Text style={s.canliBilgi}>
+              {acik
+                ? (canliIzle ? 'Oyuncular sahada — canlı maç!' : 'Maç duraklatıldı.')
+                : 'Maç, hizmette olan sahalarda oynanır.'}
+            </Text>
+          </View>
+
+          {/* === KURULU YAPILAR (gerçek yükseltme verileri) === */}
+          {Object.entries(up).some(([, v]) => v > 0) ? (
+            <View style={s.rozetSatir}>
+              {Object.entries(up).filter(([, v]) => v > 0).map(([id, seviye]) => {
+                const yd = PITCH_UPGRADE_CONFIG[id];
+                if (!yd) return null;
+                return (
+                  <View key={id} style={s.rozet}>
+                    <Text style={s.rozetYazi}>{yd.emoji} {yd.ad} · {seviye}/{yd.maksSeviye}</Text>
+                  </View>
+                );
+              })}
+            </View>
+          ) : null}
+
+          {/* İstatistikler */}
+          <View style={s.istatistikSatiri}>
+            <View style={s.istatistikKutu}>
+              <Text style={s.istatistikDeger}>⭐ {gosterilenKalite}/10</Text>
+              <Text style={s.istatistikEtiket}>Kalite</Text>
+            </View>
+            <View style={s.istatistikKutu}>
+              <Text style={s.istatistikDeger}>{para(gunlukGider)}</Text>
+              <Text style={s.istatistikEtiket}>Günlük Gider</Text>
+            </View>
+            <View style={s.istatistikKutu}>
+              <Text style={s.istatistikDeger}>{acik ? para(pasifGelir) : '—'}</Text>
+              <Text style={s.istatistikEtiket}>Pasif Gelir</Text>
+            </View>
+          </View>
+
+          {/* İnşaat durumu */}
+          {(aktif.asama ?? 0) >= 1 && (aktif.asama ?? 0) < 5 ? (
+            <View style={s.kutu}>
+              <Text style={s.kutuBaslik}>🚧 İnşaat — %{insaatYuzde} tamam</Text>
+              <View style={s.bar}>
+                <View style={[s.barDolgu, { width: `${Math.max(4, insaatYuzde)}%` }]} />
+              </View>
+              {sonrakiAsama ? (
+                <View>
+                  <Text style={s.kutuAltBaslik}>{sonrakiAsama.label}</Text>
+                  <Text style={s.muted}>{sonrakiAsama.aciklama}</Text>
+                  <TouchableOpacity style={s.butonYesil} onPress={insaatAdim} activeOpacity={0.8}>
+                    <Text style={s.butonBeyaz}>
+                      {state.nakit >= sonrakiAsama.cost
+                        ? `İnşaatı İlerlet — ${para(sonrakiAsama.cost)} (⚡${sonrakiAsama.enerji})`
+                        : `Nakit yetersiz (${para(sonrakiAsama.cost)})`}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              ) : null}
+            </View>
+          ) : null}
+
+          {/* Bakım (Yıldız) */}
+          {yildiz ? (
+            <View style={s.kutu}>
+              <Text style={s.kutuBaslik}>🧹 Günlük Bakım</Text>
+              <Text style={s.muted}>Bakım saha kalitesini korur; aksatırsan kalite düşer.</Text>
+              <TouchableOpacity style={s.butonYesil} onPress={bakimYap} activeOpacity={0.8}>
+                <Text style={s.butonBeyaz}>Bakım Yap — {para(BAKIM_UCRETI)} (⚡{ENERJI_BAKIM})</Text>
+              </TouchableOpacity>
+            </View>
+          ) : null}
+
+          {/* Yükseltme etkileri özeti */}
+          <View style={s.etkiKutu}>
+            <Text style={s.kutuBaslik}>📈 Yükseltme Etkileri</Text>
+            <Text style={s.muted}>
+              Fiyat +{Math.round(etki.fiyat * 100)}% · Memnuniyet +{etki.memnuniyet} · Prestij +{etki.prestij}
+              {etki.pasifGelir > 0 ? ` · Pasif gelir ${para(etki.pasifGelir)}/gün` : ''}
+              {etki.enerjiIndirimi > 0 ? ` · Enerji -${etki.enerjiIndirimi}` : ''}
+              {etki.havaKoruma ? ' · ❄️ Hava koruması' : ''}
+            </Text>
+          </View>
+
+          {/* 16 kalemlik saha yükseltme ızgarası */}
+          <Text style={s.bolumBaslik}>Aktif Saha Yükseltmeleri</Text>
+          <View style={s.yukseltmeIzgara}>
+            {Object.values(PITCH_UPGRADE_CONFIG).map((ud: PitchUpgradeDef) => {
+              const seviye = up[ud.id] ?? 0;
+              const maliyet = pitchUpgradeMaliyeti(ud, seviye);
+              return (
+                <View key={ud.id} style={s.yukseltmeKart}>
+                  <Text style={s.yukseltmeEmoji}>{ud.emoji}</Text>
+                  <Text style={s.yukseltmeAd} numberOfLines={1}>{ud.ad}</Text>
+                  <Text style={s.yukseltmeSeviye}>Seviye {seviye}/{ud.maksSeviye}</Text>
+                  <Text style={s.yukseltmeEtki}>{ud.etki}</Text>
+                  {maliyet != null ? (
+                    <TouchableOpacity style={s.butonKucuk} onPress={() => yukseltAl(ud.id)} activeOpacity={0.8}>
+                      <Text style={s.butonKucukYazi}>Yükselt — {para(maliyet)}</Text>
+                    </TouchableOpacity>
+                  ) : (
+                    <View style={[s.butonKucuk, s.butonKucukPasif]}>
+                      <Text style={s.butonKucukYazi}>Maks. seviye</Text>
+                    </View>
+                  )}
+                </View>
+              );
+            })}
+          </View>
+
+          {/* Yıldız: tesis ana yükseltmeleri */}
+          {yildiz ? (
+            <View style={s.kutu}>
+              <Text style={s.kutuBaslik}>🏗️ Tesis Yükseltmeleri</Text>
+              {Object.entries(UPGRADE_CONFIG).map(([anahtar, cfgRaw]) => {
+                const cfg = cfgRaw as any;
+                const seviye = up[anahtar] ?? 0;
+                const maks = Number(cfg?.maxLevel ?? 0);
+                const maliyetListe = Array.isArray(cfg?.costs) ? cfg.costs : [];
+                const maliyet = seviye < maks ? maliyetListe[seviye] : undefined;
+                return (
+                  <View key={anahtar} style={s.anaYukseltmeSatir}>
+                    <View style={s.anaYukseltmeBilgi}>
+                      <Text style={s.anaYukseltmeAd}>
+                        {cfg?.emoji ?? '🔧'} {cfg?.ad ?? cfg?.baslik ?? anahtar}{' '}
+                        <Text style={s.muted}>(Seviye {seviye}/{maks || '?'})</Text>
+                      </Text>
+                      {cfg?.aciklama ? <Text style={s.muted}>{String(cfg.aciklama)}</Text> : null}
+                    </View>
+                    {maliyet != null ? (
+                      <TouchableOpacity
+                        style={s.butonKucuk}
+                        onPress={() => anaYukseltAl(anahtar as UpgradeType)}
+                        activeOpacity={0.8}
+                      >
+                        <Text style={s.butonKucukYazi}>{para(Number(maliyet))}</Text>
+                      </TouchableOpacity>
+                    ) : (
+                      <View style={[s.butonKucuk, s.butonKucukPasif]}>
+                        <Text style={s.butonKucukYazi}>MAX</Text>
+                      </View>
+                    )}
+                  </View>
+                );
+              })}
+            </View>
+          ) : null}
+
+          {/* === SPONSORLAR (tesis genelinde) — HER ZAMAN GÖRÜNÜR === */}
+          <View style={s.kutu}>
+            <View style={s.sponsorBaslikSatir}>
+              <Text style={s.kutuBaslik}>💼 Sponsorlar ({imzaliSponsorlar.length}/{MAX_SPONSOR})</Text>
+              {imzaliSponsorlar.length > 0 ? (
+                <Text style={s.sponsorGelir}>+{para(toplamSponsorGeliri(imzaliSponsorlar))}/gün</Text>
+              ) : null}
+            </View>
+            <Text style={s.muted}>
+              Tesis genelinde anlaşma — imzaladığın sponsorlar sahadaki reklam bantlarına yazılır,
+              günlük geliri gün sonunda otomatik yatar. Aynı anda en fazla {MAX_SPONSOR} sponsor.
+            </Text>
+            <View style={s.sponsorIzgara}>
+              {SPONSORLAR.map(sp => {
+                const imzali = imzaliSponsorlar.includes(sp.id);
+                const uygun = sponsorUygunMu(sp, anaSahaAsama, anaSahaUp);
+                const nakitYetiyor = state.nakit >= sp.onOdeme;
+                return (
+                  <View
+                    key={sp.id}
+                    style={[
+                      s.sponsorKart,
+                      imzali && { borderColor: sp.renk },
+                      !imzali && !uygun && s.sponsorKartKilitli,
+                    ]}
+                  >
+                    <View style={s.sponsorSatir}>
+                      <View style={[s.sponsorNokta, { backgroundColor: sp.renk }]} />
+                      <Text style={s.sponsorAd} numberOfLines={1}>{sp.ad}</Text>
+                    </View>
+                    <Text style={s.sponsorAciklama} numberOfLines={2}>{sp.aciklama}</Text>
+                    <Text style={s.sponsorPara}>
+                      Peşin {para(sp.onOdeme)} · Günlük +{para(sp.gunlukGelir)}
+                    </Text>
+                    {sponsorKosulSatirlari(sp, anaSahaAsama, anaSahaUp).map((satir, i) => (
+                      <Text key={i} style={s.sponsorKosul}>{satir}</Text>
+                    ))}
+                    {imzali ? (
+                      <TouchableOpacity
+                        style={[s.sponsorButon, s.sponsorButonKirmizi]}
+                        onPress={() => sponsorFesih(sp.id)}
+                        activeOpacity={0.8}
+                      >
+                        <Text style={s.sponsorButonYazi}>Fesih Et — gelir durur</Text>
+                      </TouchableOpacity>
+                    ) : !uygun ? (
+                      <View style={[s.sponsorButon, s.sponsorButonPasif]}>
+                        <Text style={s.sponsorButonYazi}>Şartlar sağlanmadı</Text>
+                      </View>
+                    ) : !nakitYetiyor ? (
+                      <View style={[s.sponsorButon, s.sponsorButonPasif]}>
+                        <Text style={s.sponsorButonYazi}>Nakit yetersiz (peşin {para(sp.onOdeme)})</Text>
+                      </View>
+                    ) : (
+                      <TouchableOpacity
+                        style={s.sponsorButon}
+                        onPress={() => sponsorImzala(sp.id)}
+                        activeOpacity={0.8}
+                      >
+                        <Text style={s.sponsorButonYazi}>İmzala — Peşin {para(sp.onOdeme)}</Text>
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                );
+              })}
+            </View>
+          </View>
+        </View>
+
+        {/* === YATIRIM: YENİ SAHA KATALOĞU === */}
+        <Text style={s.bolumBaslik}>Yatırım: Yeni Saha Kataloğu</Text>
+        {katalog.length === 0 ? (
+          <Text style={s.muted}>Tüm sahalar açıldı — işletme tam kapasitede! 🏆</Text>
+        ) : null}
+        {katalog.map(d => {
+          const tip = SAHA_TIP_BILGI[d.sahaTipi] ?? SAHA_TIP_BILGI.yildiz;
+          const nakitYetiyor = state.nakit >= d.arsaBedeli;
+          return (
+            <View key={d.id} style={[s.katalogKart, { borderColor: `${tip.renk}55` }]}>
+              <View style={s.katalogBaslikSatir}>
+                <Text style={s.katalogAd}>{tip.emoji} {d.ad}</Text>
+                <Text style={s.katalogFiyat}>{para(d.arsaBedeli)}</Text>
+              </View>
+
+              {/* Katalogda da 2D önizleme: "bunu alırsan böyle görünecek" */}
+              <Saha2D mini asama={0} kalite={d.baslangicKalitesi} sahaTipi={d.sahaTipi} canli={false} />
+
+              <Text style={s.muted}>{d.aciklama}</Text>
+              <Text style={s.katalogDetay}>
+                ⭐ Başlangıç kalitesi {d.baslangicKalitesi}/10 · Kapasite {d.kapasite} kişi · Günlük gider {para(d.gunlukGider)}
+              </Text>
+              <Text style={s.katalogDetay}>
+                Yatırım: arsa {para(d.arsaBedeli)} + inşaat {para(d.insaatBedeli)} ={' '}
+                <Text style={s.sari}>{para(d.arsaBedeli + d.insaatBedeli)}</Text>
+              </Text>
+              <TouchableOpacity
+                style={nakitYetiyor ? s.butonYesil : s.butonPasif}
+                onPress={() => arsaAl(d.id)}
+                activeOpacity={0.8}
+              >
+                <Text style={s.butonBeyaz}>
+                  {nakitYetiyor
+                    ? `Arsayı Al — ${para(d.arsaBedeli)}`
+                    : `Nakit yetersiz (${para(d.arsaBedeli)})`}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          );
+        })}
+
+      </ScrollView>
+
+      {/* === GÜN SONU ÖZETİ (MODAL) === */}
+      <Modal visible={!!gunSonu} transparent animationType="fade" onRequestClose={() => setGunSonu(null)}>
+        <View style={s.modalKaplama}>
+          <View style={s.modalKutu}>
+            {gunSonu?.sonuc?.isGameOver ? (
+              <Text style={s.modalIflos}>💀 İFLAS ETTİN!</Text>
+            ) : (
+              <Text style={s.modalBaslik}>🌙 Gün {gunSonu?.sonuc?.gun ?? '?'} Bitti!</Text>
+            )}
+
+            <View style={s.modalSatir}>
+              <Text style={s.modalEtiket}>💵 Toplam Gelir</Text>
+              <Text style={[s.modalDeger, { color: RENK.basari }]}>+{para(gunSonu?.sonuc?.gelir ?? 0)}</Text>
+            </View>
+            <View style={s.modalSatir}>
+              <Text style={s.modalEtiket}>🏟️ Saha Geliri</Text>
+              <Text style={s.modalSoluk}>{para(gunSonu?.sonuc?.sahaGelir ?? 0)}</Text>
+            </View>
+            <View style={s.modalSatir}>
+              <Text style={s.modalEtiket}>🧾 Toplam Gider (kira, elektrik, bakım)</Text>
+              <Text style={[s.modalDeger, { color: RENK.hata }]}>-{para(gunSonu?.sonuc?.gider ?? 0)}</Text>
+            </View>
+            <View style={s.modalSatir}>
+              <Text style={s.modalEtiket}>👥 Personel Maaşı (giderin içinde)</Text>
+              <Text style={s.modalSoluk}>{para(gunSonu?.sonuc?.personelMaas ?? 0)}</Text>
+            </View>
+            <View style={s.modalSatir}>
+              <Text style={s.modalEtiket}>💼 Sponsor Geliri (kasaya yattı)</Text>
+              <Text style={[s.modalDeger, { color: RENK.basari }]}>+{para(gunSonu?.sponsorGeliri ?? 0)}</Text>
+            </View>
+
+            {(gunSonu?.sonuc?.gorevOdul ?? 0) > 0 ? (
+              <View style={s.modalSatir}>
+                <Text style={s.modalEtiket}>🎁 Görev Ödülü</Text>
+                <Text style={[s.modalDeger, { color: RENK.basari }]}>+{para(gunSonu.sonuc.gorevOdul)}</Text>
+              </View>
+            ) : null}
+            {(gunSonu?.sonuc?.jetonOdul ?? 0) > 0 ? (
+              <View style={s.modalSatir}>
+                <Text style={s.modalEtiket}>🎟️ Jeton Ödülü</Text>
+                <Text style={[s.modalDeger, { color: RENK.basari }]}>+{gunSonu.sonuc.jetonOdul} jeton</Text>
+              </View>
+            ) : null}
+
+            <View style={s.modalAyirici} />
+
+            <View style={s.modalSatir}>
+              <Text style={s.modalEtiket}>📊 Net Kâr / Zarar</Text>
+              <Text style={[s.modalDeger, { color: (gunSonu?.sonuc?.net ?? 0) >= 0 ? RENK.basari : RENK.hata }]}>
+                {para(gunSonu?.sonuc?.net ?? 0)}
+              </Text>
+            </View>
+            <View style={s.modalSatir}>
+              <Text style={s.modalEtiket}>💰 Kasadaki Para</Text>
+              <Text style={s.modalKasa}>
+                {para((gunSonu?.sonuc?.nakit ?? 0) + (gunSonu?.sponsorGeliri ?? 0))}
+              </Text>
+            </View>
+            <View style={s.modalSatir}>
+              <Text style={s.modalEtiket}>😊 Memnuniyet</Text>
+              <Text style={s.modalSoluk}>%{gunSonu?.sonuc?.yeniMemnuniyet ?? '—'}</Text>
+            </View>
+            {(gunSonu?.sonuc?.sadikKazanci ?? 0) > 0 ? (
+              <View style={s.modalSatir}>
+                <Text style={s.modalEtiket}>❤️ Sadık Müşteri</Text>
+                <Text style={[s.modalDeger, { color: RENK.basari }]}>+{gunSonu.sonuc.sadikKazanci}</Text>
+              </View>
+            ) : null}
+
+            {gunSonu?.sonuc?.isGameOver ? (
+              <Text style={s.modalIflosNot}>
+                Nakit eksiye düştü ve iflas limiti aşıldı. Ana ekrandan oyunu sıfırlayıp yeniden başlayabilirsin.
+              </Text>
+            ) : null}
+
+            <TouchableOpacity style={s.modalKapat} onPress={() => setGunSonu(null)} activeOpacity={0.85}>
+              <Text style={s.modalKapatYazi}>☀️ Yeni Güne Başla</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+    </View>
+  );
+}
+
+// ============================================
+// STİLLER
+// ============================================
+const s = StyleSheet.create({
+  ekran: { flex: 1, backgroundColor: RENK.arkaPlan },
+  icerik: { padding: 14, paddingBottom: 48, gap: 12 },
+  sari: { color: RENK.vurgu, fontSize: 14, fontFamily: FONT.vurgu },
+  muted: { color: RENK.yaziSoluk, fontSize: 12, lineHeight: 17, fontFamily: FONT.govde },
+  baslik: { color: RENK.yazi, fontSize: 20, fontFamily: FONT.baslik, marginTop: 4 },
+  bolumBaslik: { color: RENK.yaziAcik, fontSize: 14, fontFamily: FONT.baslik, marginTop: 6 },
+  ipucu: { color: RENK.yaziMat, fontSize: 11, fontStyle: 'italic', fontFamily: FONT.govde },
+
+  // Günü Bitir butonu
+  gunBitirButon: {
+    backgroundColor: RENK.vurgu, borderRadius: 14, paddingVertical: 14, paddingHorizontal: 14,
+    alignItems: 'center', borderWidth: 2, borderColor: '#FCD34D',
+  },
+  gunBitirYazi: { color: RENK.arkaPlan, fontSize: 16, fontFamily: FONT.buyuk },
+  gunBitirAlt: { color: RENK.arkaPlan, opacity: 0.8, fontSize: 10, fontFamily: FONT.govde, marginTop: 2 },
+
+  // Gün sonu modalı
+  modalKaplama: { flex: 1, backgroundColor: 'rgba(0,0,0,0.80)', alignItems: 'center', justifyContent: 'center', padding: 20 },
+  modalKutu: {
+    width: '100%', maxWidth: 420, backgroundColor: RENK.panel, borderRadius: 16,
+    borderWidth: 1.5, borderColor: RENK.vurgu, padding: 16, gap: 6,
+  },
+  modalBaslik: { color: RENK.yazi, fontSize: 18, fontFamily: FONT.baslik, marginBottom: 6, textAlign: 'center' },
+  modalIflos: { color: RENK.hata, fontSize: 18, fontFamily: FONT.baslik, marginBottom: 6, textAlign: 'center' },
+  modalIflosNot: { color: RENK.hata, fontSize: 11, lineHeight: 15, fontFamily: FONT.govde, marginTop: 4, textAlign: 'center' },
+  modalSatir: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 2 },
+  modalEtiket: { color: RENK.yaziAcik, fontSize: 12, fontFamily: FONT.govde, flex: 1, marginRight: 8 },
+  modalDeger: { fontSize: 12, fontFamily: FONT.baslik },
+  modalSoluk: { color: RENK.yaziSoluk, fontSize: 11, fontFamily: FONT.govde },
+  modalKasa: { color: RENK.yazi, fontSize: 14, fontFamily: FONT.baslik },
+  modalAyirici: { height: 1, backgroundColor: RENK.cizgi, marginVertical: 6 },
+  modalKapat: { backgroundColor: RENK.basari, borderRadius: 10, paddingVertical: 12, alignItems: 'center', marginTop: 10 },
+  modalKapatYazi: { color: '#FFFFFF', fontSize: 13, fontFamily: FONT.buyuk },
+
+  // Mesaj
+  mesajOk: { backgroundColor: RENK.basariKoyu, borderColor: RENK.basari, borderWidth: 1, borderRadius: 10, padding: 10 },
+  mesajHata: { backgroundColor: RENK.hataKoyu, borderColor: RENK.hata, borderWidth: 1, borderRadius: 10, padding: 10 },
+  mesajYazi: { color: RENK.yazi, fontSize: 12, fontFamily: FONT.vurgu },
+
+  // Sahalar ızgarası
+  sahaIzgara: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
+  sahaKart: {
+    width: '49%', backgroundColor: RENK.kart, borderRadius: 12, padding: 10,
+    borderWidth: 2, borderColor: RENK.cizgi, marginBottom: 10,
+  },
+  sahaKartAktif: { borderColor: RENK.vurgu },
+  sahaKartKilitli: { opacity: 0.55 },
+  sahaKartUst: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },
+  sahaKartEmoji: { fontSize: 22 },
+  aktifRozet: { backgroundColor: RENK.vurgu, borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2 },
+  aktifRozetYazi: { color: RENK.arkaPlan, fontSize: 9, fontFamily: FONT.buyuk },
+  sahaKartAd: { color: RENK.yazi, fontSize: 13, fontFamily: FONT.baslik, marginTop: 6 },
+  sahaKartDurum: { fontSize: 11, fontFamily: FONT.vurgu, marginTop: 2 },
+  sahaKartAlt: { color: RENK.yaziSoluk, fontSize: 11, marginTop: 4, fontFamily: FONT.govde },
+  miniBar: { height: 6, backgroundColor: RENK.cizgi, borderRadius: 3, marginTop: 6, overflow: 'hidden' },
+  miniBarDolgu: { height: 6, backgroundColor: RENK.basari, borderRadius: 3 },
+
+  // Canlı maç satırı
+  canliSatir: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 8 },
+  canliButon: { backgroundColor: RENK.vurgu, borderRadius: 10, paddingVertical: 8, paddingHorizontal: 12 },
+  canliButonYazi: { color: RENK.arkaPlan, fontSize: 12, fontFamily: FONT.buyuk },
+  canliBilgi: { color: RENK.yaziSoluk, fontSize: 11, flex: 1, fontFamily: FONT.govde },
+
+  // Kurulu yapılar rozetleri
+  rozetSatir: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
+  rozet: { backgroundColor: RENK.kart, borderColor: RENK.cizgi, borderWidth: 1, borderRadius: 8, paddingHorizontal: 8, paddingVertical: 4 },
+  rozetYazi: { color: RENK.yaziAcik, fontSize: 10, fontFamily: FONT.vurgu },
+
+  // Panel
+  panel: { backgroundColor: RENK.panel, borderRadius: 14, padding: 12, borderWidth: 1, borderColor: RENK.cizgi, gap: 10 },
+  panelBaslikSatir: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  panelBaslik: { color: RENK.yazi, fontSize: 15, fontFamily: FONT.baslik, flex: 1, marginRight: 8 },
+  durumRozet: { borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3 },
+  durumRozetYazi: { color: RENK.arkaPlan, fontSize: 10, fontFamily: FONT.buyuk },
+
+  istatistikSatiri: { flexDirection: 'row', gap: 8 },
+  istatistikKutu: { flex: 1, backgroundColor: RENK.kart, borderRadius: 10, padding: 8, alignItems: 'center' },
+  istatistikDeger: { color: RENK.yazi, fontSize: 12, fontFamily: FONT.baslik },
+  istatistikEtiket: { color: RENK.yaziMat, fontSize: 10, marginTop: 2, fontFamily: FONT.govde },
+
+  kutu: { backgroundColor: RENK.kart, borderRadius: 12, padding: 10, gap: 6 },
+  kutuBaslik: { color: RENK.yazi, fontSize: 13, fontFamily: FONT.baslik },
+  kutuAltBaslik: { color: RENK.vurgu, fontSize: 12, fontFamily: FONT.vurgu },
+  etkiKutu: { backgroundColor: RENK.kart, borderRadius: 12, padding: 10, gap: 4 },
+
+  bar: { height: 10, backgroundColor: RENK.cizgi, borderRadius: 5, overflow: 'hidden', marginVertical: 4 },
+  barDolgu: { height: 10, backgroundColor: RENK.basari },
+
+  // Butonlar
+  butonYesil: { backgroundColor: RENK.basari, borderRadius: 10, paddingVertical: 10, alignItems: 'center', marginTop: 4 },
+  butonPasif: { backgroundColor: RENK.pasif, borderRadius: 10, paddingVertical: 10, alignItems: 'center', marginTop: 4 },
+  butonBeyaz: { color: '#FFFFFF', fontSize: 13, fontFamily: FONT.buyuk },
+  butonKucuk: { backgroundColor: RENK.vurgu, borderRadius: 8, paddingVertical: 6, paddingHorizontal: 10, alignItems: 'center', marginTop: 6 },
+  butonKucukPasif: { backgroundColor: RENK.pasif },
+  butonKucukYazi: { color: RENK.arkaPlan, fontSize: 11, fontFamily: FONT.buyuk },
+
+  // Yükseltme ızgarası
+  yukseltmeIzgara: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
+  yukseltmeKart: {
+    width: '49%', backgroundColor: RENK.kart, borderRadius: 12, padding: 10,
+    borderWidth: 1, borderColor: RENK.cizgi, marginBottom: 10,
+  },
+  yukseltmeEmoji: { fontSize: 20 },
+  yukseltmeAd: { color: RENK.yazi, fontSize: 12, fontFamily: FONT.vurgu, marginTop: 4 },
+  yukseltmeSeviye: { color: RENK.vurgu, fontSize: 11, fontFamily: FONT.vurgu, marginTop: 2 },
+  yukseltmeEtki: { color: RENK.yaziSoluk, fontSize: 11, marginTop: 4, minHeight: 30, fontFamily: FONT.govde },
+
+  // Ana yükseltmeler
+  anaYukseltmeSatir: { flexDirection: 'row', alignItems: 'center', paddingVertical: 6, borderTopWidth: 1, borderTopColor: RENK.cizgi },
+  anaYukseltmeBilgi: { flex: 1, marginRight: 8 },
+  anaYukseltmeAd: { color: RENK.yazi, fontSize: 12, fontFamily: FONT.vurgu },
+
+  // Sponsorlar
+  sponsorBaslikSatir: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  sponsorGelir: { color: RENK.basari, fontSize: 12, fontFamily: FONT.baslik },
+  sponsorIzgara: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
+  sponsorKart: {
+    width: '49%', backgroundColor: RENK.panel, borderRadius: 12, padding: 10,
+    borderWidth: 1.5, borderColor: RENK.cizgi, marginBottom: 10,
+  },
+  sponsorKartKilitli: { opacity: 0.6 },
+  sponsorSatir: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  sponsorNokta: { width: 10, height: 10, borderRadius: 5 },
+  sponsorAd: { color: RENK.yazi, fontSize: 12, fontFamily: FONT.baslik, flex: 1, marginRight: 4 },
+  sponsorAciklama: { color: RENK.yaziSoluk, fontSize: 10, lineHeight: 14, marginTop: 4, fontFamily: FONT.govde },
+  sponsorPara: { color: RENK.vurgu, fontSize: 11, fontFamily: FONT.vurgu, marginTop: 4 },
+  sponsorKosul: { color: RENK.yaziSoluk, fontSize: 10, lineHeight: 14, marginTop: 2, fontFamily: FONT.govde },
+  sponsorButon: { backgroundColor: RENK.basari, borderRadius: 8, paddingVertical: 7, alignItems: 'center', marginTop: 6 },
+  sponsorButonKirmizi: { backgroundColor: RENK.hata },
+  sponsorButonPasif: { backgroundColor: RENK.pasif },
+  sponsorButonYazi: { color: '#FFFFFF', fontSize: 11, fontFamily: FONT.buyuk },
+
+  // Katalog
+  katalogKart: { backgroundColor: RENK.panel, borderRadius: 14, padding: 12, borderWidth: 1, gap: 6 },
+  katalogBaslikSatir: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  katalogAd: { color: RENK.yazi, fontSize: 15, fontFamily: FONT.baslik, flex: 1, marginRight: 8 },
+  katalogFiyat: { color: RENK.vurgu, fontSize: 14, fontFamily: FONT.baslik },
+  katalogDetay: { color: RENK.yaziSoluk, fontSize: 11, lineHeight: 16, fontFamily: FONT.govde },
+});
+// === DOSYA SONU — bu satırı görüyorsan yapıştırma tam demektir ===
+
+===== app\tabs\isletme.tsx =====
+// ============================================
+// BEŞLİ PATRON — app/tabs/isletme.tsx (ÇOKLU SAHA + PERSONEL + LİG + OLAY SORUSU KARTTA)
+// ============================================
+import React, { useState } from 'react';
+import {
+  View, Text, ScrollView, TouchableOpacity, StyleSheet, Modal,
+} from 'react-native';
+import { useGame } from '../../context/GameContext';
+import {
+  DAILY_KIRA, DAILY_ELEKTRIK_SU, UPGRADE_CONFIG,
+  STAFF_CONFIG, TURNUVA_CONFIG, OLAY_HAVUZU, type UpgradeType,
+} from '../../constants/gameConfig';
+import { ISLETME_YERI, SAHA_TIP_BILGI } from '../../constants/pitchConfig';
+import {
+  sahaGunlukGideri, sahaGunlukPasifGelir,
+  KASIYER_ENERJI_INDIRIMI, TEMIZLIKCI_MEMNUNIYET_BONUSU,
+  ANTRENOR_TURNUVA_BONUSU, GUVENLIK_TEKLIF_BONUSU,
+} from '../../services/gameLogic';
+import {
+  LIG_CONFIG, puandanSirala,
+  type LigDurum, type LigHaftaSonucu,
+} from '../../services/leagueLogic';
+import type { PitchState, StaffMember, TurnuvaResult } from '../../types/game';
+
+function para(n: number): string {
+  return `${Math.round(n).toLocaleString('tr-TR')}₺`;
+}
+
+function asamaEtiketi(asama: number): string {
+  if (asama <= 0) return '🌱 Arsa Yok';
+  if (asama === 1) return '🏠 Arsa Alındı';
+  if (asama < 5) return '🚧 İnşaat';
+  return '✅ Hizmette';
+}
+
+const SONUC_ETIKET: Record<TurnuvaResult['sonuc'], string> = {
+  birincilik: '🥇 Birincilik',
+  ikincilik: '🥈 İkincilik',
+  ucunculuk: '🥉 Üçüncülük',
+  katilim: 'Katılım',
+};
+
+// Personel ücret kuralı — GameContext.hireStaff ile BİREBİR aynı:
+// ilk alım = L1'in günlük maaşı, terfi = hedef kademenin günlük maaşı (peşin).
+// Günlük maaş ayrıca her gün sonunda düşer.
+function staffUcreti(cfg: { levels?: any[] }, currentLevel: number): number {
+  if (currentLevel <= 0) return (cfg?.levels?.[0]?.maas) ?? 0;
+  return (cfg?.levels?.[currentLevel]?.maas) ?? 0;
+}
+
+// Günlük personel maaşı: STAFF_CONFIG şemasından (levels[].maas)
+function toplamPersonelMaas(staff: Record<string, StaffMember>): number {
+  let toplam = 0;
+  for (const s of Object.values(staff ?? {})) {
+    if (!s?.hired || s.level < 1) continue;
+    const cfg = STAFF_CONFIG.find(c => c.id === s.id);
+    toplam += cfg?.levels?.[s.level - 1]?.maas ?? 0;
+  }
+  return toplam;
+}
+
+// Personelin oyuna gerçek etkisi — gameLogic'teki seviye tablolarından okunur (birebir aynı değerler):
+// temizlikçi → L1: +5 | L2: +8 | L3: +12 memnuniyet
+// kasiyer → L1: -2 | L2: -3 | L3: -4 enerji
+// antrenör → L1: +5 | L2: +10 | L3: +15 turnuva performansı
+// güvenlik → L1: +1 | L2: +2 | L3: +3 ekstra teklif/gün + olay riski -%10/kademe
+function personelEtkiYazisi(id: string, level: number): string | null {
+  const seviye = Math.max(0, Math.min(3, Math.round(level ?? 0)));
+  if (id === 'temizlikci') {
+    const bonus = TEMIZLIKCI_MEMNUNIYET_BONUSU[seviye] ?? 0;
+    return bonus > 0 ? `gün sonunda +${bonus} memnuniyet` : null;
+  }
+  if (id === 'kasiyer') {
+    const indirim = KASIYER_ENERJI_INDIRIMI[seviye] ?? 0;
+    return indirim > 0 ? `rezervasyonlarda -${indirim} enerji` : null;
+  }
+  if (id === 'antrenor') {
+    const bonus = ANTRENOR_TURNUVA_BONUSU[seviye] ?? 0;
+    return bonus > 0 ? `turnuvalarda +${bonus} performans` : null;
+  }
+  if (id === 'guvenlik') {
+    const eki = GUVENLIK_TEKLIF_BONUSU[seviye] ?? 0;
+    if (eki <= 0) return null;
+    return `gün içinde +${eki} ekstra teklif · olay riski -%${10 * seviye}`;
+  }
+  return null;
+}
+
+// NaN güvenli sayı
+function sayi(v: any): number {
+  return Number.isFinite(Number(v)) ? Number(v) : 0;
+}
+
+// Olay seçeneğinin etki özeti: butonun altında tek satır
+function olayEtkiOzeti(etki: any): string {
+  if (!etki) return '';
+  const p: string[] = [];
+  if (etki.sans) p.push(`🎲 %${etki.sans.yuzde} şans`);
+  if (etki.nakit) p.push(`💰 ${etki.nakit > 0 ? '+' : ''}${para(etki.nakit)}`);
+  if (etki.memnuniyet) p.push(`😊 ${etki.memnuniyet > 0 ? '+' : ''}${etki.memnuniyet}`);
+  if (etki.prestij) p.push(`⭐ ${etki.prestij > 0 ? '+' : ''}${etki.prestij}`);
+  if (etki.enerji) p.push(`⚡ ${etki.enerji > 0 ? '+' : ''}${etki.enerji}`);
+  if (etki.jeton) p.push(`🪙 ${etki.jeton > 0 ? '+' : ''}${etki.jeton}`);
+  if (etki.gelirCarpani) p.push(`📈 gelir x${etki.gelirCarpani}`);
+  return p.join(' · ');
+}
+
+export default function IsletmeScreen() {
+  const { state, purchaseUpgrade, hireStaff, joinTurnuva, buyProperty,
+          ligKatil, ligHaftaOyna, ligBirak, cozOlay } = useGame();
+
+  const [mesaj, setMesaj] = useState<string | null>(null);
+  const [hata, setHata] = useState(false);
+  const [confirmUpgrade, setConfirmUpgrade] = useState<UpgradeType | null>(null);
+  const [confirmStaff, setConfirmStaff] = useState<string | null>(null);
+  const [turnuvaResult, setTurnuvaResult] = useState<TurnuvaResult | null>(null);
+  const [ligSonuc, setLigSonuc] = useState<LigHaftaSonucu | null>(null);
+  const [olaySonucAcik, setOlaySonucAcik] = useState(false);
+  const [olayOzet, setOlayOzet] = useState<string>('');
+
+  if (!state) {
+    return (
+      <View style={is.ekran}>
+        <Text style={is.sari}>Yükleniyor…</Text>
+      </View>
+    );
+  }
+
+  const bildir = (sonuc: string | null, basari?: string) => {
+    if (sonuc) { setHata(true); setMesaj(sonuc); }
+    else if (basari) { setHata(false); setMesaj(basari); }
+  };
+
+  // === SAHALAR ===
+  const sahaListesi = Object.values(state.pitches ?? {}).filter(Boolean) as PitchState[];
+  const acikSahalar = sahaListesi.filter(p => (p.asama ?? 0) >= 5);
+
+  // === KONSOLİDE FİNANS ===
+  const bugunGelir = state.bugunGelir ?? 0;
+  const personelMaas = toplamPersonelMaas(state.staff ?? {});
+  const kiraGideri = state.yerSahibi ? 0 : DAILY_KIRA;
+
+  // === KADRO ===
+  const kadroSayisi = Object.values(state.staff ?? {}).filter(s => s?.hired).length;
+
+  const sahaSatirlari = sahaListesi.map(p => {
+    const acik = (p.asama ?? 0) >= 5;
+    return {
+      p,
+      acik,
+      gider: sahaGunlukGideri(p) ?? 0,
+      pasif: acik ? (sahaGunlukPasifGelir(p, state) ?? 0) : 0,
+    };
+  });
+  const toplamSahaGideri = sahaSatirlari.reduce((t, s) => t + s.gider, 0);
+  const toplamPasif = sahaSatirlari.reduce((t, s) => t + s.pasif, 0);
+  const toplamGider = kiraGideri + DAILY_ELEKTRIK_SU + personelMaas + toplamSahaGideri;
+  const net = bugunGelir + toplamPasif - toplamGider;
+
+  // === MEMNUNİYET ===
+  const memnuniyet = Math.max(0, Math.min(100, state.memnuniyet ?? 50));
+  const memnuniyetRenk = memnuniyet >= 70 ? '#34D399' : memnuniyet >= 40 ? '#F59E0B' : '#F87171';
+
+  // === TURNUVA ===
+  const aralikGun = (TURNUVA_CONFIG as any)?.aralikGun ?? 3;
+  const katilimBedeli = (TURNUVA_CONFIG as any)?.katilimBedeli ?? 0;
+  const gunFark = (state.gun ?? 1) - (state.sonTurnuvaGun ?? 0);
+  const turnuvaReady = gunFark >= aralikGun;
+  const kalanGun = Math.max(0, aralikGun - gunFark);
+
+  // === SAHİBİNDEN ===
+  const yerFiyat = ISLETME_YERI.satinAlmaFiyat;
+  const yereNakitYeterli = (state.nakit ?? 0) >= yerFiyat;
+
+  const handleSahibinden = () => {
+    const sonuc = buyProperty();
+    if (sonuc) bildir(sonuc);
+    else bildir(null, `🏠 Yer artık bizim! Günlük kira kalktı, +${ISLETME_YERI.prestijOdul} prestij.`);
+  };
+
+  const handleTurnuva = () => {
+    const res = joinTurnuva();
+    if ('error' in res) { setHata(true); setMesaj(res.error); }
+    else setTurnuvaResult(res.result);
+  };
+
+  // === LİG ===
+  const lig: LigDurum | null = (state as any)?.lig ?? null;
+  const ligTablo = lig ? puandanSirala(lig.takimlar) : [];
+  const benimLigTakim = lig?.takimlar.find(t => t.id === 'ben');
+  const siradakiLigMac = lig
+    ? lig.fikstur.find(m => m.hafta === lig.hafta && (m.ev === 'ben' || m.dep === 'ben'))
+    : null;
+  const rakipLigTakim = lig && siradakiLigMac
+    ? lig.takimlar.find(t => t.id === (siradakiLigMac.ev === 'ben' ? siradakiLigMac.dep : siradakiLigMac.ev))
+    : null;
+  const ligMacAcik = lig ? state.gun !== lig.sonMacGunu : false;
+  const yildizAcik =
+    (state.pitches?.yildiz?.asama ?? 0) >= 5 || (state.yildizSaha?.asama ?? 0) >= 5;
+
+  const handleLigKatil = () => {
+    const err = ligKatil();
+    if (err) bildir(err);
+    else bildir(null, '⚽ Lige hoş geldin! İlk hafta maçı hazır.');
+  };
+
+  const handleLigMac = () => {
+    const res = ligHaftaOyna();
+    if ('error' in res) { setHata(true); setMesaj(res.error); }
+    else setLigSonuc(res.result);
+  };
+
+  const handleLigBirak = () => {
+    const err = ligBirak();
+    if (err) bildir(err);
+    else bildir(null, 'Ligden ayrıldın.');
+  };
+
+  // === OLAY ===
+  const bugununOlayi = state.bugunOlayId
+    ? (OLAY_HAVUZU.find(o => o.id === state.bugunOlayId) ?? null)
+    : null;
+  const olaySonucMesaji = (state as any)?.olaySonucMesaji ?? null;
+  const olayGecmisListesi = (state.olayGecmisi ?? [])
+    .slice(-5)
+    .reverse()
+    .map(id => OLAY_HAVUZU.find(o => o.id === id))
+    .filter(Boolean) as typeof OLAY_HAVUZU;
+
+  // Aktif korumalar: kamera/otopark/kantin yükseltmesi + güvenlik personeli
+  // Bu korumalar ilgili olayların hiç çıkmamasını sağlar.
+  const mainUp: any = state.upgrades ?? {};
+  const korumaListesi: string[] = [];
+  const kameraVar = sayi(mainUp.kamera) > 0 || sahaListesi.some(p => sayi((p.upgrades as any)?.kamera) > 0);
+  const otoparkVar = sayi(mainUp.otopark) > 0 || sahaListesi.some(p => sayi((p.upgrades as any)?.otopark) > 0);
+  const kantinVar = sayi(mainUp.kantin) > 0 || sahaListesi.some(p => sayi((p.upgrades as any)?.kantin) > 0);
+  const guvenlikVar = !!state.staff?.guvenlik?.hired;
+  if (kameraVar) korumaListesi.push('📹 Kamera: hırsızlık olayı çıkmaz');
+  if (otoparkVar) korumaListesi.push('🅿️ Otopark: araç hasarı olayı çıkmaz');
+  if (kantinVar) korumaListesi.push('☕ Kantin: gıda denetimi olayı çıkmaz');
+  if (guvenlikVar) korumaListesi.push('🛡️ Güvenlik: olay riski düşük, kavga olayı çıkmaz');
+
+  // Olay seçimi: kartın içinden çözülür — ayrı ekran gerekmez.
+  // Şanslı seçeneklerde sonuç GameContext'te zar atılıp olaySonucMesaji'na yazılır;
+  // sonuç modalı güncel state'ten okur.
+  const handleOlaySec = (index: number) => {
+    if (!bugununOlayi || state.olayCozuldu) return;
+    const secenek = bugununOlayi.secenekler?.[index];
+    if (!secenek) return;
+    const err = cozOlay(index);
+    if (err) { setHata(true); setMesaj(err); return; }
+    setOlayOzet(olayEtkiOzeti(secenek.etki));
+    setOlaySonucAcik(true);
+  };
+
+  // === ONAY MODALI VERİLERİ ===
+  const upgradeListe = Object.entries(UPGRADE_CONFIG as Record<string, any>) as [UpgradeType, any][];
+  const onayCfg = confirmUpgrade ? ((UPGRADE_CONFIG as Record<string, any>)[confirmUpgrade] as any) : null;
+  const onaySeviye = confirmUpgrade ? (state.upgrades?.[confirmUpgrade] ?? 0) : 0;
+  const onayCost = onayCfg?.costs?.[onaySeviye] ?? 0;
+
+  const onayStaffCfg = confirmStaff ? STAFF_CONFIG.find(c => c.id === confirmStaff) : null;
+  const onayStaffLevel = confirmStaff ? (state.staff?.[confirmStaff]?.level ?? 0) : 0;
+  const onayStaffUcret = onayStaffCfg ? staffUcreti(onayStaffCfg, onayStaffLevel) : 0;
+
+  const handleUpgradeOnay = () => {
+    if (!confirmUpgrade) return;
+    const err = purchaseUpgrade(confirmUpgrade);
+    setConfirmUpgrade(null);
+    bildir(err, '⬆️ Yükseltme alındı!');
+  };
+
+  const handleStaffOnay = () => {
+    if (!confirmStaff) return;
+    const err = hireStaff(confirmStaff);
+    setConfirmStaff(null);
+    bildir(err, '👥 Personel kadroya eklendi!');
+  };
+
+  return (
+    <View style={is.ekran}>
+      <ScrollView contentContainerStyle={is.icerik} showsVerticalScrollIndicator={false}>
+        <Text style={is.baslik}>🏢 İşletme Merkezi</Text>
+
+        {/* === GÜN DURUMU + MEMNUNİYET === */}
+        <View style={is.kart}>
+          <View style={is.durumSatir}>
+            <Text style={is.durumDeger}>📅 Gün {state.gun ?? 1}</Text>
+            <Text style={is.durumDeger}>💰 {para(state.nakit ?? 0)}</Text>
+            <Text style={is.durumDeger}>⭐ {state.prestij ?? 0}</Text>
+            <Text style={is.durumDeger}>🏟️ {acikSahalar.length}/{sahaListesi.length} açık</Text>
+          </View>
+          <Text style={is.memEtiket}>😊 Müşteri Memnuniyeti — %{memnuniyet}</Text>
+          <View style={is.memBarArka}>
+            <View style={[is.memBarOn, { width: `${memnuniyet}%`, backgroundColor: memnuniyetRenk }]} />
+          </View>
+        </View>
+
+        {/* === GÜNLÜK FİNANS (KONSOLİDE) === */}
+        <View style={is.kart}>
+          <Text style={is.bolumBaslik}>💰 Günlük Finans</Text>
+          <View style={is.finSatir}>
+            <Text style={is.finEtiket}>📈 Rezervasyon geliri (bugün)</Text>
+            <Text style={is.finYesil}>+{para(bugunGelir)}</Text>
+          </View>
+          <View style={is.finSatir}>
+            <Text style={is.finEtiket}>📺 Saha pasif gelirleri</Text>
+            <Text style={is.finYesil}>+{para(toplamPasif)}</Text>
+          </View>
+          <View style={is.finSatir}>
+            <Text style={is.finEtiket}>🏠 Kira</Text>
+            {state.yerSahibi
+              ? <Text style={is.finYesil}>Yok — yer bizim! 🎉</Text>
+              : <Text style={is.finKirmizi}>-{para(DAILY_KIRA)}</Text>}
+          </View>
+          <View style={is.finSatir}>
+            <Text style={is.finEtiket}>💡 Elektrik + Su</Text>
+            <Text style={is.finKirmizi}>-{para(DAILY_ELEKTRIK_SU)}</Text>
+          </View>
+          <View style={is.finSatir}>
+            <Text style={is.finEtiket}>👥 Personel maaşları</Text>
+            <Text style={is.finKirmizi}>
+              -{para(personelMaas)}{kadroSayisi > 0 ? ` (${kadroSayisi} kişi)` : ''}
+            </Text>
+          </View>
+          <View style={is.finSatir}>
+            <Text style={is.finEtiket}>🏟️ Saha giderleri ({sahaListesi.length} saha)</Text>
+            <Text style={is.finKirmizi}>-{para(toplamSahaGideri)}</Text>
+          </View>
+          <View style={[is.finSatir, is.finNet]}>
+            <Text style={is.netEtiket}>NET (bugün)</Text>
+            <Text style={[is.netDeger, { color: net >= 0 ? '#34D399' : '#F87171' }]}>
+              {net >= 0 ? '+' : ''}{para(net)}
+            </Text>
+          </View>
+        </View>
+
+        {/* === SAHA BAZLI MALİ TABLO === */}
+        <View style={is.kart}>
+          <Text style={is.bolumBaslik}>📊 Saha Bazlı Mali Tablo</Text>
+          {sahaSatirlari.map(({ p, acik, gider, pasif }) => {
+            const tip = SAHA_TIP_BILGI[p.sahaTipi] ?? SAHA_TIP_BILGI.yildiz;
+            return (
+              <View key={p.id} style={is.maliSatir}>
+                <Text style={is.maliEmoji}>{tip.emoji}</Text>
+                <View style={is.maliBilgi}>
+                  <Text style={is.maliAd} numberOfLines={1}>{p.ad ?? p.id}</Text>
+                  <Text style={is.maliAlt}>{asamaEtiketi(p.asama ?? 0)}</Text>
+                </View>
+                <View style={is.maliSayilar}>
+                  <Text style={is.maliGider}>-{para(gider)}/gün</Text>
+                  {acik ? <Text style={is.maliPasif}>+{para(pasif)} pasif</Text> : null}
+                </View>
+              </View>
+            );
+          })}
+          <View style={[is.maliSatir, is.maliToplam]}>
+            <Text style={is.maliToplamYazi}>
+              Saha toplamı: -{para(toplamSahaGideri)} gider · +{para(toplamPasif)} pasif gelir
+            </Text>
+          </View>
+        </View>
+
+        {/* === SAHİBDEN SATIN AL === */}
+        {state.yerSahibi ? (
+          <View style={[is.kart, is.sahibinKart]}>
+            <Text style={is.sahibinBaslik}>🏠 Sahamız Artık Bizim!</Text>
+            <Text style={is.sahibinAciklama}>
+              Günlük {para(DAILY_KIRA)} kira tamamen kalktı — artık sadece {para(DAILY_ELEKTRIK_SU)} elektrik-su
+              ödüyoruz. +{ISLETME_YERI.prestijOdul} prestij kazandın, bu rozet kalıcı. 🎉
+            </Text>
+          </View>
+        ) : (
+          <View style={is.kart}>
+            <Text style={is.bolumBaslik}>🏷️ Sahibinden Satın Al</Text>
+            <Text style={is.sahibinAciklama}>{ISLETME_YERI.aciklama}</Text>
+            <View style={is.sahibinSatir}>
+              <Text style={is.sahibinEtiket}>💵 Fiyat</Text>
+              <Text style={is.sahibinDeger}>{para(yerFiyat)}</Text>
+            </View>
+            <View style={is.sahibinSatir}>
+              <Text style={is.sahibinEtiket}>🪙 Ödül</Text>
+              <Text style={is.sahibinDeger}>+{ISLETME_YERI.prestijOdul} prestij</Text>
+            </View>
+            <View style={is.sahibinSatir}>
+              <Text style={is.sahibinEtiket}>✂️ Kaldırır</Text>
+              <Text style={is.sahibinDeger}>{para(DAILY_KIRA)}/gün kira</Text>
+            </View>
+            <TouchableOpacity
+              style={[is.buton, { backgroundColor: yereNakitYeterli ? '#22C55E' : '#334155' }]}
+              onPress={handleSahibinden}
+            >
+              <Text style={is.butonYazi}>
+                {yereNakitYeterli ? `Yeri Al — ${para(yerFiyat)}` : `Nakit yetersiz (${para(yerFiyat)})`}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {/* === TESİS YÜKSELTMELERİ === */}
+        <View style={is.kart}>
+          <Text style={is.bolumBaslik}>⬆️ Tesis Yükseltmeleri</Text>
+          {upgradeListe.map(([id, cfg]) => {
+            const seviye = state.upgrades?.[id] ?? 0;
+            const maks = cfg?.maxLevel ?? cfg?.costs?.length ?? 0;
+            const cost = cfg?.costs?.[seviye];
+            const makslandi = seviye >= maks;
+            return (
+              <View key={id} style={is.upSatiri}>
+                <Text style={is.upEmoji}>{cfg?.emoji ?? '🔧'}</Text>
+                <View style={is.upBilgi}>
+                  <Text style={is.upAd}>
+                    {cfg?.ad ?? cfg?.isim ?? id} <Text style={is.upSeviye}>L{seviye}/{maks}</Text>
+                  </Text>
+                  <Text style={is.upAciklama} numberOfLines={2}>{cfg?.aciklama ?? cfg?.etki ?? ''}</Text>
+                </View>
+                <TouchableOpacity
+                  disabled={makslandi}
+                  style={[is.upButon, makslandi && { backgroundColor: '#334155' }]}
+                  onPress={() => setConfirmUpgrade(id)}
+                >
+                  <Text style={is.upButonYazi}>{makslandi ? 'MAX' : para(cost ?? 0)}</Text>
+                </TouchableOpacity>
+              </View>
+            );
+          })}
+        </View>
+
+        {/* === PERSONEL === */}
+        <View style={is.kart}>
+          <Text style={is.bolumBaslik}>👥 Personel</Text>
+          <Text style={is.personelOzet}>
+            {kadroSayisi > 0
+              ? `${kadroSayisi} kişi görevde · günlük maaş toplamı ${para(personelMaas)} — maaşlar her gün sonunda otomatik düşer. Etkiler seviyeyle ölçeklenir.`
+              : 'Kadro boş: temizlikçi memnuniyeti yükseltir, kasiyer rezervasyonlarda enerji tasarrufu sağlar. Maaşlar gün sonunda düşer.'}
+          </Text>
+          {STAFF_CONFIG.map(cfg => {
+            const m = state.staff?.[cfg.id] ?? { id: cfg.id, hired: false, level: 0 };
+            const seviye = m.level ?? 0;
+            const maks = cfg.levels?.length ?? 0;
+            const makslandi = seviye >= maks;
+            const ucret = staffUcreti(cfg, seviye);
+            const sonraki = makslandi ? null : cfg.levels?.[seviye];
+            const maas = sonraki?.maas ?? 0;
+            const etkiYazisi = personelEtkiYazisi(cfg.id, seviye);
+            return (
+              <View key={cfg.id} style={is.upSatiri}>
+                <Text style={is.upEmoji}>{cfg.emoji ?? '🧑‍💼'}</Text>
+                <View style={is.upBilgi}>
+                  <Text style={is.upAd}>
+                    {cfg.label ?? cfg.id} <Text style={is.upSeviye}>L{seviye}/{maks}</Text>
+                  </Text>
+                  <Text style={is.upAciklama} numberOfLines={2}>
+                    {cfg.aciklama ?? ''}{sonraki ? ` · Sonraki: ${sonraki.label ?? '—'} (${para(maas)}/gün)` : ''}
+                  </Text>
+                  {seviye > 0 && (
+                    <Text style={is.personelEtki}>
+                      {etkiYazisi
+                        ? `✓ Aktif: ${etkiYazisi}`
+                        : `✓ Görevde: ${cfg.levels?.[seviye - 1]?.label ?? 'Aktif'}`}
+                    </Text>
+                  )}
+                </View>
+                <TouchableOpacity
+                  disabled={makslandi}
+                  style={[is.upButon, makslandi && { backgroundColor: '#334155' }]}
+                  onPress={() => setConfirmStaff(cfg.id)}
+                >
+                  <Text style={is.upButonYazi}>
+                    {makslandi ? 'MAX' : seviye === 0 ? `Al ${para(ucret)}` : `Terfi ${para(ucret)}`}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            );
+          })}
+        </View>
+
+        {/* === TURNUVA === */}
+        <View style={is.kart}>
+          <Text style={is.bolumBaslik}>🏆 Turnuva</Text>
+          <Text style={is.sahibinAciklama}>
+            Halısaha turnuvasına katıl, ödül ve prestij kazan! Katılım: {para(katilimBedeli)} · Her {aralikGun} günde bir.
+          </Text>
+          {!turnuvaReady ? (
+            <View style={is.turnuvaBekle}>
+              <Text style={is.turnuvaBekleYazi}>⏳ Sonraki turnuvaya {kalanGun} gün</Text>
+            </View>
+          ) : (
+            <TouchableOpacity style={[is.buton, { backgroundColor: '#F59E0B' }]} onPress={handleTurnuva}>
+              <Text style={is.butonKoyu}>Turnuvaya Katıl — {para(katilimBedeli)}</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+
+        {/* === GÜNÜN OLAYI — soru ve seçenekler doğrudan burada === */}
+        <View style={is.kart}>
+          <Text style={is.bolumBaslik}>🎲 Olay Durumu</Text>
+          {bugununOlayi ? (
+            <>
+              <Text style={is.olayBaslik}>{bugununOlayi.emoji} {bugununOlayi.baslik}</Text>
+              <Text style={is.olayYazi}>{bugununOlayi.aciklama}</Text>
+              {state.olayCozuldu ? (
+                olaySonucMesaji
+                  ? <Text style={is.olaySonuc}>📌 {olaySonucMesaji}</Text>
+                  : <Text style={is.olaySonuc}>📌 Bugünün olayı çözüldü.</Text>
+              ) : (
+                <>
+                  <Text style={is.olaySoru}>Ne yapıyorsun?</Text>
+                  {(bugununOlayi.secenekler ?? []).map((sec, i) => (
+                    <TouchableOpacity
+                      key={`${bugununOlayi.id}_${i}`}
+                      style={is.olaySecenek}
+                      onPress={() => handleOlaySec(i)}
+                    >
+                      <Text style={is.olaySecenekLabel}>{sec.label}</Text>
+                      <Text style={is.olaySecenekAciklama}>{sec.aciklama}</Text>
+                      {olayEtkiOzeti(sec.etki).length > 0 && (
+                        <Text style={is.olaySecenekEtki}>{olayEtkiOzeti(sec.etki)}</Text>
+                      )}
+                    </TouchableOpacity>
+                  ))}
+                </>
+              )}
+            </>
+          ) : (
+            <Text style={is.olayYazi}>☀️ Bugün sakin bir gün — olay yok. (Olay her gün çıkmaz; güvenlik kademesi çıkma şansını düşürür.)</Text>
+          )}
+          {korumaListesi.length > 0 && (
+            <Text style={is.olayKoruma}>{korumaListesi.join(' · ')}</Text>
+          )}
+          {olayGecmisListesi.length > 0 && (
+            <>
+              <Text style={is.olayGecmisBaslik}>Son olaylar:</Text>
+              {olayGecmisListesi.map((o, i) => (
+                <Text key={`${o.id}_${i}`} style={is.olayGecmisSatir}>{o.emoji} {o.baslik}</Text>
+              ))}
+            </>
+          )}
+        </View>
+
+        {/* === LİG === */}
+        <View style={is.kart}>
+          <Text style={is.bolumBaslik}>⚽ Beşli Patron Ligi</Text>
+          {!lig ? (
+            <>
+              <Text style={is.sahibinAciklama}>
+                8 takımlı, tek devreli lig (7 hafta). Günde en fazla 1 hafta maçı ({LIG_CONFIG.macEnerjisi} enerji).
+                Galibiyet {para(LIG_CONFIG.oduller.galibiyet)} + prestij. Sezonu ilk 3'te bitir, sezon ödülü kap.
+                Takım gücün: saha kalitesi, antrenör, memnuniyet ve prestijden beslenir.
+              </Text>
+              <TouchableOpacity
+                style={[is.buton, { backgroundColor: yildizAcik ? '#F59E0B' : '#334155' }]}
+                onPress={handleLigKatil}
+              >
+                <Text style={is.butonYazi}>{yildizAcik ? 'Lige Katıl — Ücretsiz' : 'Yıldız saha hizmette olmalı'}</Text>
+              </TouchableOpacity>
+            </>
+          ) : (
+            <>
+              <View style={is.ligBaslikSatir}>
+                <Text style={is.ligSezonYazi}>🏆 {lig.sezon}. Sezon · Hafta {lig.hafta}/7</Text>
+                {lig.sampiyonluk > 0 && (
+                  <Text style={is.ligSampiyonluk}>⭐ {lig.sampiyonluk}x şampiyon</Text>
+                )}
+              </View>
+
+              {lig.sonMac && (
+                <Text style={is.ligSonMac}>
+                  Son maç: {lig.sonMac.senGol}-{lig.sonMac.rakipGol} {lig.sonMac.rakipAd}{' '}
+                  {lig.sonMac.sonuc === 'galibiyet' ? '✅' : lig.sonMac.sonuc === 'beraberlik' ? '➖' : '❌'}
+                </Text>
+              )}
+
+              {/* Puan durumu */}
+              <View style={is.ligTabloBaslik}>
+                <Text style={[is.ligTh, { flex: 0.5 }]}>#</Text>
+                <Text style={[is.ligThAd, { flex: 2.3 }]}>TAKIM</Text>
+                <Text style={[is.ligTh, { flex: 0.7 }]}>O</Text>
+                <Text style={[is.ligTh, { flex: 0.8 }]}>AV</Text>
+                <Text style={[is.ligTh, { flex: 0.7 }]}>P</Text>
+              </View>
+              {ligTablo.map((t, i) => (
+                <View key={t.id} style={[is.ligSatir, t.id === 'ben' && is.ligSatirBen]}>
+                  <Text style={[is.ligTd, { flex: 0.5 }]}>{i + 1}</Text>
+                  <Text style={[is.ligTdAd, { flex: 2.3 }]} numberOfLines={1}>{t.ad}</Text>
+                  <Text style={[is.ligTd, { flex: 0.7 }]}>{t.oynanan}</Text>
+                  <Text style={[is.ligTd, { flex: 0.8 }]}>
+                    {t.attigi - t.yedigi > 0 ? '+' : ''}{t.attigi - t.yedigi}
+                  </Text>
+                  <Text style={[is.ligTdPuan, { flex: 0.7 }]}>{t.puan}</Text>
+                </View>
+              ))}
+
+              {rakipLigTakim && (
+                <Text style={is.ligSirada}>
+                  Sırada: {rakipLigTakim.ad} (güç {rakipLigTakim.guc}) · Senin güç: {benimLigTakim?.guc ?? '?'}
+                </Text>
+              )}
+              <TouchableOpacity
+                style={[is.buton, { backgroundColor: ligMacAcik ? '#F59E0B' : '#334155' }]}
+                onPress={handleLigMac}
+              >
+                <Text style={is.butonYazi}>
+                  {ligMacAcik
+                    ? `${lig.hafta}. Hafta Maçı Oyna — ${LIG_CONFIG.macEnerjisi} enerji`
+                    : 'Bugünün maçı oynandı ✅'}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={is.ligCikBtn} onPress={handleLigBirak}>
+                <Text style={is.ligCikYazi}>Ligden ayrıl</Text>
+              </TouchableOpacity>
+            </>
+          )}
+        </View>
+      </ScrollView>
+
+      {/* === YÜKSELTME ONAY MODALI === */}
+      <Modal visible={confirmUpgrade !== null} transparent animationType="fade" onRequestClose={() => setConfirmUpgrade(null)}>
+        <View style={is.modalOverlay}>
+          <View style={is.modalKart}>
+            <Text style={is.modalBaslik}>{onayCfg?.emoji ?? '🔧'} {onayCfg?.ad ?? onayCfg?.isim ?? 'Yükseltme'}</Text>
+            <Text style={is.modalYazi}>
+              L{onaySeviye} → L{onaySeviye + 1} yükseltmesi için {para(onayCost)} ödenecek. Onaylıyor musun?
+            </Text>
+            <View style={is.modalButonlar}>
+              <TouchableOpacity style={is.btnIptal} onPress={() => setConfirmUpgrade(null)}>
+                <Text style={is.btnIptalYazi}>Vazgeç</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={is.btnOnay} onPress={handleUpgradeOnay}>
+                <Text style={is.btnOnayYazi}>Onayla</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* === PERSONEL ONAY MODALI === */}
+      <Modal visible={confirmStaff !== null} transparent animationType="fade" onRequestClose={() => setConfirmStaff(null)}>
+        <View style={is.modalOverlay}>
+          <View style={is.modalKart}>
+            <Text style={is.modalBaslik}>{onayStaffCfg?.emoji ?? '🧑‍💼'} {onayStaffCfg?.label ?? 'Personel'}</Text>
+            <Text style={is.modalYazi}>
+              {onayStaffLevel === 0 ? 'İşe alım' : 'Terfi'} ücreti {para(onayStaffUcret)}. Onaylıyor musun?
+            </Text>
+            <View style={is.modalButonlar}>
+              <TouchableOpacity style={is.btnIptal} onPress={() => setConfirmStaff(null)}>
+                <Text style={is.btnIptalYazi}>Vazgeç</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={is.btnOnay} onPress={handleStaffOnay}>
+                <Text style={is.btnOnayYazi}>Onayla</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* === TURNUVA SONUÇ MODALI === */}
+      <Modal visible={turnuvaResult !== null} transparent animationType="fade" onRequestClose={() => setTurnuvaResult(null)}>
+        <View style={is.modalOverlay}>
+          <View style={is.modalKart}>
+            <Text style={is.modalBaslik}>🏆 {turnuvaResult?.isim ?? 'Turnuva'}</Text>
+            <Text style={is.modalSonuc}>{turnuvaResult ? SONUC_ETIKET[turnuvaResult.sonuc] : ''}</Text>
+            <Text style={is.modalYazi}>
+              💰 Kazanç: {para(turnuvaResult?.kazanc ?? 0)}{'\n'}⭐ Prestij: +{turnuvaResult?.prestijKazanc ?? 0}
+            </Text>
+            <View style={is.modalButonlar}>
+              <TouchableOpacity style={is.btnOnay} onPress={() => setTurnuvaResult(null)}>
+                <Text style={is.btnOnayYazi}>Harika!</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* === LİG MAÇ SONUCU MODALI === */}
+      <Modal visible={ligSonuc !== null} transparent animationType="fade" onRequestClose={() => setLigSonuc(null)}>
+        <View style={is.modalOverlay}>
+          <View style={is.modalKart}>
+            <Text style={is.modalBaslik}>⚽ {ligSonuc?.hafta}. Hafta</Text>
+            <Text style={is.ligModalSkor}>
+              Beşli Patron SK {ligSonuc?.senGol} - {ligSonuc?.rakipGol} {ligSonuc?.rakipAd}
+            </Text>
+            <Text style={is.modalSonuc}>
+              {ligSonuc?.sonuc === 'galibiyet'
+                ? '✅ Galibiyet!'
+                : ligSonuc?.sonuc === 'beraberlik'
+                  ? '➖ Beraberlik'
+                  : '❌ Yenilgi'}
+            </Text>
+            {ligSonuc && ligSonuc.sezonBitti && (
+              <Text style={is.ligModalSezon}>
+                🏁 Sezon bitti! Final sırası: {ligSonuc.siralama}.{' '}
+                {ligSonuc.siralama === 1 ? 'ŞAMPİYON! 🎉' : ''}
+              </Text>
+            )}
+            <Text style={is.modalYazi}>
+              💰 Maç kazancı: +{para(ligSonuc?.kazanc ?? 0)}{'\n'}
+              {(ligSonuc?.sezonOdulu ?? 0) > 0
+                ? `🏆 Sezon ödülü: +${para(ligSonuc?.sezonOdulu ?? 0)}\n`
+                : ''}
+              ⭐ Prestij: +{(ligSonuc?.prestij ?? 0) + (ligSonuc?.sezonPrestij ?? 0)}
+            </Text>
+            <View style={is.modalButonlar}>
+              <TouchableOpacity style={is.btnOnay} onPress={() => setLigSonuc(null)}>
+                <Text style={is.btnOnayYazi}>Tamam</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* === OLAY SONUCU MODALI === */}
+      <Modal visible={olaySonucAcik} transparent animationType="fade" onRequestClose={() => setOlaySonucAcik(false)}>
+        <View style={is.modalOverlay}>
+          <View style={is.modalKart}>
+            <Text style={is.modalBaslik}>📌 Olay Sonucu</Text>
+            <Text style={is.modalSonuc}>{olaySonucMesaji ?? 'Karar uygulandı.'}</Text>
+            {olayOzet.length > 0 && <Text style={is.modalYazi}>{olayOzet}</Text>}
+            <View style={is.modalButonlar}>
+              <TouchableOpacity style={is.btnOnay} onPress={() => setOlaySonucAcik(false)}>
+                <Text style={is.btnOnayYazi}>Tamam</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* === BİLDİRİM === */}
+      {mesaj != null && (
+        <View style={[is.toast, { backgroundColor: hata ? '#7F1D1D' : '#14532D' }]}>
+          <Text style={is.toastYazi}>{mesaj}</Text>
+          <TouchableOpacity onPress={() => setMesaj(null)}>
+            <Text style={is.toastYazi}>✕</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+    </View>
+  );
+}
+
+// ============================================
+// === STİLLER ===
+// ============================================
+const is = StyleSheet.create({
+  ekran: { flex: 1, backgroundColor: '#0F172A' },
+  icerik: { padding: 16, paddingBottom: 90 },
+  baslik: { color: '#F8FAFC', fontSize: 20, fontWeight: '800', marginBottom: 12 },
+  sari: { color: '#F59E0B' },
+  kart: {
+    backgroundColor: '#1E293B', borderWidth: 1, borderColor: '#334155',
+    borderRadius: 16, padding: 14, marginBottom: 12,
+  },
+  durumSatir: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 10 },
+  durumDeger: { color: '#F8FAFC', fontWeight: '800', fontSize: 13 },
+  memEtiket: { color: '#94A3B8', fontSize: 11, marginBottom: 6 },
+  memBarArka: { height: 10, backgroundColor: '#0B1220', borderRadius: 999, overflow: 'hidden' },
+  memBarOn: { height: '100%', borderRadius: 999 },
+  bolumBaslik: { color: '#F8FAFC', fontSize: 15, fontWeight: '800', marginBottom: 10 },
+  finSatir: {
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+    paddingVertical: 5, borderBottomWidth: 1, borderBottomColor: '#0B1220',
+  },
+  finEtiket: { color: '#94A3B8', fontSize: 12, flexShrink: 1 },
+  finYesil: { color: '#34D399', fontWeight: '800', fontSize: 13 },
+  finKirmizi: { color: '#F87171', fontWeight: '800', fontSize: 13 },
+  finNet: { borderBottomWidth: 0, marginTop: 4 },
+  netEtiket: { color: '#F8FAFC', fontWeight: '800', fontSize: 14 },
+  netDeger: { fontWeight: '800', fontSize: 16 },
+  maliSatir: {
+    flexDirection: 'row', alignItems: 'center', gap: 10,
+    paddingVertical: 7, borderBottomWidth: 1, borderBottomColor: '#0B1220',
+  },
+  maliEmoji: { fontSize: 20 },
+  maliBilgi: { flex: 1 },
+  maliAd: { color: '#F8FAFC', fontWeight: '700', fontSize: 13 },
+  maliAlt: { color: '#64748B', fontSize: 11, marginTop: 1 },
+  maliSayilar: { alignItems: 'flex-end' },
+  maliGider: { color: '#F87171', fontWeight: '700', fontSize: 12 },
+  maliPasif: { color: '#34D399', fontWeight: '700', fontSize: 11, marginTop: 2 },
+  maliToplam: { borderBottomWidth: 0 },
+  maliToplamYazi: { color: '#F59E0B', fontWeight: '800', fontSize: 12, flex: 1, textAlign: 'right' },
+  sahibinKart: { borderColor: '#22C55E', borderWidth: 1.5 },
+  sahibinBaslik: { color: '#34D399', fontSize: 16, fontWeight: '800', marginBottom: 6 },
+  sahibinAciklama: { color: '#94A3B8', fontSize: 12, lineHeight: 18, marginBottom: 8 },
+  sahibinSatir: {
+    flexDirection: 'row', justifyContent: 'space-between',
+    paddingVertical: 4,
+  },
+  sahibinEtiket: { color: '#94A3B8', fontSize: 12 },
+  sahibinDeger: { color: '#E2E8F0', fontWeight: '800', fontSize: 12 },
+  buton: { borderRadius: 12, paddingVertical: 13, alignItems: 'center', marginTop: 10 },
+  butonYazi: { color: '#F8FAFC', fontWeight: '800', fontSize: 14 },
+  butonKoyu: { color: '#0F172A', fontWeight: '800', fontSize: 14 },
+  upSatiri: {
+    flexDirection: 'row', alignItems: 'center', gap: 10,
+    paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: '#0B1220',
+  },
+  upEmoji: { fontSize: 22 },
+  upBilgi: { flex: 1 },
+  upAd: { color: '#F8FAFC', fontWeight: '700', fontSize: 13 },
+  upSeviye: { color: '#F59E0B', fontWeight: '800', fontSize: 11 },
+  upAciklama: { color: '#64748B', fontSize: 11, marginTop: 1 },
+  personelOzet: { color: '#94A3B8', fontSize: 11, lineHeight: 16, marginBottom: 6 },
+  personelEtki: { color: '#34D399', fontSize: 11, fontWeight: '700', marginTop: 3 },
+  upButon: {
+    backgroundColor: '#F59E0B', borderRadius: 10,
+    paddingHorizontal: 12, paddingVertical: 7,
+  },
+  upButonYazi: { color: '#0F172A', fontWeight: '800', fontSize: 12 },
+  turnuvaBekle: {
+    backgroundColor: '#0B1220', borderRadius: 12, paddingVertical: 12,
+    alignItems: 'center', marginTop: 10,
+  },
+  turnuvaBekleYazi: { color: '#F59E0B', fontWeight: '700', fontSize: 13 },
+  olayBaslik: { color: '#F8FAFC', fontWeight: '800', fontSize: 13, marginBottom: 4 },
+  olayYazi: { color: '#94A3B8', fontSize: 12, lineHeight: 18, marginBottom: 6 },
+  olaySoru: { color: '#F8FAFC', fontWeight: '800', fontSize: 12, marginBottom: 6 },
+  olaySecenek: {
+    backgroundColor: '#0B1220', borderWidth: 1, borderColor: '#334155',
+    borderRadius: 12, padding: 10, marginBottom: 8,
+  },
+  olaySecenekLabel: { color: '#F8FAFC', fontWeight: '800', fontSize: 13 },
+  olaySecenekAciklama: { color: '#94A3B8', fontSize: 11, marginTop: 2, lineHeight: 16 },
+  olaySecenekEtki: { color: '#F59E0B', fontSize: 11, fontWeight: '700', marginTop: 4 },
+  olaySonuc: { color: '#F59E0B', fontWeight: '700', fontSize: 12, marginBottom: 4 },
+  olayKoruma: { color: '#34D399', fontSize: 11, fontWeight: '600', marginBottom: 6, lineHeight: 16 },
+  olayGecmisBaslik: { color: '#64748B', fontSize: 11, fontWeight: '800', marginTop: 4, marginBottom: 2 },
+  olayGecmisSatir: { color: '#64748B', fontSize: 11, paddingVertical: 1 },
+  ligBaslikSatir: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },
+  ligSezonYazi: { color: '#F8FAFC', fontWeight: '800', fontSize: 13 },
+  ligSampiyonluk: { color: '#F59E0B', fontWeight: '800', fontSize: 11 },
+  ligSonMac: { color: '#94A3B8', fontSize: 11, marginBottom: 6 },
+  ligTabloBaslik: {
+    flexDirection: 'row', alignItems: 'center', paddingVertical: 4,
+    borderBottomWidth: 1, borderBottomColor: '#334155',
+  },
+  ligTh: { color: '#64748B', fontSize: 10, fontWeight: '800', textAlign: 'center' },
+  ligThAd: { color: '#64748B', fontSize: 10, fontWeight: '800' },
+  ligSatir: {
+    flexDirection: 'row', alignItems: 'center', paddingVertical: 5,
+    borderBottomWidth: 1, borderBottomColor: '#0B1220', borderRadius: 4,
+  },
+  ligSatirBen: { backgroundColor: 'rgba(245, 158, 11, 0.14)' },
+  ligTd: { color: '#CBD5E1', fontSize: 11, textAlign: 'center' },
+  ligTdAd: { color: '#E2E8F0', fontSize: 11, fontWeight: '600' },
+  ligTdPuan: { color: '#F8FAFC', fontSize: 11, fontWeight: '800', textAlign: 'center' },
+  ligSirada: { color: '#F59E0B', fontWeight: '700', fontSize: 12, marginTop: 8 },
+  ligCikBtn: { alignSelf: 'center', marginTop: 8, paddingVertical: 6, paddingHorizontal: 12 },
+  ligCikYazi: { color: '#64748B', fontSize: 11, fontWeight: '600' },
+  ligModalSkor: { color: '#F8FAFC', fontSize: 15, fontWeight: '800', marginBottom: 6 },
+  ligModalSezon: { color: '#F59E0B', fontWeight: '800', fontSize: 12, marginBottom: 6 },
+  modalOverlay: {
+    flex: 1, backgroundColor: 'rgba(0,0,0,0.6)',
+    alignItems: 'center', justifyContent: 'center', padding: 24,
+  },
+  modalKart: {
+    backgroundColor: '#1E293B', borderWidth: 1, borderColor: '#334155',
+    borderRadius: 16, padding: 18, width: '100%',
+  },
+  modalBaslik: { color: '#F8FAFC', fontSize: 16, fontWeight: '800', marginBottom: 8 },
+  modalSonuc: { color: '#F59E0B', fontSize: 18, fontWeight: '800', marginBottom: 8 },
+  modalYazi: { color: '#94A3B8', fontSize: 13, lineHeight: 20, marginBottom: 14 },
+  modalButonlar: { flexDirection: 'row', gap: 10, justifyContent: 'flex-end' },
+  btnIptal: {
+    backgroundColor: '#334155', borderRadius: 10,
+    paddingHorizontal: 16, paddingVertical: 10,
+  },
+  btnIptalYazi: { color: '#E2E8F0', fontWeight: '700', fontSize: 13 },
+  btnOnay: {
+    backgroundColor: '#22C55E', borderRadius: 10,
+    paddingHorizontal: 16, paddingVertical: 10,
+  },
+  btnOnayYazi: { color: '#052E16', fontWeight: '800', fontSize: 13 },
+  toast: {
+    position: 'absolute', left: 16, right: 16, bottom: 20,
+    borderRadius: 12, padding: 12, flexDirection: 'row',
+    justifyContent: 'space-between', alignItems: 'center',
+  },
+  toastYazi: { color: '#F8FAFC', fontWeight: '700', flexShrink: 1, marginRight: 8 },
+});
+
+// === DOSYA SONU — bu satırı görüyorsan yapıştırma tam demektir ===
+
+===== app\tabs\yasam.tsx =====
+import React, { useState } from 'react';
+import { View, Text, Pressable, ScrollView, StyleSheet, Platform, Modal } from 'react-native';
+import { useGame } from '../../context/GameContext';
+import { Colors } from '../../constants/colors';
+import { LIFE_ITEMS, KIZ_ARKADAS_CONFIG, type LifeItemConfig } from '../../constants/gameConfig';
+
+const KATEGORI_LABELS: Record<string, { emoji: string; label: string }> = {
+  ulasim: { emoji: '🚗', label: 'Ulaşım' },
+  konut: { emoji: '🏠', label: 'Konut' },
+  luks: { emoji: '✨', label: 'Lüks' },
+};
+
+export default function YasamScreen() {
+  const { state, buyLifeItem, upgradeKizArkadas } = useGame();
+  const [message, setMessage] = useState('');
+  const [msgType, setMsgType] = useState<'success' | 'error'>('success');
+  const [confirmItem, setConfirmItem] = useState<{ type: 'life'; id: string } | { type: 'kiz' } | null>(null);
+  const font = Platform.select({ ios: 'SpaceMono', android: 'SpaceMono', web: 'SpaceMono, monospace' });
+
+  const prestij = state?.prestij ?? 0;
+
+  const kizLevels = (KIZ_ARKADAS_CONFIG?.levels ?? []) as { emoji: string; label: string; cost: number; prestij: number }[];
+  const kizRequiredPrestij = KIZ_ARKADAS_CONFIG?.requiredPrestij ?? 0;
+  const lifeItems = LIFE_ITEMS ?? [];
+
+  const showMsg = (msg: string, type: 'success' | 'error' = 'success') => {
+    setMessage(msg);
+    setMsgType(type);
+    setTimeout(() => setMessage(''), 2500);
+  };
+
+  const handleConfirm = () => {
+    if (!confirmItem) return;
+    if (confirmItem.type === 'life') {
+      const err = buyLifeItem(confirmItem.id);
+      if (err) showMsg(err, 'error');
+      else showMsg('Satın alındı! 🎉');
+    } else {
+      const err = upgradeKizArkadas();
+      if (err) showMsg(err, 'error');
+      else showMsg('Ela ilişkiyi ilerletti! ❤️');
+    }
+    setConfirmItem(null);
+  };
+
+  const kategoriler = ['ulasim', 'konut', 'luks'] as const;
+
+  const kaSeviye = state?.kizArkdasSeviye ?? 0;
+  const kaMaxed = kaSeviye >= kizLevels.length;
+  const kaNextLevel = kaMaxed ? null : kizLevels[kaSeviye];
+  const kaCanBuy = !kaMaxed && !!kaNextLevel && (state?.nakit ?? 0) >= (kaNextLevel?.cost ?? 0) && prestij >= kizRequiredPrestij;
+  const kaPrestijLocked = prestij < kizRequiredPrestij;
+
+  return (
+    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      {message ? (
+        <View style={[styles.messageBox, msgType === 'error' && styles.messageError]}>
+          <Text style={[styles.messageText, { fontFamily: font }, msgType === 'error' && styles.messageTextError]}>{message}</Text>
+        </View>
+      ) : null}
+
+      {/* Prestij Bar */}
+      <View style={styles.prestijBar}>
+        <Text style={[styles.prestijLabel, { fontFamily: font }]}>⭐ Prestij Puanı</Text>
+        <Text style={[styles.prestijValue, { fontFamily: font }]}>{prestij}</Text>
+      </View>
+
+      {/* Kategori sections */}
+      {kategoriler.map(kat => {
+        const katInfo = KATEGORI_LABELS[kat];
+        const items = lifeItems.filter(i => i?.kategori === kat);
+        return (
+          <View key={kat} style={styles.section}>
+            <Text style={[styles.sectionTitle, { fontFamily: font }]}>{katInfo?.emoji} {katInfo?.label}</Text>
+            {items.map(item => {
+              const owned = state?.lifeItems?.[item.id];
+              const currentLevel = owned?.level ?? 0;
+              const maxed = currentLevel >= (item.levels?.length ?? 0);
+              const nextLevel = maxed ? null : item.levels?.[currentLevel];
+              const canAfford = nextLevel ? (state?.nakit ?? 0) >= (nextLevel.cost ?? 0) : false;
+              const prestijLocked = prestij < (item.requiredPrestij ?? 0);
+              const canBuy = !maxed && canAfford && !prestijLocked;
+
+              return (
+                <View key={item.id} style={[styles.itemCard, prestijLocked && styles.itemLocked]}>
+                  <View style={styles.itemHeader}>
+                    <Text style={styles.itemEmoji}>{item.emoji}</Text>
+                    <View style={styles.itemInfo}>
+                      <Text style={[styles.itemName, { fontFamily: font }]}>{item.label}</Text>
+                      <Text style={[styles.itemDesc, { fontFamily: font }]}>{item.aciklama}</Text>
+                      {currentLevel > 0 && (
+                        <Text style={[styles.itemCurrentLevel, { fontFamily: font }]}>
+                          ✅ {item.levels?.[currentLevel - 1]?.label ?? ''}
+                        </Text>
+                      )}
+                    </View>
+                  </View>
+                  {prestijLocked ? (
+                    <View style={styles.lockedRow}>
+                      <Text style={[styles.lockedText, { fontFamily: font }]}>🔒 {item.requiredPrestij ?? 0} Prestij gerekli</Text>
+                    </View>
+                  ) : maxed ? (
+                    <View style={styles.maxedRow}>
+                      <Text style={[styles.maxedText, { fontFamily: font }]}>✅ Maksimum</Text>
+                    </View>
+                  ) : nextLevel ? (
+                    <View style={styles.buyRow}>
+                      <View>
+                        <Text style={[styles.nextLevelLabel, { fontFamily: font }]}>{nextLevel.label}</Text>
+                        <Text style={[styles.nextLevelCost, { fontFamily: font }]}>{(nextLevel.cost ?? 0).toLocaleString('tr-TR')} ₺</Text>
+                        <Text style={[styles.nextLevelPrestij, { fontFamily: font }]}>+{nextLevel.prestij ?? 0} ⭐</Text>
+                      </View>
+                      <Pressable
+                        style={({ pressed }) => [styles.buyBtn, !canBuy && styles.btnDisabled, pressed && canBuy && styles.btnPressed]}
+                        onPress={() => setConfirmItem({ type: 'life', id: item.id })}
+                        disabled={!canBuy}
+                        accessibilityLabel={`${item.label} satın al`}
+                        accessibilityRole="button"
+                      >
+                        <Text style={[styles.buyBtnText, { fontFamily: font }]}>Satın Al</Text>
+                      </Pressable>
+                    </View>
+                  ) : null}
+                </View>
+              );
+            })}
+          </View>
+        );
+      })}
+
+      {/* Ela */}
+      <View style={styles.section}>
+        <Text style={[styles.sectionTitle, { fontFamily: font }]}>❤️ İlişki</Text>
+        <View style={[styles.itemCard, kaPrestijLocked && styles.itemLocked]}>
+          <View style={styles.itemHeader}>
+            <Text style={styles.itemEmoji}>👩</Text>
+            <View style={styles.itemInfo}>
+              <Text style={[styles.itemName, { fontFamily: font }]}>Ela 💕</Text>
+              <Text style={[styles.itemDesc, { fontFamily: font }]}>Hayatına Ela'yı kat</Text>
+              {kaSeviye > 0 && (
+                <Text style={[styles.itemCurrentLevel, { fontFamily: font }]}>
+                  {kizLevels[kaSeviye - 1]?.emoji ?? ''} {kizLevels[kaSeviye - 1]?.label ?? ''}
+                </Text>
+              )}
+            </View>
+          </View>
+          {/* Progress dots */}
+          <View style={styles.progressRow}>
+            {kizLevels.map((lvl, i) => (
+              <View key={i} style={styles.progressStep}>
+                <View style={[styles.progressDot, i < kaSeviye && styles.progressDotActive]} />
+                <Text style={[styles.progressLabel, { fontFamily: font }]}>{lvl?.emoji ?? ''}</Text>
+              </View>
+            ))}
+          </View>
+          {kaPrestijLocked ? (
+            <View style={styles.lockedRow}>
+              <Text style={[styles.lockedText, { fontFamily: font }]}>🔒 {kizRequiredPrestij} Prestij gerekli</Text>
+            </View>
+          ) : kaMaxed ? (
+            <View style={styles.maxedRow}>
+              <Text style={[styles.maxedText, { fontFamily: font }]}>💍 Ciddi İlişki</Text>
+            </View>
+          ) : kaNextLevel ? (
+            <View style={styles.buyRow}>
+              <View>
+                <Text style={[styles.nextLevelLabel, { fontFamily: font }]}>{kaNextLevel.emoji} {kaNextLevel.label}</Text>
+                <Text style={[styles.nextLevelCost, { fontFamily: font }]}>{(kaNextLevel.cost ?? 0).toLocaleString('tr-TR')} ₺</Text>
+                <Text style={[styles.nextLevelPrestij, { fontFamily: font }]}>+{kaNextLevel.prestij ?? 0} ⭐</Text>
+              </View>
+              <Pressable
+                style={({ pressed }) => [styles.buyBtn, !kaCanBuy && styles.btnDisabled, pressed && kaCanBuy && styles.btnPressed]}
+                onPress={() => setConfirmItem({ type: 'kiz' })}
+                disabled={!kaCanBuy}
+                accessibilityLabel="Ela ile ilişkiyi ilerlet"
+                accessibilityRole="button"
+              >
+                <Text style={[styles.buyBtnText, { fontFamily: font }]}>İlerlet</Text>
+              </Pressable>
+            </View>
+          ) : null}
+        </View>
+      </View>
+
+      {/* Confirm Modal */}
+      <Modal visible={confirmItem !== null} transparent animationType="fade" onRequestClose={() => setConfirmItem(null)}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Text style={[styles.modalTitle, { fontFamily: font }]}>Satın almak istediğine emin misin?</Text>
+            {confirmItem && (
+              <Text style={[styles.modalDesc, { fontFamily: font }]}>
+                {confirmItem.type === 'life'
+                  ? (() => {
+                      const item = lifeItems.find(i => i?.id === confirmItem.id);
+                      const lvl = item?.levels?.[(state?.lifeItems?.[confirmItem.id]?.level ?? 0)];
+                      return `${item?.emoji ?? ''} ${lvl?.label ?? ''} - ${(lvl?.cost ?? 0).toLocaleString('tr-TR')} ₺`;
+                    })()
+                  : (() => {
+                      const lvl = kizLevels[state?.kizArkdasSeviye ?? 0];
+                      return `${lvl?.emoji ?? ''} ${lvl?.label ?? ''} - ${(lvl?.cost ?? 0).toLocaleString('tr-TR')} ₺`;
+                    })()
+                }
+              </Text>
+            )}
+            <View style={styles.modalButtons}>
+              <Pressable style={[styles.modalBtn, styles.modalBtnYes]} onPress={handleConfirm}>
+                <Text style={[styles.modalBtnText, { fontFamily: font }]}>Onayla</Text>
+              </Pressable>
+              <Pressable style={[styles.modalBtn, styles.modalBtnNo]} onPress={() => setConfirmItem(null)}>
+                <Text style={[styles.modalBtnText, { fontFamily: font }]}>İptal</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
+    </ScrollView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: Colors.background },
+  content: { padding: 16, paddingBottom: 40 },
+  messageBox: { backgroundColor: Colors.surface, borderWidth: 1, borderColor: Colors.accent, borderRadius: 2, padding: 12, marginBottom: 12, alignItems: 'center' },
+  messageError: { borderColor: Colors.danger },
+  messageText: { color: Colors.accent, fontSize: 12 },
+  messageTextError: { color: Colors.danger },
+  prestijBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: Colors.surface, borderWidth: 1, borderColor: '#FFD700' + '60', borderRadius: 2, padding: 14, marginBottom: 16 },
+  prestijLabel: { color: Colors.gold, fontSize: 14 },
+  prestijValue: { color: Colors.gold, fontSize: 22, fontWeight: 'bold' },
+  section: { marginBottom: 20 },
+  sectionTitle: { color: Colors.textPrimary, fontSize: 16, fontWeight: 'bold', marginBottom: 10 },
+  itemCard: { backgroundColor: Colors.surface, borderWidth: 1, borderColor: Colors.border, borderRadius: 2, padding: 14, marginBottom: 10 },
+  itemLocked: { opacity: 0.45 },
+  itemHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 10 },
+  itemEmoji: { fontSize: 30, marginRight: 12 },
+  itemInfo: { flex: 1 },
+  itemName: { color: Colors.textPrimary, fontSize: 14, fontWeight: 'bold' },
+  itemDesc: { color: Colors.textSecondary, fontSize: 11, marginTop: 2 },
+  itemCurrentLevel: { color: Colors.accent, fontSize: 11, marginTop: 3 },
+  lockedRow: { alignItems: 'center', paddingVertical: 4 },
+  lockedText: { color: Colors.textSecondary, fontSize: 12 },
+  maxedRow: { alignItems: 'center', paddingVertical: 4 },
+  maxedText: { color: Colors.accent, fontSize: 13 },
+  buyRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderTopWidth: 1, borderTopColor: Colors.border + '60', paddingTop: 10 },
+  nextLevelLabel: { color: Colors.textPrimary, fontSize: 12 },
+  nextLevelCost: { color: Colors.gold, fontSize: 13, fontWeight: 'bold', marginTop: 2 },
+  nextLevelPrestij: { color: Colors.gold + 'BB', fontSize: 11, marginTop: 1 },
+  buyBtn: { backgroundColor: Colors.accent, borderRadius: 2, paddingVertical: 10, paddingHorizontal: 20 },
+  buyBtnText: { color: Colors.white, fontSize: 13, fontWeight: 'bold' },
+  btnDisabled: { opacity: 0.4 },
+  btnPressed: { transform: [{ scale: 0.97 }] },
+  progressRow: { flexDirection: 'row', justifyContent: 'space-around', marginBottom: 10 },
+  progressStep: { alignItems: 'center', gap: 4 },
+  progressDot: { width: 12, height: 12, borderRadius: 6, backgroundColor: Colors.border, borderWidth: 1, borderColor: Colors.textSecondary + '40' },
+  progressDotActive: { backgroundColor: Colors.accent, borderColor: Colors.accent },
+  progressLabel: { color: Colors.textSecondary, fontSize: 14 },
+  modalOverlay: { flex: 1, backgroundColor: '#00000099', justifyContent: 'center', alignItems: 'center', padding: 24 },
+  modalCard: { backgroundColor: Colors.surface, borderWidth: 1, borderColor: Colors.border, borderRadius: 2, padding: 24, width: '100%', maxWidth: 340 },
+  modalTitle: { color: Colors.textPrimary, fontSize: 15, fontWeight: 'bold', marginBottom: 12, textAlign: 'center' },
+  modalDesc: { color: Colors.textSecondary, fontSize: 13, textAlign: 'center', marginBottom: 16 },
+  modalButtons: { flexDirection: 'row', gap: 12 },
+  modalBtn: { flex: 1, paddingVertical: 12, alignItems: 'center', borderRadius: 2 },
+  modalBtnYes: { backgroundColor: Colors.accent },
+  modalBtnNo: { backgroundColor: Colors.surfaceLight, borderWidth: 1, borderColor: Colors.border },
+  modalBtnText: { color: Colors.white, fontSize: 14, fontWeight: 'bold' },
+});
+
+// === DOSYA SONU — YAŞAM ===
+
+===== app\tabs\rezervasyonlar.tsx =====
+// ============================================
+// BEŞLİ PATRON — app/tabs/rezervasyonlar.tsx (ÇOKLU SAHA)
+// ============================================
+import React, { useState } from 'react';
+import {
+  View, Text, ScrollView, TouchableOpacity, StyleSheet,
+} from 'react-native';
+import { useGame } from '../../context/GameContext';
+import { MAX_ENERJI } from '../../constants/gameConfig';
+import { SAHA_TIP_BILGI } from '../../constants/pitchConfig';
+import { rezervasyonEnerjiMaliyeti } from '../../services/gameLogic';
+import type { Reservation, PitchState } from '../../types/game';
+
+function para(n: number): string {
+  return `${Math.round(n).toLocaleString('tr-TR')}₺`;
+}
+
+// Müşteri tipi → gösterim (sadece ekran süsü, config'e bağımlı değil)
+const MUSTERI_BILGI: Record<string, { emoji: string; ad: string }> = {
+  mahalle: { emoji: '🏘️', ad: 'Mahalle Takımı' },
+  ogrenci: { emoji: '🎓', ad: 'Öğrenci Grubu' },
+  ofis: { emoji: '💼', ad: 'Ofis Ekibi' },
+  amator: { emoji: '⚽', ad: 'Amatör Lig' },
+  dogumGunu: { emoji: '🎂', ad: 'Doğum Günü' },
+  yas50plus: { emoji: '👴', ad: '50+ Kafalar' },
+  kurumsal: { emoji: '🏢', ad: 'Kurumsal Takım' },
+};
+
+export default function RezervasyonScreen() {
+  const { state, acceptReservation, rejectReservation } = useGame();
+  const [mesaj, setMesaj] = useState<string | null>(null);
+  const [hata, setHata] = useState(false);
+  const [filtre, setFiltre] = useState<string>('hepsi'); // 'hepsi' | sahaId
+
+  if (!state) {
+    return (
+      <View style={st.ekran}>
+        <Text style={st.sari}>Yükleniyor…</Text>
+      </View>
+    );
+  }
+
+  // === SAHALAR ===
+  const sahaListesi = Object.values(state.pitches ?? {}).filter(Boolean) as PitchState[];
+  const acikSahalar = sahaListesi.filter(p => (p.asama ?? 0) >= 5);
+
+  // === TEKLİFLER ===
+  const tumTeklifler = (state.bugunRezervasyonlar ?? []).filter(r => r?.durum === 'bekliyor');
+  const gosterilen = filtre === 'hepsi'
+    ? tumTeklifler
+    : tumTeklifler.filter(r => (r.sahaId ?? 'yildiz') === filtre);
+  const kabulEdilenler = state.kabulEdilenler ?? [];
+  const bugunGelir = state.bugunGelir ?? 0;
+
+  const bildir = (sonuc: string | null, basari?: string) => {
+    if (sonuc) { setHata(true); setMesaj(sonuc); }
+    else if (basari) { setHata(false); setMesaj(basari); }
+  };
+
+  // Tek teklifin sahasının rozet bilgisi (eski kayıtlarda sahaId yoksa Yıldız)
+  const sahaBilgi = (sahaId?: string) => {
+    const id = sahaId ?? 'yildiz';
+    const p = state.pitches?.[id];
+    const tip = SAHA_TIP_BILGI[p?.sahaTipi ?? 'yildiz'] ?? SAHA_TIP_BILGI.yildiz;
+    return { id, ad: p?.ad ?? 'Yıldız Saha', emoji: tip.emoji, renk: tip.renk };
+  };
+
+  // Kartta gösterilen enerji maliyeti — Context'in kabul anında yaktığı formülle aynı:
+  // grup büyüklüğü + kasiyer indirimi + sahanın kendi turnike indirim (Yıldız'ın yükseltmesi state.upgrades'te)
+  const enerjiMaliyeti = (rez: Reservation): number => {
+    const id = rez.sahaId ?? 'yildiz';
+    const p = state.pitches?.[id];
+    const up: Record<string, number> = id === 'yildiz'
+      ? ((state.upgrades ?? {}) as Record<string, number>)
+      : ((p?.upgrades ?? {}) as Record<string, number>);
+    return rezervasyonEnerjiMaliyeti(
+      rez.kisiSayisi ?? 0,
+      state.staff?.kasiyer?.level ?? 0,
+      up?.turnike ?? 0,
+    );
+  };
+
+  const kabulEt = (rez: Reservation) => {
+    const maliyet = enerjiMaliyeti(rez);
+    const sonuc = acceptReservation(rez.id);
+    if (sonuc) bildir(sonuc);
+    else bildir(null, `🤝 ${rez.musteriAdi} kabul edildi — ${sahaBilgi(rez.sahaId).ad}, ${maliyet} enerji.`);
+  };
+
+  const reddet = (rez: Reservation) => {
+    rejectReservation(rez.id);
+    bildir(null, `🚫 ${rez.musteriAdi} reddedildi.`);
+  };
+
+  const enerjiYuzde = Math.max(0, Math.min(100, ((state.enerji ?? 0) / MAX_ENERJI) * 100));
+
+  // Hiç açık saha yoksa defter yerine uyarı
+  if (acikSahalar.length === 0) {
+    return (
+      <View style={st.ekran}>
+        <ScrollView contentContainerStyle={st.icerik} showsVerticalScrollIndicator={false}>
+          <Text style={st.baslik}>📞 Rezervasyon Defteri</Text>
+          <View style={st.kart}>
+            <Text style={st.bolumBaslik}>🚧 Açık sahan yok</Text>
+            <Text style={st.aciklama}>
+              Teklif alabilmen için en az bir sahanın inşaatı bitmiş olmalı.
+              Saha sekmesinden inşaatı ilerlet — açılan saha için burada teklifler akmaya başlar.
+            </Text>
+          </View>
+        </ScrollView>
+        {mesaj != null && (
+          <View style={[st.toast, { backgroundColor: hata ? '#7F1D1D' : '#14532D' }]}>
+            <Text style={st.toastYazi}>{mesaj}</Text>
+            <TouchableOpacity onPress={() => setMesaj(null)}>
+              <Text style={st.toastYazi}>✕</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      </View>
+    );
+  }
+
+  return (
+    <View style={st.ekran}>
+      <ScrollView contentContainerStyle={st.icerik} showsVerticalScrollIndicator={false}>
+        <Text style={st.baslik}>📞 Rezervasyon Defteri</Text>
+
+        {/* === GÜN DURUMU === */}
+        <View style={st.kart}>
+          <View style={st.durumSatir}>
+            <Text style={st.durumDeger}>📅 Gün {state.gun ?? 1}</Text>
+            <Text style={st.durumDeger}>⚡ {state.enerji ?? 0}/{MAX_ENERJI}</Text>
+            <Text style={st.durumDeger}>💰 {para(state.nakit ?? 0)}</Text>
+            <Text style={st.durumDeger}>📈 {para(bugunGelir)}</Text>
+          </View>
+          <View style={st.barArka}>
+            <View style={[st.barOn, { width: `${enerjiYuzde}%` }]} />
+          </View>
+          <Text style={st.durumNot}>
+            Her kabul ettiğin teklif enerji yakar — grup büyüdükçe maliyet artar;
+            kasiyerin ve sahanın turnike sistemi indirim yapar.
+          </Text>
+        </View>
+
+        {/* === SAHA FİLTRESİ === */}
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={st.seri}>
+          <TouchableOpacity
+            style={[st.cip, filtre === 'hepsi' && st.cipSecili]}
+            onPress={() => { setFiltre('hepsi'); setMesaj(null); }}
+          >
+            <Text style={st.cipEmoji}>🗂️</Text>
+            <Text style={st.cipAd}>Tümü ({tumTeklifler.length})</Text>
+          </TouchableOpacity>
+          {acikSahalar.map(p => {
+            const b = sahaBilgi(p.id);
+            const adet = tumTeklifler.filter(r => (r.sahaId ?? 'yildiz') === p.id).length;
+            const secili = filtre === p.id;
+            return (
+              <TouchableOpacity
+                key={p.id}
+                style={[st.cip, secili && { borderColor: b.renk, backgroundColor: '#1E293B' }]}
+                onPress={() => { setFiltre(p.id); setMesaj(null); }}
+              >
+                <Text style={st.cipEmoji}>{b.emoji}</Text>
+                <Text style={st.cipAd}>{p.ad ?? 'Saha'}</Text>
+                <Text style={st.cipAdet}>{adet}</Text>
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
+
+        {/* === TEKLİF LİSTESİ === */}
+        {gosterilen.length === 0 ? (
+          <View style={st.kart}>
+            <Text style={st.bos}>
+              {tumTeklifler.length === 0
+                ? '😴 Bugünlük başka teklif yok. Günü bitir, yarın yeni müşteriler gelir.'
+                : '📭 Bu saha için bekleyen teklif yok — başka sahayı da kontrol et.'}
+            </Text>
+          </View>
+        ) : (
+          gosterilen.map(rez => {
+            const sB = sahaBilgi(rez.sahaId);
+            const mb = MUSTERI_BILGI[rez.musteriTipi] ?? { emoji: '🙂', ad: 'Müşteri' };
+            const maliyet = enerjiMaliyeti(rez);
+            const enerjiYetiyor = (state.enerji ?? 0) >= maliyet;
+            return (
+              <View key={rez.id} style={st.kart}>
+                {/* Kart başı: müşteri + saha rozeti */}
+                <View style={st.kartBas}>
+                  <Text style={st.musteriEmoji}>{mb.emoji}</Text>
+                  <View style={{ flex: 1 }}>
+                    <Text style={st.musteriAd}>{rez.musteriAdi}</Text>
+                    <Text style={st.musteriTur}>{mb.ad}</Text>
+                  </View>
+                  <View style={[st.sahaRozet, { borderColor: sB.renk }]}>
+                    <Text style={st.sahaRozetYazi}>{sB.emoji} {sB.ad}</Text>
+                  </View>
+                </View>
+
+                {/* Saat + enerji maliyeti */}
+                <View style={st.bilgiSatiri}>
+                  <Text style={st.bilgiCip}>⏰ {rez.saatAraligi}</Text>
+                  <Text style={[st.bilgiCip, !enerjiYetiyor && { color: '#F87171' }]}>⚡ {maliyet} enerji</Text>
+                  {rez.sadik ? <Text style={[st.bilgiCip, { color: '#F9A8D4' }]}>❤️ Sadık müşteri</Text> : null}
+                </View>
+
+                {/* Fiyat + aksiyonlar */}
+                <View style={st.aksiyonSatiri}>
+                  <Text style={st.fiyat}>{para(rez.fiyat ?? 0)}</Text>
+                  <View style={st.butonGrup}>
+                    <TouchableOpacity
+                      style={st.btnRed}
+                      onPress={() => reddet(rez)}
+                      accessibilityRole="button"
+                      accessibilityLabel={`${rez.musteriAdi ?? ''} reddet`}
+                    >
+                      <Text style={st.btnRedYazi}>❌ Reddet</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[st.btnYesil, !enerjiYetiyor && { backgroundColor: '#334155' }]}
+                      disabled={!enerjiYetiyor}
+                      onPress={() => kabulEt(rez)}
+                      accessibilityRole="button"
+                      accessibilityLabel={`${rez.musteriAdi ?? ''} kabul et`}
+                    >
+                      <Text style={st.btnYesilYazi}>
+                        {enerjiYetiyor ? '✅ Kabul Et' : '⚡ Enerji Az'}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </View>
+            );
+          })
+        )}
+
+        {/* === BUGÜN KABUL EDİLENLER === */}
+        {kabulEdilenler.length > 0 && (
+          <View style={st.kart}>
+            <Text style={st.bolumBaslik}>✅ Bugün Kabul Edilenler ({kabulEdilenler.length})</Text>
+            {kabulEdilenler.map(r => {
+              const sB = sahaBilgi(r.sahaId);
+              return (
+                <View key={r.id} style={st.kabulSatiri}>
+                  <Text style={st.kabulSaha}>{sB.emoji}</Text>
+                  <Text style={st.kabulAd} numberOfLines={1}>{r.musteriAdi}</Text>
+                  <Text style={st.kabulSaat}>{r.saatAraligi}</Text>
+                  <Text style={st.kabulFiyat}>{para(r.fiyat ?? 0)}</Text>
+                </View>
+              );
+            })}
+            <Text style={st.kabulToplam}>Toplam {para(bugunGelir)} — gün sonunda kasaya girer.</Text>
+          </View>
+        )}
+      </ScrollView>
+
+      {/* === BİLDİRİM === */}
+      {mesaj != null && (
+        <View style={[st.toast, { backgroundColor: hata ? '#7F1D1D' : '#14532D' }]}>
+          <Text style={st.toastYazi}>{mesaj}</Text>
+          <TouchableOpacity onPress={() => setMesaj(null)}>
+            <Text style={st.toastYazi}>✕</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+    </View>
+  );
+}
+
+// ============================================
+// === STİLLER ===
+// ============================================
+const st = StyleSheet.create({
+  ekran: { flex: 1, backgroundColor: '#0F172A' },
+  icerik: { padding: 16, paddingBottom: 90 },
+  baslik: { color: '#F8FAFC', fontSize: 20, fontWeight: '800', marginBottom: 12 },
+  sari: { color: '#F59E0B' },
+  muted: { color: '#94A3B8', fontSize: 12 },
+  kart: {
+    backgroundColor: '#1E293B', borderWidth: 1, borderColor: '#334155',
+    borderRadius: 16, padding: 14, marginBottom: 12,
+  },
+  durumSatir: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 10 },
+  durumDeger: { color: '#F8FAFC', fontWeight: '800', fontSize: 13 },
+  durumNot: { color: '#64748B', fontSize: 11, marginTop: 8, lineHeight: 16 },
+  barArka: { height: 8, backgroundColor: '#0B1220', borderRadius: 999, overflow: 'hidden' },
+  barOn: { height: '100%', backgroundColor: '#22C55E' },
+  seri: { marginBottom: 12 },
+  cip: {
+    flexDirection: 'row', alignItems: 'center', gap: 8,
+    borderWidth: 2, borderColor: '#334155', borderRadius: 14,
+    paddingHorizontal: 12, paddingVertical: 8, marginRight: 8, backgroundColor: '#0B1220',
+  },
+  cipSecili: { borderColor: '#F59E0B', backgroundColor: '#1E293B' },
+  cipEmoji: { fontSize: 18 },
+  cipAd: { color: '#F8FAFC', fontWeight: '700', fontSize: 13 },
+  cipAdet: { color: '#94A3B8', fontSize: 10, fontWeight: '600' },
+  kartBas: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  musteriEmoji: { fontSize: 28 },
+  musteriAd: { color: '#F8FAFC', fontSize: 16, fontWeight: '800' },
+  musteriTur: { color: '#94A3B8', fontSize: 12, marginTop: 2 },
+  sahaRozet: {
+    borderWidth: 1.5, borderRadius: 999,
+    paddingHorizontal: 10, paddingVertical: 4, backgroundColor: '#0B1220',
+  },
+  sahaRozetYazi: { color: '#E2E8F0', fontSize: 11, fontWeight: '800' },
+  bilgiSatiri: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 10 },
+  bilgiCip: {
+    color: '#E2E8F0', backgroundColor: '#0B1220', borderRadius: 999,
+    paddingHorizontal: 10, paddingVertical: 4, fontSize: 11, overflow: 'hidden',
+  },
+  aksiyonSatiri: {
+    flexDirection: 'row', alignItems: 'center', gap: 10,
+    marginTop: 12, borderTopWidth: 1, borderTopColor: '#0B1220', paddingTop: 10,
+  },
+  fiyat: { color: '#34D399', fontWeight: '800', fontSize: 18, flex: 1 },
+  butonGrup: { flexDirection: 'row', gap: 8 },
+  btnRed: {
+    backgroundColor: '#7F1D1D', borderRadius: 12,
+    paddingHorizontal: 14, paddingVertical: 11,
+  },
+  btnRedYazi: { color: '#FCA5A5', fontWeight: '800', fontSize: 13 },
+  btnYesil: {
+    backgroundColor: '#22C55E', borderRadius: 12,
+    paddingHorizontal: 14, paddingVertical: 11,
+  },
+  btnYesilYazi: { color: '#052E16', fontWeight: '800', fontSize: 13 },
+  kabulSatiri: {
+    flexDirection: 'row', alignItems: 'center', gap: 8,
+    paddingVertical: 6, borderBottomWidth: 1, borderBottomColor: '#0B1220',
+  },
+  kabulSaha: { fontSize: 16 },
+  kabulAd: { color: '#F8FAFC', fontWeight: '700', fontSize: 13, flex: 1 },
+  kabulSaat: { color: '#64748B', fontSize: 11 },
+  kabulFiyat: { color: '#34D399', fontWeight: '800', fontSize: 13 },
+  kabulToplam: { color: '#F59E0B', fontWeight: '800', fontSize: 12, marginTop: 8 },
+  bolumBaslik: { color: '#F8FAFC', fontSize: 15, fontWeight: '800', marginBottom: 10 },
+  aciklama: { color: '#94A3B8', fontSize: 12, lineHeight: 18 },
+  bos: { color: '#94A3B8', fontSize: 13, textAlign: 'center', lineHeight: 20 },
+  toast: {
+    position: 'absolute', left: 16, right: 16, bottom: 20,
+    borderRadius: 12, padding: 12, flexDirection: 'row',
+    justifyContent: 'space-between', alignItems: 'center',
+  },
+  toastYazi: { color: '#F8FAFC', fontWeight: '700', flexShrink: 1, marginRight: 8 },
+});
+
+// === DOSYA SONU — bu satırı görüyorsan yapıştırma tam demektir ===
