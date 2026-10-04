@@ -1,4 +1,4 @@
-ï»¿name: iOS Ad Hoc Build
+name: iOS Ad Hoc Build
 
 on:
   workflow_dispatch:
@@ -30,8 +30,8 @@ jobs:
 
           mkdir -p "$RUNNER_TEMP/signing"
 
-          echo "$IOS_DIST_CERT_BASE64" | base64 --decode > "$RUNNER_TEMP/signing/dist-cert.p12"
-          echo "$IOS_PROVISIONING_PROFILE_BASE64" | base64 --decode > "$RUNNER_TEMP/signing/profile.mobileprovision"
+          echo "$IOS_DIST_CERT_BASE64" | base64 -D > "$RUNNER_TEMP/signing/dist-cert.p12"
+          echo "$IOS_PROVISIONING_PROFILE_BASE64" | base64 -D > "$RUNNER_TEMP/signing/profile.mobileprovision"
 
           security create-keychain -p "" "$RUNNER_TEMP/build.keychain-db"
           security default-keychain -s "$RUNNER_TEMP/build.keychain-db"
@@ -75,7 +75,7 @@ jobs:
           WORKSPACE=$(find ios -maxdepth 1 -name "*.xcworkspace" -print -quit)
 
           if [ -z "$WORKSPACE" ]; then
-            echo "iOS workspace bulunamadÄ±."
+            echo "iOS workspace bulunamadý."
             exit 1
           fi
 
@@ -83,7 +83,7 @@ jobs:
             awk '/Schemes:/ {found=1; next} found && NF {print $1; exit}')
 
           if [ -z "$SCHEME" ]; then
-            echo "Xcode scheme bulunamadÄ±."
+            echo "Xcode scheme bulunamadý."
             exit 1
           fi
 
@@ -126,7 +126,7 @@ jobs:
             -scheme "$IOS_SCHEME" \
             -configuration Release \
             -sdk iphoneos \
-            -archivePath "$RUNNER_TEMP/archive/BeÅŸliPatron.xcarchive" \
+            -archivePath "$RUNNER_TEMP/archive/BeþliPatron.xcarchive" \
             -allowProvisioningUpdates \
             DEVELOPMENT_TEAM=WNF86CPGX5 \
             CODE_SIGN_STYLE=Manual \
@@ -141,7 +141,7 @@ jobs:
 
           xcodebuild \
             -exportArchive \
-            -archivePath "$RUNNER_TEMP/archive/BeÅŸliPatron.xcarchive" \
+            -archivePath "$RUNNER_TEMP/archive/BeþliPatron.xcarchive" \
             -exportPath "$RUNNER_TEMP/export" \
             -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist"
 
