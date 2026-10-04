@@ -24,3 +24,9 @@ test_dokumu.txt
 UI_AUDIT.txt
 UI_REV2_AUDIT.txt
 donma_son_kaynak_raporu.txt
+
+# Apple signing credentials - NEVER COMMIT
+credentials.json
+credentials/
+*.p12
+*.mobileprovision
