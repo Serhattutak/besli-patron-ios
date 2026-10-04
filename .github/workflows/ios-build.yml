@@ -30,7 +30,9 @@ jobs:
 
           mkdir -p "$RUNNER_TEMP/signing"
 
-          printf "%s" "$IOS_DIST_CERT_BASE64" | tr -d "[:space:]" | base64 -D > "$RUNNER_TEMP/signing/dist-cert.p12"
+          CERT_LEN=${#IOS_DIST_CERT_BASE64}
+echo "DIST_CERT_BASE64_LENGTH=$CERT_LEN"
+printf "%s" "$IOS_DIST_CERT_BASE64" | tr -d "[:space:]" | base64 -D > "$RUNNER_TEMP/signing/dist-cert.p12"
           printf "%s" "$IOS_PROVISIONING_PROFILE_BASE64" | tr -d "[:space:]" | base64 -D > "$RUNNER_TEMP/signing/profile.mobileprovision"
 
           security create-keychain -p "" "$RUNNER_TEMP/build.keychain-db"
@@ -151,4 +153,5 @@ jobs:
           name: besli-patron-ios-adhoc
           path: ${{ runner.temp }}/export/*.ipa
           if-no-files-found: error
+
 
