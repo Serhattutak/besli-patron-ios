@@ -12,7 +12,7 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
-import { useIAP } from 'expo-iap';
+import { useIAP } from '../stubs/expo-iap';
 import { useGame } from '../context/GameContext';
 import { sfx } from '../services/soundManager';
 

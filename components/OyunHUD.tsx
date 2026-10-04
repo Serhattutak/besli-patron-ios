@@ -9,6 +9,7 @@ import { usePathname } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useGame } from '../context/GameContext';
 import { MAX_ENERJI } from '../constants/gameConfig';
+import { islemKaydet } from '../services/tani';
 
 function gs(v: unknown, yedek = 0): number {
   const n = Number(v);
@@ -25,6 +26,16 @@ export default function OyunHUD() {
   const { width } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const k = Math.max(0.85, Math.min(1.4, width / 375));
+
+  // TANIK (Sardur Technologies): her state degisimi gunluge islenir
+  const sonImzaRef = React.useRef('');
+  React.useEffect(() => {
+    if (!state) return;
+    const imza = `gun=${gs(state.gun, 1)} nakit=${gs(state.nakit)} enerji=${gs(state.enerji)} prestij=${gs(state.prestij)}`;
+    if (sonImzaRef.current === imza) return;
+    sonImzaRef.current = imza;
+    islemKaydet('state ' + imza);
+  }, [state]);
 
   // Yalnızca sekme ekranlarında görünür (index/intro/gameover'da gizlenir)
   if (!state || !pathname.startsWith('/tabs')) return null;

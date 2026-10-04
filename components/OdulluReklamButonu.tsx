@@ -1,4 +1,4 @@
-// ============================================
+﻿// ============================================
 // BEŞLİ PATRON — OdulluReklamButonu.tsx (v2)
 // Ödül: ENERJİ (para değil) — SINIRSIZ izleme
 // ============================================
@@ -15,7 +15,7 @@ import { useGame } from '../context/GameContext';
 import { odulluReklamIzle } from '../services/adManager';
 import { sfx } from '../services/soundManager';
 
-export default function OdulluReklamButonu({ odulEnerji = 1 }: { odulEnerji?: number }) {
+export default function OdulluReklamButonu({ odulEnerji = 50 }: { odulEnerji?: number }) {
   const game = useGame() as any;
   const [yukleniyor, setYukleniyor] = useState(false);
   const [mesaj, setMesaj] = useState('');

@@ -1,18 +1,27 @@
+﻿import { RENK } from './theme';
+
 export const Colors = {
-  primary: '#1A472A',
-  accent: '#52B788',
-  gold: '#FFD700',
-  jetonBlue: '#4A90D9',
-  background: '#0D1F15',
-  surface: '#142E1F',
-  surfaceLight: '#1A472A',
-  card: '#173524',
-  text: '#F2FAF4',
-  textMuted: '#A9CDB8',
-  textPrimary: '#E8F5E9',
-  textSecondary: '#81C784',
-  danger: '#EF4444',
-  border: '#2D5A3D',
+  primary: RENK.vurgu,
+  accent: RENK.vurgu,
+  gold: '#FBBF24',
+  jetonBlue: RENK.mavi,
+
+  background: RENK.arkaPlan,
+  surface: RENK.panel,
+  surfaceLight: RENK.kart,
+  card: RENK.kart,
+
+  text: '#F8FAFC',
+  textMuted: RENK.yaziSoluk,
+  textPrimary: RENK.yazi,
+  textSecondary: RENK.yaziAcik,
+
+  danger: RENK.hata,
+  border: RENK.cizgi,
   white: '#FFFFFF',
-  dark: '#2D2D2D',
+  dark: '#0F172A',
+
+  success: RENK.basari,
+  info: RENK.mavi,
+  warning: RENK.vurgu,
 } as const;

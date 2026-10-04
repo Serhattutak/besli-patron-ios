@@ -1,4 +1,7 @@
-﻿import React, { useEffect } from 'react';
+import { enableScreens } from 'react-native-screens';
+enableScreens(false);
+import '../utils/hataYakala';
+import React, { useEffect } from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { View, Text, StyleSheet } from 'react-native';

@@ -1,3 +1,4 @@
+﻿import { Colors } from '../../constants/colors';
 // ============================================
 // BEŞLİ PATRON — app/tabs/isletme.tsx (ÇOKLU SAHA + PERSONEL + LİG + OLAY SORUSU KARTTA)
 // ============================================
@@ -8,7 +9,7 @@ import {
 import { useGame } from '../../context/GameContext';
 import {
   DAILY_KIRA, DAILY_ELEKTRIK_SU, UPGRADE_CONFIG,
-  STAFF_CONFIG, TURNUVA_CONFIG, OLAY_HAVUZU, type UpgradeType,
+  STAFF_CONFIG, OLAY_HAVUZU, type UpgradeType,
 } from '../../constants/gameConfig';
 import { ISLETME_YERI, SAHA_TIP_BILGI } from '../../constants/pitchConfig';
 import {
@@ -16,11 +17,7 @@ import {
   KASIYER_ENERJI_INDIRIMI, TEMIZLIKCI_MEMNUNIYET_BONUSU,
   ANTRENOR_TURNUVA_BONUSU, GUVENLIK_TEKLIF_BONUSU,
 } from '../../services/gameLogic';
-import {
-  LIG_CONFIG, puandanSirala,
-  type LigDurum, type LigHaftaSonucu,
-} from '../../services/leagueLogic';
-import type { PitchState, StaffMember, TurnuvaResult } from '../../types/game';
+import type { PitchState, StaffMember } from '../../types/game';
 
 function para(n: number): string {
   return `${Math.round(n).toLocaleString('tr-TR')}₺`;
@@ -33,12 +30,6 @@ function asamaEtiketi(asama: number): string {
   return '✅ Hizmette';
 }
 
-const SONUC_ETIKET: Record<TurnuvaResult['sonuc'], string> = {
-  birincilik: '🥇 Birincilik',
-  ikincilik: '🥈 İkincilik',
-  ucunculuk: '🥉 Üçüncülük',
-  katilim: 'Katılım',
-};
 
 // Personel ücret kuralı — GameContext.hireStaff ile BİREBİR aynı:
 // ilk alım = L1'in günlük maaşı, terfi = hedef kademenin günlük maaşı (peşin).
@@ -106,15 +97,13 @@ function olayEtkiOzeti(etki: any): string {
 }
 
 export default function IsletmeScreen() {
-  const { state, purchaseUpgrade, hireStaff, joinTurnuva, buyProperty,
-          ligKatil, ligHaftaOyna, ligBirak, cozOlay } = useGame();
+  const { state, purchaseUpgrade, hireStaff, buyProperty,
+          cozOlay } = useGame();
 
   const [mesaj, setMesaj] = useState<string | null>(null);
   const [hata, setHata] = useState(false);
   const [confirmUpgrade, setConfirmUpgrade] = useState<UpgradeType | null>(null);
   const [confirmStaff, setConfirmStaff] = useState<string | null>(null);
-  const [turnuvaResult, setTurnuvaResult] = useState<TurnuvaResult | null>(null);
-  const [ligSonuc, setLigSonuc] = useState<LigHaftaSonucu | null>(null);
   const [olaySonucAcik, setOlaySonucAcik] = useState(false);
   const [olayOzet, setOlayOzet] = useState<string>('');
 
@@ -159,14 +148,7 @@ export default function IsletmeScreen() {
 
   // === MEMNUNİYET ===
   const memnuniyet = Math.max(0, Math.min(100, state.memnuniyet ?? 50));
-  const memnuniyetRenk = memnuniyet >= 70 ? '#34D399' : memnuniyet >= 40 ? '#F59E0B' : '#F87171';
-
-  // === TURNUVA ===
-  const aralikGun = (TURNUVA_CONFIG as any)?.aralikGun ?? 3;
-  const katilimBedeli = (TURNUVA_CONFIG as any)?.katilimBedeli ?? 0;
-  const gunFark = (state.gun ?? 1) - (state.sonTurnuvaGun ?? 0);
-  const turnuvaReady = gunFark >= aralikGun;
-  const kalanGun = Math.max(0, aralikGun - gunFark);
+  const memnuniyetRenk = memnuniyet >= 70 ? '#34D399' : memnuniyet >= 40 ? Colors.primary : '#F87171';
 
   // === SAHİBİNDEN ===
   const yerFiyat = ISLETME_YERI.satinAlmaFiyat;
@@ -176,44 +158,6 @@ export default function IsletmeScreen() {
     const sonuc = buyProperty();
     if (sonuc) bildir(sonuc);
     else bildir(null, `🏠 Yer artık bizim! Günlük kira kalktı, +${ISLETME_YERI.prestijOdul} prestij.`);
-  };
-
-  const handleTurnuva = () => {
-    const res = joinTurnuva();
-    if ('error' in res) { setHata(true); setMesaj(res.error); }
-    else setTurnuvaResult(res.result);
-  };
-
-  // === LİG ===
-  const lig: LigDurum | null = (state as any)?.lig ?? null;
-  const ligTablo = lig ? puandanSirala(lig.takimlar) : [];
-  const benimLigTakim = lig?.takimlar.find(t => t.id === 'ben');
-  const siradakiLigMac = lig
-    ? lig.fikstur.find(m => m.hafta === lig.hafta && (m.ev === 'ben' || m.dep === 'ben'))
-    : null;
-  const rakipLigTakim = lig && siradakiLigMac
-    ? lig.takimlar.find(t => t.id === (siradakiLigMac.ev === 'ben' ? siradakiLigMac.dep : siradakiLigMac.ev))
-    : null;
-  const ligMacAcik = lig ? state.gun !== lig.sonMacGunu : false;
-  const yildizAcik =
-    (state.pitches?.yildiz?.asama ?? 0) >= 5 || (state.yildizSaha?.asama ?? 0) >= 5;
-
-  const handleLigKatil = () => {
-    const err = ligKatil();
-    if (err) bildir(err);
-    else bildir(null, '⚽ Lige hoş geldin! İlk hafta maçı hazır.');
-  };
-
-  const handleLigMac = () => {
-    const res = ligHaftaOyna();
-    if ('error' in res) { setHata(true); setMesaj(res.error); }
-    else setLigSonuc(res.result);
-  };
-
-  const handleLigBirak = () => {
-    const err = ligBirak();
-    if (err) bildir(err);
-    else bildir(null, 'Ligden ayrıldın.');
   };
 
   // === OLAY ===
@@ -339,7 +283,7 @@ export default function IsletmeScreen() {
         <View style={is.kart}>
           <Text style={is.bolumBaslik}>📊 Saha Bazlı Mali Tablo</Text>
           {sahaSatirlari.map(({ p, acik, gider, pasif }) => {
-            const tip = SAHA_TIP_BILGI[p.sahaTipi] ?? SAHA_TIP_BILGI.yildiz;
+            const tip = SAHA_TIP_BILGI[(p.sahaTipi ?? 'yildiz') as keyof typeof SAHA_TIP_BILGI] ?? SAHA_TIP_BILGI.yildiz;
             return (
               <View key={p.id} style={is.maliSatir}>
                 <Text style={is.maliEmoji}>{tip.emoji}</Text>
@@ -387,7 +331,7 @@ export default function IsletmeScreen() {
               <Text style={is.sahibinDeger}>{para(DAILY_KIRA)}/gün kira</Text>
             </View>
             <TouchableOpacity
-              style={[is.buton, { backgroundColor: yereNakitYeterli ? '#22C55E' : '#334155' }]}
+              style={[is.buton, { backgroundColor: yereNakitYeterli ? Colors.success : Colors.border }]}
               onPress={handleSahibinden}
             >
               <Text style={is.butonYazi}>
@@ -396,35 +340,6 @@ export default function IsletmeScreen() {
             </TouchableOpacity>
           </View>
         )}
-
-        {/* === TESİS YÜKSELTMELERİ === */}
-        <View style={is.kart}>
-          <Text style={is.bolumBaslik}>⬆️ Tesis Yükseltmeleri</Text>
-          {upgradeListe.map(([id, cfg]) => {
-            const seviye = state.upgrades?.[id] ?? 0;
-            const maks = cfg?.maxLevel ?? cfg?.costs?.length ?? 0;
-            const cost = cfg?.costs?.[seviye];
-            const makslandi = seviye >= maks;
-            return (
-              <View key={id} style={is.upSatiri}>
-                <Text style={is.upEmoji}>{cfg?.emoji ?? '🔧'}</Text>
-                <View style={is.upBilgi}>
-                  <Text style={is.upAd}>
-                    {cfg?.ad ?? cfg?.isim ?? id} <Text style={is.upSeviye}>L{seviye}/{maks}</Text>
-                  </Text>
-                  <Text style={is.upAciklama} numberOfLines={2}>{cfg?.aciklama ?? cfg?.etki ?? ''}</Text>
-                </View>
-                <TouchableOpacity
-                  disabled={makslandi}
-                  style={[is.upButon, makslandi && { backgroundColor: '#334155' }]}
-                  onPress={() => setConfirmUpgrade(id)}
-                >
-                  <Text style={is.upButonYazi}>{makslandi ? 'MAX' : para(cost ?? 0)}</Text>
-                </TouchableOpacity>
-              </View>
-            );
-          })}
-        </View>
 
         {/* === PERSONEL === */}
         <View style={is.kart}>
@@ -448,7 +363,7 @@ export default function IsletmeScreen() {
                 <Text style={is.upEmoji}>{cfg.emoji ?? '🧑‍💼'}</Text>
                 <View style={is.upBilgi}>
                   <Text style={is.upAd}>
-                    {cfg.label ?? cfg.id} <Text style={is.upSeviye}>L{seviye}/{maks}</Text>
+                    {cfg.ad ?? cfg.id} <Text style={is.upSeviye}>L{seviye}/{maks}</Text>
                   </Text>
                   <Text style={is.upAciklama} numberOfLines={2}>
                     {cfg.aciklama ?? ''}{sonraki ? ` · Sonraki: ${sonraki.label ?? '—'} (${para(maas)}/gün)` : ''}
@@ -463,7 +378,7 @@ export default function IsletmeScreen() {
                 </View>
                 <TouchableOpacity
                   disabled={makslandi}
-                  style={[is.upButon, makslandi && { backgroundColor: '#334155' }]}
+                  style={[is.upButon, makslandi && { backgroundColor: Colors.border }]}
                   onPress={() => setConfirmStaff(cfg.id)}
                 >
                   <Text style={is.upButonYazi}>
@@ -473,23 +388,6 @@ export default function IsletmeScreen() {
               </View>
             );
           })}
-        </View>
-
-        {/* === TURNUVA === */}
-        <View style={is.kart}>
-          <Text style={is.bolumBaslik}>🏆 Turnuva</Text>
-          <Text style={is.sahibinAciklama}>
-            Halısaha turnuvasına katıl, ödül ve prestij kazan! Katılım: {para(katilimBedeli)} · Her {aralikGun} günde bir.
-          </Text>
-          {!turnuvaReady ? (
-            <View style={is.turnuvaBekle}>
-              <Text style={is.turnuvaBekleYazi}>⏳ Sonraki turnuvaya {kalanGun} gün</Text>
-            </View>
-          ) : (
-            <TouchableOpacity style={[is.buton, { backgroundColor: '#F59E0B' }]} onPress={handleTurnuva}>
-              <Text style={is.butonKoyu}>Turnuvaya Katıl — {para(katilimBedeli)}</Text>
-            </TouchableOpacity>
-          )}
         </View>
 
         {/* === GÜNÜN OLAYI — soru ve seçenekler doğrudan burada === */}
@@ -538,81 +436,7 @@ export default function IsletmeScreen() {
           )}
         </View>
 
-        {/* === LİG === */}
-        <View style={is.kart}>
-          <Text style={is.bolumBaslik}>⚽ Beşli Patron Ligi</Text>
-          {!lig ? (
-            <>
-              <Text style={is.sahibinAciklama}>
-                8 takımlı, tek devreli lig (7 hafta). Günde en fazla 1 hafta maçı ({LIG_CONFIG.macEnerjisi} enerji).
-                Galibiyet {para(LIG_CONFIG.oduller.galibiyet)} + prestij. Sezonu ilk 3'te bitir, sezon ödülü kap.
-                Takım gücün: saha kalitesi, antrenör, memnuniyet ve prestijden beslenir.
-              </Text>
-              <TouchableOpacity
-                style={[is.buton, { backgroundColor: yildizAcik ? '#F59E0B' : '#334155' }]}
-                onPress={handleLigKatil}
-              >
-                <Text style={is.butonYazi}>{yildizAcik ? 'Lige Katıl — Ücretsiz' : 'Yıldız saha hizmette olmalı'}</Text>
-              </TouchableOpacity>
-            </>
-          ) : (
-            <>
-              <View style={is.ligBaslikSatir}>
-                <Text style={is.ligSezonYazi}>🏆 {lig.sezon}. Sezon · Hafta {lig.hafta}/7</Text>
-                {lig.sampiyonluk > 0 && (
-                  <Text style={is.ligSampiyonluk}>⭐ {lig.sampiyonluk}x şampiyon</Text>
-                )}
-              </View>
-
-              {lig.sonMac && (
-                <Text style={is.ligSonMac}>
-                  Son maç: {lig.sonMac.senGol}-{lig.sonMac.rakipGol} {lig.sonMac.rakipAd}{' '}
-                  {lig.sonMac.sonuc === 'galibiyet' ? '✅' : lig.sonMac.sonuc === 'beraberlik' ? '➖' : '❌'}
-                </Text>
-              )}
-
-              {/* Puan durumu */}
-              <View style={is.ligTabloBaslik}>
-                <Text style={[is.ligTh, { flex: 0.5 }]}>#</Text>
-                <Text style={[is.ligThAd, { flex: 2.3 }]}>TAKIM</Text>
-                <Text style={[is.ligTh, { flex: 0.7 }]}>O</Text>
-                <Text style={[is.ligTh, { flex: 0.8 }]}>AV</Text>
-                <Text style={[is.ligTh, { flex: 0.7 }]}>P</Text>
-              </View>
-              {ligTablo.map((t, i) => (
-                <View key={t.id} style={[is.ligSatir, t.id === 'ben' && is.ligSatirBen]}>
-                  <Text style={[is.ligTd, { flex: 0.5 }]}>{i + 1}</Text>
-                  <Text style={[is.ligTdAd, { flex: 2.3 }]} numberOfLines={1}>{t.ad}</Text>
-                  <Text style={[is.ligTd, { flex: 0.7 }]}>{t.oynanan}</Text>
-                  <Text style={[is.ligTd, { flex: 0.8 }]}>
-                    {t.attigi - t.yedigi > 0 ? '+' : ''}{t.attigi - t.yedigi}
-                  </Text>
-                  <Text style={[is.ligTdPuan, { flex: 0.7 }]}>{t.puan}</Text>
-                </View>
-              ))}
-
-              {rakipLigTakim && (
-                <Text style={is.ligSirada}>
-                  Sırada: {rakipLigTakim.ad} (güç {rakipLigTakim.guc}) · Senin güç: {benimLigTakim?.guc ?? '?'}
-                </Text>
-              )}
-              <TouchableOpacity
-                style={[is.buton, { backgroundColor: ligMacAcik ? '#F59E0B' : '#334155' }]}
-                onPress={handleLigMac}
-              >
-                <Text style={is.butonYazi}>
-                  {ligMacAcik
-                    ? `${lig.hafta}. Hafta Maçı Oyna — ${LIG_CONFIG.macEnerjisi} enerji`
-                    : 'Bugünün maçı oynandı ✅'}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={is.ligCikBtn} onPress={handleLigBirak}>
-                <Text style={is.ligCikYazi}>Ligden ayrıl</Text>
-              </TouchableOpacity>
-            </>
-          )}
-        </View>
-      </ScrollView>
+        </ScrollView>
 
       {/* === YÜKSELTME ONAY MODALI === */}
       <Modal visible={confirmUpgrade !== null} transparent animationType="fade" onRequestClose={() => setConfirmUpgrade(null)}>
@@ -638,7 +462,7 @@ export default function IsletmeScreen() {
       <Modal visible={confirmStaff !== null} transparent animationType="fade" onRequestClose={() => setConfirmStaff(null)}>
         <View style={is.modalOverlay}>
           <View style={is.modalKart}>
-            <Text style={is.modalBaslik}>{onayStaffCfg?.emoji ?? '🧑‍💼'} {onayStaffCfg?.label ?? 'Personel'}</Text>
+            <Text style={is.modalBaslik}>{onayStaffCfg?.emoji ?? '🧑‍💼'} {onayStaffCfg?.ad ?? 'Personel'}</Text>
             <Text style={is.modalYazi}>
               {onayStaffLevel === 0 ? 'İşe alım' : 'Terfi'} ücreti {para(onayStaffUcret)}. Onaylıyor musun?
             </Text>
@@ -654,60 +478,9 @@ export default function IsletmeScreen() {
         </View>
       </Modal>
 
-      {/* === TURNUVA SONUÇ MODALI === */}
-      <Modal visible={turnuvaResult !== null} transparent animationType="fade" onRequestClose={() => setTurnuvaResult(null)}>
-        <View style={is.modalOverlay}>
-          <View style={is.modalKart}>
-            <Text style={is.modalBaslik}>🏆 {turnuvaResult?.isim ?? 'Turnuva'}</Text>
-            <Text style={is.modalSonuc}>{turnuvaResult ? SONUC_ETIKET[turnuvaResult.sonuc] : ''}</Text>
-            <Text style={is.modalYazi}>
-              💰 Kazanç: {para(turnuvaResult?.kazanc ?? 0)}{'\n'}⭐ Prestij: +{turnuvaResult?.prestijKazanc ?? 0}
-            </Text>
-            <View style={is.modalButonlar}>
-              <TouchableOpacity style={is.btnOnay} onPress={() => setTurnuvaResult(null)}>
-                <Text style={is.btnOnayYazi}>Harika!</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
+      
 
-      {/* === LİG MAÇ SONUCU MODALI === */}
-      <Modal visible={ligSonuc !== null} transparent animationType="fade" onRequestClose={() => setLigSonuc(null)}>
-        <View style={is.modalOverlay}>
-          <View style={is.modalKart}>
-            <Text style={is.modalBaslik}>⚽ {ligSonuc?.hafta}. Hafta</Text>
-            <Text style={is.ligModalSkor}>
-              Beşli Patron SK {ligSonuc?.senGol} - {ligSonuc?.rakipGol} {ligSonuc?.rakipAd}
-            </Text>
-            <Text style={is.modalSonuc}>
-              {ligSonuc?.sonuc === 'galibiyet'
-                ? '✅ Galibiyet!'
-                : ligSonuc?.sonuc === 'beraberlik'
-                  ? '➖ Beraberlik'
-                  : '❌ Yenilgi'}
-            </Text>
-            {ligSonuc && ligSonuc.sezonBitti && (
-              <Text style={is.ligModalSezon}>
-                🏁 Sezon bitti! Final sırası: {ligSonuc.siralama}.{' '}
-                {ligSonuc.siralama === 1 ? 'ŞAMPİYON! 🎉' : ''}
-              </Text>
-            )}
-            <Text style={is.modalYazi}>
-              💰 Maç kazancı: +{para(ligSonuc?.kazanc ?? 0)}{'\n'}
-              {(ligSonuc?.sezonOdulu ?? 0) > 0
-                ? `🏆 Sezon ödülü: +${para(ligSonuc?.sezonOdulu ?? 0)}\n`
-                : ''}
-              ⭐ Prestij: +{(ligSonuc?.prestij ?? 0) + (ligSonuc?.sezonPrestij ?? 0)}
-            </Text>
-            <View style={is.modalButonlar}>
-              <TouchableOpacity style={is.btnOnay} onPress={() => setLigSonuc(null)}>
-                <Text style={is.btnOnayYazi}>Tamam</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
+      
 
       {/* === OLAY SONUCU MODALI === */}
       <Modal visible={olaySonucAcik} transparent animationType="fade" onRequestClose={() => setOlaySonucAcik(false)}>
@@ -742,17 +515,17 @@ export default function IsletmeScreen() {
 // === STİLLER ===
 // ============================================
 const is = StyleSheet.create({
-  ekran: { flex: 1, backgroundColor: '#0F172A' },
+  ekran: { flex: 1, backgroundColor: Colors.background },
   icerik: { padding: 16, paddingBottom: 90 },
   baslik: { color: '#F8FAFC', fontSize: 20, fontWeight: '800', marginBottom: 12 },
-  sari: { color: '#F59E0B' },
+  sari: { color: Colors.primary },
   kart: {
-    backgroundColor: '#1E293B', borderWidth: 1, borderColor: '#334155',
+    backgroundColor: Colors.card, borderWidth: 1, borderColor: Colors.border,
     borderRadius: 16, padding: 14, marginBottom: 12,
   },
   durumSatir: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 10 },
   durumDeger: { color: '#F8FAFC', fontWeight: '800', fontSize: 13 },
-  memEtiket: { color: '#94A3B8', fontSize: 11, marginBottom: 6 },
+  memEtiket: { color: Colors.textMuted, fontSize: 11, marginBottom: 6 },
   memBarArka: { height: 10, backgroundColor: '#0B1220', borderRadius: 999, overflow: 'hidden' },
   memBarOn: { height: '100%', borderRadius: 999 },
   bolumBaslik: { color: '#F8FAFC', fontSize: 15, fontWeight: '800', marginBottom: 10 },
@@ -760,7 +533,7 @@ const is = StyleSheet.create({
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
     paddingVertical: 5, borderBottomWidth: 1, borderBottomColor: '#0B1220',
   },
-  finEtiket: { color: '#94A3B8', fontSize: 12, flexShrink: 1 },
+  finEtiket: { color: Colors.textMuted, fontSize: 12, flexShrink: 1 },
   finYesil: { color: '#34D399', fontWeight: '800', fontSize: 13 },
   finKirmizi: { color: '#F87171', fontWeight: '800', fontSize: 13 },
   finNet: { borderBottomWidth: 0, marginTop: 4 },
@@ -773,24 +546,24 @@ const is = StyleSheet.create({
   maliEmoji: { fontSize: 20 },
   maliBilgi: { flex: 1 },
   maliAd: { color: '#F8FAFC', fontWeight: '700', fontSize: 13 },
-  maliAlt: { color: '#64748B', fontSize: 11, marginTop: 1 },
+  maliAlt: { color: Colors.textMuted, fontSize: 11, marginTop: 1 },
   maliSayilar: { alignItems: 'flex-end' },
   maliGider: { color: '#F87171', fontWeight: '700', fontSize: 12 },
   maliPasif: { color: '#34D399', fontWeight: '700', fontSize: 11, marginTop: 2 },
   maliToplam: { borderBottomWidth: 0 },
-  maliToplamYazi: { color: '#F59E0B', fontWeight: '800', fontSize: 12, flex: 1, textAlign: 'right' },
-  sahibinKart: { borderColor: '#22C55E', borderWidth: 1.5 },
+  maliToplamYazi: { color: Colors.primary, fontWeight: '800', fontSize: 12, flex: 1, textAlign: 'right' },
+  sahibinKart: { borderColor: Colors.success, borderWidth: 1.5 },
   sahibinBaslik: { color: '#34D399', fontSize: 16, fontWeight: '800', marginBottom: 6 },
-  sahibinAciklama: { color: '#94A3B8', fontSize: 12, lineHeight: 18, marginBottom: 8 },
+  sahibinAciklama: { color: Colors.textMuted, fontSize: 12, lineHeight: 18, marginBottom: 8 },
   sahibinSatir: {
     flexDirection: 'row', justifyContent: 'space-between',
     paddingVertical: 4,
   },
-  sahibinEtiket: { color: '#94A3B8', fontSize: 12 },
+  sahibinEtiket: { color: Colors.textMuted, fontSize: 12 },
   sahibinDeger: { color: '#E2E8F0', fontWeight: '800', fontSize: 12 },
   buton: { borderRadius: 12, paddingVertical: 13, alignItems: 'center', marginTop: 10 },
   butonYazi: { color: '#F8FAFC', fontWeight: '800', fontSize: 14 },
-  butonKoyu: { color: '#0F172A', fontWeight: '800', fontSize: 14 },
+  butonKoyu: { color: Colors.background, fontWeight: '800', fontSize: 14 },
   upSatiri: {
     flexDirection: 'row', alignItems: 'center', gap: 10,
     paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: '#0B1220',
@@ -798,44 +571,44 @@ const is = StyleSheet.create({
   upEmoji: { fontSize: 22 },
   upBilgi: { flex: 1 },
   upAd: { color: '#F8FAFC', fontWeight: '700', fontSize: 13 },
-  upSeviye: { color: '#F59E0B', fontWeight: '800', fontSize: 11 },
-  upAciklama: { color: '#64748B', fontSize: 11, marginTop: 1 },
-  personelOzet: { color: '#94A3B8', fontSize: 11, lineHeight: 16, marginBottom: 6 },
+  upSeviye: { color: Colors.primary, fontWeight: '800', fontSize: 11 },
+  upAciklama: { color: Colors.textMuted, fontSize: 11, marginTop: 1 },
+  personelOzet: { color: Colors.textMuted, fontSize: 11, lineHeight: 16, marginBottom: 6 },
   personelEtki: { color: '#34D399', fontSize: 11, fontWeight: '700', marginTop: 3 },
   upButon: {
-    backgroundColor: '#F59E0B', borderRadius: 10,
+    backgroundColor: Colors.primary, borderRadius: 10,
     paddingHorizontal: 12, paddingVertical: 7,
   },
-  upButonYazi: { color: '#0F172A', fontWeight: '800', fontSize: 12 },
+  upButonYazi: { color: Colors.background, fontWeight: '800', fontSize: 12 },
   turnuvaBekle: {
     backgroundColor: '#0B1220', borderRadius: 12, paddingVertical: 12,
     alignItems: 'center', marginTop: 10,
   },
-  turnuvaBekleYazi: { color: '#F59E0B', fontWeight: '700', fontSize: 13 },
+  turnuvaBekleYazi: { color: Colors.primary, fontWeight: '700', fontSize: 13 },
   olayBaslik: { color: '#F8FAFC', fontWeight: '800', fontSize: 13, marginBottom: 4 },
-  olayYazi: { color: '#94A3B8', fontSize: 12, lineHeight: 18, marginBottom: 6 },
+  olayYazi: { color: Colors.textMuted, fontSize: 12, lineHeight: 18, marginBottom: 6 },
   olaySoru: { color: '#F8FAFC', fontWeight: '800', fontSize: 12, marginBottom: 6 },
   olaySecenek: {
-    backgroundColor: '#0B1220', borderWidth: 1, borderColor: '#334155',
+    backgroundColor: '#0B1220', borderWidth: 1, borderColor: Colors.border,
     borderRadius: 12, padding: 10, marginBottom: 8,
   },
   olaySecenekLabel: { color: '#F8FAFC', fontWeight: '800', fontSize: 13 },
-  olaySecenekAciklama: { color: '#94A3B8', fontSize: 11, marginTop: 2, lineHeight: 16 },
-  olaySecenekEtki: { color: '#F59E0B', fontSize: 11, fontWeight: '700', marginTop: 4 },
-  olaySonuc: { color: '#F59E0B', fontWeight: '700', fontSize: 12, marginBottom: 4 },
+  olaySecenekAciklama: { color: Colors.textMuted, fontSize: 11, marginTop: 2, lineHeight: 16 },
+  olaySecenekEtki: { color: Colors.primary, fontSize: 11, fontWeight: '700', marginTop: 4 },
+  olaySonuc: { color: Colors.primary, fontWeight: '700', fontSize: 12, marginBottom: 4 },
   olayKoruma: { color: '#34D399', fontSize: 11, fontWeight: '600', marginBottom: 6, lineHeight: 16 },
-  olayGecmisBaslik: { color: '#64748B', fontSize: 11, fontWeight: '800', marginTop: 4, marginBottom: 2 },
-  olayGecmisSatir: { color: '#64748B', fontSize: 11, paddingVertical: 1 },
+  olayGecmisBaslik: { color: Colors.textMuted, fontSize: 11, fontWeight: '800', marginTop: 4, marginBottom: 2 },
+  olayGecmisSatir: { color: Colors.textMuted, fontSize: 11, paddingVertical: 1 },
   ligBaslikSatir: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },
   ligSezonYazi: { color: '#F8FAFC', fontWeight: '800', fontSize: 13 },
-  ligSampiyonluk: { color: '#F59E0B', fontWeight: '800', fontSize: 11 },
-  ligSonMac: { color: '#94A3B8', fontSize: 11, marginBottom: 6 },
+  ligSampiyonluk: { color: Colors.primary, fontWeight: '800', fontSize: 11 },
+  ligSonMac: { color: Colors.textMuted, fontSize: 11, marginBottom: 6 },
   ligTabloBaslik: {
     flexDirection: 'row', alignItems: 'center', paddingVertical: 4,
-    borderBottomWidth: 1, borderBottomColor: '#334155',
+    borderBottomWidth: 1, borderBottomColor: Colors.border,
   },
-  ligTh: { color: '#64748B', fontSize: 10, fontWeight: '800', textAlign: 'center' },
-  ligThAd: { color: '#64748B', fontSize: 10, fontWeight: '800' },
+  ligTh: { color: Colors.textMuted, fontSize: 10, fontWeight: '800', textAlign: 'center' },
+  ligThAd: { color: Colors.textMuted, fontSize: 10, fontWeight: '800' },
   ligSatir: {
     flexDirection: 'row', alignItems: 'center', paddingVertical: 5,
     borderBottomWidth: 1, borderBottomColor: '#0B1220', borderRadius: 4,
@@ -844,30 +617,30 @@ const is = StyleSheet.create({
   ligTd: { color: '#CBD5E1', fontSize: 11, textAlign: 'center' },
   ligTdAd: { color: '#E2E8F0', fontSize: 11, fontWeight: '600' },
   ligTdPuan: { color: '#F8FAFC', fontSize: 11, fontWeight: '800', textAlign: 'center' },
-  ligSirada: { color: '#F59E0B', fontWeight: '700', fontSize: 12, marginTop: 8 },
+  ligSirada: { color: Colors.primary, fontWeight: '700', fontSize: 12, marginTop: 8 },
   ligCikBtn: { alignSelf: 'center', marginTop: 8, paddingVertical: 6, paddingHorizontal: 12 },
-  ligCikYazi: { color: '#64748B', fontSize: 11, fontWeight: '600' },
+  ligCikYazi: { color: Colors.textMuted, fontSize: 11, fontWeight: '600' },
   ligModalSkor: { color: '#F8FAFC', fontSize: 15, fontWeight: '800', marginBottom: 6 },
-  ligModalSezon: { color: '#F59E0B', fontWeight: '800', fontSize: 12, marginBottom: 6 },
+  ligModalSezon: { color: Colors.primary, fontWeight: '800', fontSize: 12, marginBottom: 6 },
   modalOverlay: {
     flex: 1, backgroundColor: 'rgba(0,0,0,0.6)',
     alignItems: 'center', justifyContent: 'center', padding: 24,
   },
   modalKart: {
-    backgroundColor: '#1E293B', borderWidth: 1, borderColor: '#334155',
+    backgroundColor: Colors.card, borderWidth: 1, borderColor: Colors.border,
     borderRadius: 16, padding: 18, width: '100%',
   },
   modalBaslik: { color: '#F8FAFC', fontSize: 16, fontWeight: '800', marginBottom: 8 },
-  modalSonuc: { color: '#F59E0B', fontSize: 18, fontWeight: '800', marginBottom: 8 },
-  modalYazi: { color: '#94A3B8', fontSize: 13, lineHeight: 20, marginBottom: 14 },
+  modalSonuc: { color: Colors.primary, fontSize: 18, fontWeight: '800', marginBottom: 8 },
+  modalYazi: { color: Colors.textMuted, fontSize: 13, lineHeight: 20, marginBottom: 14 },
   modalButonlar: { flexDirection: 'row', gap: 10, justifyContent: 'flex-end' },
   btnIptal: {
-    backgroundColor: '#334155', borderRadius: 10,
+    backgroundColor: Colors.border, borderRadius: 10,
     paddingHorizontal: 16, paddingVertical: 10,
   },
   btnIptalYazi: { color: '#E2E8F0', fontWeight: '700', fontSize: 13 },
   btnOnay: {
-    backgroundColor: '#22C55E', borderRadius: 10,
+    backgroundColor: Colors.success, borderRadius: 10,
     paddingHorizontal: 16, paddingVertical: 10,
   },
   btnOnayYazi: { color: '#052E16', fontWeight: '800', fontSize: 13 },
@@ -880,3 +653,4 @@ const is = StyleSheet.create({
 });
 
 // === DOSYA SONU — bu satırı görüyorsan yapıştırma tam demektir ===
+

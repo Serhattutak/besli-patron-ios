@@ -448,7 +448,7 @@ export const LIFE_ITEMS: LifeItemConfig[] = [
     label: 'Bisiklet',
     aciklama: 'Sahaya ulaşım kolaylaşır',
     kategori: 'ulasim',
-    levels: [{ label: 'Bisiklet', cost: 3000, prestij: 5 }],
+    levels: [{ label: 'Bisiklet', cost: 15000, prestij: 5 }],
     requiredPrestij: 0,
   },
   {
@@ -458,8 +458,8 @@ export const LIFE_ITEMS: LifeItemConfig[] = [
     aciklama: 'Daha hızlı ulaşım',
     kategori: 'ulasim',
     levels: [
-      { label: 'Mondo 125 (İkinci El)', cost: 35000, prestij: 10 },
-      { label: 'Yamasa R1 (Sıfır, Kaçtı Abi!)', cost: 185000, prestij: 20 },
+      { label: 'Mondo 125', cost: 85000, prestij: 10 },
+      { label: 'Yamasa R1 (Sıfır, Kaçtı Abi!)', cost: 195000, prestij: 20 },
     ],
     requiredPrestij: 10,
   },
@@ -483,13 +483,13 @@ export const LIFE_ITEMS: LifeItemConfig[] = [
   },
   {
     id: 'ev_kira',
-    emoji: '🏚️',
+    emoji: '🛚️',
     label: 'Kiralık Daire',
     aciklama: 'Kendi evin olsun',
     kategori: 'konut',
     levels: [
-      { label: '1+1 Kiralık (Asansörsüz)', cost: 15000, prestij: 5 },
-      { label: '2+1 Kiralık (Balkonlu)', cost: 40000, prestij: 8 },
+      { label: '1+1 Kiralık (Asansörsüz)', cost: 60000, prestij: 5 },
+      { label: '2+1 Kiralık (Balkonlu)', cost: 120000, prestij: 8 },
     ],
     requiredPrestij: 0,
   },
@@ -500,9 +500,9 @@ export const LIFE_ITEMS: LifeItemConfig[] = [
     aciklama: 'Evlilik taşının altına imza at',
     kategori: 'konut',
     levels: [
-      { label: '2+1 Satılık Daire (Krediyle)', cost: 250000, prestij: 20 },
-      { label: '3+2 Satılık Daire (Site İçi)', cost: 650000, prestij: 35 },
-      { label: 'Villa (Bahçeli, Havuzlu)', cost: 2000000, prestij: 55 },
+      { label: '2+1 Satılık Daire (Krediyle)', cost: 1200000, prestij: 20 },
+      { label: '3+2 Satılık Daire (Site İçi)', cost: 2900000, prestij: 35 },
+      { label: 'Villa (Bahçeli, Havuzlu)', cost: 7500000, prestij: 55 },
     ],
     requiredPrestij: 25,
   },
@@ -513,9 +513,9 @@ export const LIFE_ITEMS: LifeItemConfig[] = [
     aciklama: 'Rezervasyonlar artık şık bir telefondan yönetiliyor',
     kategori: 'luks',
     levels: [
-      { label: 'Kelepir Telefon', cost: 6000, prestij: 2 },
-      { label: 'Bay Yenilik 12', cost: 28000, prestij: 6 },
-      { label: 'Elma Pro Max (256 GB)', cost: 72000, prestij: 12 },
+      { label: 'Kelepir Telefon', cost: 12000, prestij: 2 },
+      { label: 'Bay Yenilik 12', cost: 38000, prestij: 6 },
+      { label: 'Elma Pro Max (256 GB)', cost: 115000, prestij: 12 },
     ],
     requiredPrestij: 5,
   },
@@ -526,9 +526,9 @@ export const LIFE_ITEMS: LifeItemConfig[] = [
     aciklama: 'Maç saati mi? Patron saati mi?',
     kategori: 'luks',
     levels: [
-      { label: 'Koleksiyon Saat', cost: 35000, prestij: 8 },
-      { label: 'Altın Kaplama Saat', cost: 150000, prestij: 20 },
-      { label: 'Rols Röys Kol Saati', cost: 900000, prestij: 40 },
+      { label: 'Koleksiyon Saat', cost: 18000, prestij: 8 },
+      { label: 'Altın Kaplama Saat', cost: 220000, prestij: 20 },
+      { label: 'Rols Röys Kol Saati', cost: 2400000, prestij: 40 },
     ],
     requiredPrestij: 20,
   },
@@ -546,6 +546,20 @@ export const KIZ_ARKADAS_CONFIG = {
   seviyeBasinaPrestij: 5,
   evlilikSeviye: 10,
   evlilikPrestij: 150,
+  requiredPrestij: 50,
+  // 10 kademe: yasam.tsx bu listeyi okur (emoji, label, cost, prestij)
+        levels: [
+    { emoji: '☕', label: 'Kahve İçtik', cost: 10000, prestij: 5 },
+    { emoji: '🎬', label: 'Sinema Randevusu', cost: 18000, prestij: 8 },
+    { emoji: '🍴', label: 'Akşam Yemeği', cost: 30000, prestij: 10 },
+    { emoji: '🎁', label: 'İlk Hediye', cost: 45000, prestij: 12 },
+    { emoji: '💑', label: 'Sevgili Olduk', cost: 65000, prestij: 15 },
+    { emoji: '🌴', label: 'Tatil Kaçamağı', cost: 90000, prestij: 18 },
+    { emoji: '💍', label: 'Nişanlandık', cost: 125000, prestij: 25 },
+    { emoji: '🏡', label: 'Ev Kiraladık', cost: 170000, prestij: 30 },
+    { emoji: '👶', label: 'Çocuk Sahibi Olduk', cost: 230000, prestij: 40 },
+    { emoji: '💒', label: 'Evlendik', cost: 300000, prestij: 60 },
+  ],
 };
 
 // === ŞEHİRLER ===

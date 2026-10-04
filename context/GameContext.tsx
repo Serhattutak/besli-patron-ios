@@ -1,7 +1,8 @@
+﻿import { ligSifirla } from '../services/ligManager';
 // ============================================
 // BEŞLİ PATRON — GameContext.tsx (ÇOKLU SAHA + SPONSORLAR + GÜVENLİK + LİG)
 // ============================================
-import React, { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect, useRef, type ReactNode } from 'react';
 import type { GameState, Reservation, DailyTask, PitchState, SahaAsama, Upgrades, TurnuvaResult, HavaTipi } from '../types/game';
 import type { DayEndResult } from '../services/gameLogic';
 import {
@@ -193,7 +194,8 @@ interface GameContextType {
   unlockCity: (cityId: string) => string | null;
   switchCity: (cityId: string) => string | null;
   hireStaff: (staffId: string) => string | null;
-  joinTurnuva: () => { error: string } | { result: TurnuvaResult };
+  nakitEkle: (d: number) => void;
+  enerjiEkle: (miktar: number) => void; joinTurnuva: () => { error: string } | { result: TurnuvaResult };
   buyProperty: () => string | null;
   devHediye: (nakit?: number, prestij?: number, jeton?: number, enerjiDoldur?: boolean) => void;
   // === ÇOKLU SAHA (yeni) ===
@@ -217,6 +219,10 @@ const GameContext = createContext<GameContextType | null>(null);
 export function GameProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<GameState | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // GUN SONU KILIDI: ayni gunun iki kez islenmesini ve cift dokunmayi engeller (Sardur Technologies)
+  const endDayKilitRef = useRef(false);
+  const endDayGunRef = useRef(-1);
 
   // Otomatik kayıt: state her güncellendiğinde diske yazılır
   const autoSave = useCallback(async (yeni: GameState) => {
@@ -259,6 +265,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
       yildizSaha: acikYildiz,
       pitches: { yildiz: { ...acikYildiz } },
     };
+    endDayKilitRef.current = false;
+    endDayGunRef.current = -1;
     const ilkGun = gunuHazirla(baslangic);
     setState(ilkGun);
     try { await saveGame(ilkGun); } catch {}
@@ -269,6 +277,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
     try {
       const yuklenen = await loadGame();
       if (!yuklenen) return false;
+      endDayKilitRef.current = false;
+      endDayGunRef.current = -1;
       let s = migrateState(yuklenen);
       s = eskiKayitOnar(s);
       if ((s.bugunRezervasyonlar ?? []).length === 0) s = teklifleriKur(s);
@@ -320,7 +330,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       pitches,
       gunlukGorevler: gorevIlerlet(state.gunlukGorevler, 'rezervasyon', rez),
     });
-    sfx('para');
+    // iOS DONMA TESTİ: gün sonu ses efekti geçici olarak kapalı
     return null;
   }, [state, autoSave]);
 
@@ -330,7 +340,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     const rez = (state.bugunRezervasyonlar ?? []).find(r => r?.id === id);
     if (!rez || rez.durum !== 'bekliyor') return;
 
-    const ceza = safeNum(MEMNUNIYET_CONFIG?.redMemnuniyetCezasi, 5);
+    const ceza = safeNum((MEMNUNIYET_CONFIG as any)?.redMemnuniyetCezasi, 5);
     autoSave({
       ...state,
       memnuniyet: Math.max(0, safeNum(state.memnuniyet, 50) - ceza),
@@ -341,39 +351,84 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
   // === GÜN SONU ===
   const endDay = useCallback((): DayEndResult | null => {
-    if (!state) return null;
-    if (state.isGameOver) return null;
+if (!state) {
+      console.error("[END_DAY] STATE_NULL");
+      return null;
+    }
 
-    // Sponsorlar: imzalı liste gün sonu işlemleri boyunca korunur
-    const imzali = sponsorlarAl(state);
+    if (state.isGameOver) {
+      console.error("[END_DAY] GAME_OVER", state.gun);
+      return null;
+    }
 
-    // Gelir görevini değerlendir
-    const gorevler = (state.gunlukGorevler ?? []).map(g =>
-      (!g?.tamamlandi && g.hedefTip === 'gelir' && safeNum(state.bugunGelir, 0) >= safeNum(g.hedef, 1))
-        ? { ...g, ilerleme: g.hedef, tamamlandi: true }
-        : g
-    );
+    // Aynı anda ikinci gün geçişini engelle.
+    if (endDayKilitRef.current) {
+      console.warn("[END_DAY] LOCK_ACTIVE - ikinci çağrı engellendi");
+      return null;
+    }
 
-    const { newState, result } = processEndDay({ ...state, gunlukGorevler: gorevler });
+    endDayKilitRef.current = true;
 
-    // Sponsor günlük gelirleri: gün kapanırken otomatik kasaya girer
-    const sponsorGeliri = toplamSponsorGeliri(imzali);
-    const sonraki: GameStateWithSponsor = {
-      ...newState,
-      nakit: safeNum(newState.nakit, 0) + sponsorGeliri,
-      sponsorlar: imzali,
-    };
+    try {
+// Sponsorları güvenli şekilde al.
+      const imzali = sponsorlarAl(state);
 
-    const tomorrow = gunuHazirla(sonraki);
-    autoSave(tomorrow);
+      // Günlük gelir görevi
+      const gorevler = (state.gunlukGorevler ?? []).map(g =>
+        (!g?.tamamlandi &&
+          g.hedefTip === "gelir" &&
+          safeNum(state.bugunGelir, 0) >= safeNum(g.hedef, 1))
+          ? {
+              ...g,
+              ilerleme: g.hedef,
+              tamamlandi: true,
+            }
+          : g
+      );
+const { newState, result } = processEndDay({
+        ...state,
+        gunlukGorevler: gorevler,
+      });
+const sponsorGeliri = toplamSponsorGeliri(imzali);
 
-    // REKLAM: her 2 oyun gununde 1 gecis reklam (ozet ekrandan sonra)
-    sfx('para');
-    gunSonuReklamKontrol();
+      const sonraki: GameStateWithSponsor = {
+        ...newState,
+        nakit: safeNum(newState.nakit, 0) + sponsorGeliri,
+        sponsorlar: imzali,
+      };
+const tomorrow = gunuHazirla(sonraki);
 
-    return result;
-  }, [state, autoSave]);
+      // YENİ GÜNÜ ÖNCE STATE'E UYGULA.
+      // Böylece gün sayısı ve yeni gün verileri ekrana hemen yansır.
+      setState(tomorrow);
+// KAYIT: Gün geçişinin kritik UI yolunu bloke etme.
+      // saveGame içinde JSON.stringify senkron çalıştığı için
+      // kaydı yeni gün ekranı oluşturulduktan sonra başlatıyoruz.
+      setTimeout(() => {
+        void saveGame(tomorrow).catch(error => {
+          console.error("[END_DAY_SAVE_ERROR]", error);
+        });
+      }, 2500);
+return result;
 
+    } catch (error) {
+      console.error("[END_DAY_ERROR]", error);
+
+      // Hatanın gerçek sebebini iOS logunda görebilmek için.
+      if (error instanceof Error) {
+        console.error("[END_DAY_ERROR_MESSAGE]", error.message);
+        console.error("[END_DAY_ERROR_STACK]", error.stack);
+      }
+
+      return null;
+
+    } finally {
+      // Gün geçişi tamamlandıktan sonra kilidi aç.
+      setTimeout(() => {
+        endDayKilitRef.current = false;
+}, 700);
+    }
+  }, [state]);
   // === ANA YÜKSELTMELER (kantin, sponsor, aydınlatma vb.) ===
   const purchaseUpgrade = useCallback((type: UpgradeType): string | null => {
     if (!state) return 'Oyun bulunamadı!';
@@ -477,7 +532,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       arsaAlindi: true,
       asama: 1,
       kalite: 0, // açılışta (aşama 5) başlangıç kalitesine yükselir
-      upgrades: {},
+      upgrades: { bakim: 0, haliYenileme: 0, aydinlatma: 0, dusSoyunma: 0, kantin: 0, sponsor: 0 },
       bakimYapildi: false,
       rezervasyonlar: [],
       kabulEdilenler: [],
@@ -619,7 +674,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     if (imzali.includes(id)) return 'Bu sponsorla zaten anlaşman var!';
     if (imzali.length >= MAX_SPONSOR) return `Aynı anda en fazla ${MAX_SPONSOR} sponsor!`;
     const yildiz = state.pitches?.yildiz ?? state.yildizSaha;
-    if (!sponsorUygunMu(sp, safeNum(yildiz?.asama, 0), (state.upgrades ?? {}) as Record<string, number>)) {
+    if (!sponsorUygunMu(sp, safeNum(yildiz?.asama, 0), (state.upgrades ?? {}) as unknown as Record<string, number>)) {
       return 'Bu sponsorun şartları henüz sağlanmıyor!';
     }
     if (state.nakit < sp.onOdeme) return `Yetersiz nakit! (${sp.onOdeme}₺ peşin gerekli)`;
@@ -751,6 +806,14 @@ export function GameProvider({ children }: { children: ReactNode }) {
   }, [state, autoSave]);
 
   // === ŞEHİRLER ===
+  // === ENERJI (odullu reklam odulu) ===
+  const enerjiEkle = useCallback((miktar: number): void => {
+    if (!state) return;
+    const ekle = Math.max(0, Math.round(miktar));
+    if (ekle === 0) return;
+    autoSave({ ...state, enerji: state.enerji + ekle });
+  }, [state, autoSave]);
+
   const unlockCity = useCallback((cityId: string): string | null => {
     if (!state) return 'Oyun bulunamadı!';
     const cfg = CITIES.find(c => c?.id === cityId) as any;
@@ -845,6 +908,14 @@ export function GameProvider({ children }: { children: ReactNode }) {
   }, [state, autoSave]);
 
   // === TURNUVA ===
+  // Sardur Technologies: Lig/Takim nakit koprusu (mac hasilati, transferler)
+  const nakitEkle = useCallback((delta: number) => {
+    setState(prev => {
+      if (!prev) return prev;
+      return { ...prev, nakit: Number(prev.nakit ?? 0) + delta };
+    });
+  }, []);
+
   const joinTurnuva = useCallback((): { error: string } | { result: TurnuvaResult } => {
     if (!state) return { error: 'Oyun bulunamadı!' };
     const cfg: any = TURNUVA_CONFIG as any;
@@ -858,7 +929,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       ...state,
       nakit: state.nakit + safeNum(sonuc.kazanc, 0),
       prestij: state.prestij + safeNum(sonuc.prestijKazanc, 0),
-      turnuvaSonuclari: [...(state.turnuvaSonuclari ?? []), sonuc],
+      turnuvaSonuclari: [...(state.turnuvaSonuclari ?? []).slice(-10), sonuc], // Sardur Technologies: kayit siniri (son 10)
       sonTurnuvaGun: state.gun,
     });
     return { result: sonuc };
@@ -884,8 +955,12 @@ export function GameProvider({ children }: { children: ReactNode }) {
     try { await saveGame(state); } catch {}
   }, [state]);
 
+
   const resetGame = useCallback(async () => {
     try { await deleteSave(); } catch {}
+    try { await ligSifirla(); } catch {} // lig kaydini da sil (reset sonrasi lig bastan baslar)
+    endDayKilitRef.current = false;
+    endDayGunRef.current = -1;
     await initNewGame();
   }, [initNewGame]);
 
@@ -919,7 +994,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     unlockCity,
     switchCity,
     hireStaff,
-    joinTurnuva,
+    joinTurnuva, nakitEkle, enerjiEkle,
     buyProperty,
     devHediye,
     buyYildizArsa,
@@ -945,3 +1020,4 @@ export function useGame(): GameContextType {
 }
 
 // === DOSYA SONU — bu satırı görüyorsan yapıştırma tam demektir ===
+

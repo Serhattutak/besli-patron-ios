@@ -35,12 +35,12 @@ export interface DailyTask {
 
 export interface Upgrades {
   // Mevcut yükseltmeler
-  bakim: number;
-  haliYenileme: number;
-  aydinlatma: number;
-  dusSoyunma: number;
-  kantin: number;
-  sponsor: number;
+  bakim?: number;
+  haliYenileme?: number;
+  aydinlatma?: number;
+  dusSoyunma?: number;
+  kantin?: number;
+  sponsor?: number;
 
   // Yeni saha yükseltmeleri
   telOrgu?: number;

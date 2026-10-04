@@ -3,6 +3,7 @@ import { View, Text, Pressable, ScrollView, StyleSheet, Platform, Modal } from '
 import { useGame } from '../../context/GameContext';
 import { Colors } from '../../constants/colors';
 import { LIFE_ITEMS, KIZ_ARKADAS_CONFIG, type LifeItemConfig } from '../../constants/gameConfig';
+import OdulluReklamButonu from '../../components/OdulluReklamButonu';
 
 const KATEGORI_LABELS: Record<string, { emoji: string; label: string }> = {
   ulasim: { emoji: '🚗', label: 'Ulaşım' },
@@ -213,6 +214,7 @@ export default function YasamScreen() {
           </View>
         </View>
       </Modal>
+        <OdulluReklamButonu odulEnerji={1} />
     </ScrollView>
   );
 }

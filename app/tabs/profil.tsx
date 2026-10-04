@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { router } from 'expo-router';
 import { useGame } from '../../context/GameContext';
+import { taniOku, islemKaydet } from '../../services/tani';
 import { Colors } from '../../constants/colors';
 import {
   JETON_ENERJI_COST,
@@ -34,6 +35,7 @@ export default function ProfilScreen() {
   const [confirmCity, setConfirmCity] = useState<string | null>(null);
   const [showDevPanel, setShowDevPanel] = useState(false);
   const [futbolcuTik, setFutbolcuTik] = useState(0);
+  const [taniMetni, setTaniMetni] = useState('');
 
   const font = Platform.select({
     ios: 'SpaceMono',
@@ -77,12 +79,18 @@ export default function ProfilScreen() {
     }
   };
 
+  const handleTani = async () => {
+    const rapor = await taniOku();
+    setTaniMetni(rapor);
+  };
+
   const handleSave = async () => {
     await manualSave();
     showMsg('Oyun kaydedildi!');
   };
 
   const handleReset = async () => {
+    islemKaydet('KULLANICI: oyunu sifirladi');
     setShowResetConfirm(false);
     await resetGame();
     router.replace('/intro');
@@ -371,6 +379,12 @@ export default function ProfilScreen() {
               </Text>
             </Pressable>
 
+            <Pressable style={styles.devButton} onPress={handleTani}>
+              <Text style={[styles.devButtonText, { fontFamily: font }]}>
+                🩺 Tanı Raporu
+              </Text>
+            </Pressable>
+
             <Pressable
               style={styles.closeButton}
               onPress={() => setShowDevPanel(false)}
@@ -378,6 +392,22 @@ export default function ProfilScreen() {
               <Text style={[styles.closeButtonText, { fontFamily: font }]}>
                 Kapat
               </Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal visible={taniMetni !== ''} transparent animationType="fade" onRequestClose={() => setTaniMetni('')}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.devPanel}>
+            <Text style={[styles.devTitle, { fontFamily: font }]}>🩺 Tanı Raporu</Text>
+            <ScrollView style={{ maxHeight: 380, marginBottom: 10 }}>
+              <Text selectable style={{ color: '#E5E7EB', fontFamily: font, fontSize: 11, lineHeight: 16 }}>
+                {taniMetni}
+              </Text>
+            </ScrollView>
+            <Pressable style={styles.closeButton} onPress={() => setTaniMetni('')}>
+              <Text style={styles.closeButtonText}>Kapat</Text>
             </Pressable>
           </View>
         </View>
@@ -432,14 +462,14 @@ export default function ProfilScreen() {
             </Text>
 
             <Text style={[styles.confirmText, { fontFamily: font }]}>
-              {confirmCityConfig?.label ?? 'Bu şehir'} için{' '}
-              {Number(confirmCityConfig?.unlockCost ?? 0).toLocaleString(
+              {confirmCityConfig?.ad ?? 'Bu şehir'} için{' '}
+              {Number((confirmCityConfig as any)?.unlockCost ?? 0).toLocaleString(
                 'tr-TR',
               )}{' '}
               ₺ ve ⭐
               {Number(
                 confirmCityConfig?.requiredPrestij ??
-                  confirmCityConfig?.prestijCost ??
+                  (confirmCityConfig as any)?.prestijCost ??
                   0,
               )}{' '}
               prestij gereklidir.
@@ -495,7 +525,7 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   messageText: {
-    color: '#FFFFFF',
+    color: Colors.white,
     textAlign: 'center',
     fontSize: 13,
   },
@@ -584,7 +614,7 @@ const styles = StyleSheet.create({
     opacity: 0.45,
   },
   buttonText: {
-    color: '#FFFFFF',
+    color: Colors.white,
     fontSize: 13,
     fontWeight: '700',
   },
@@ -622,7 +652,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
   },
   smallButtonText: {
-    color: '#FFFFFF',
+    color: Colors.white,
     fontSize: 11,
     fontWeight: '700',
   },
@@ -634,7 +664,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   resetButtonText: {
-    color: '#FFFFFF',
+    color: Colors.white,
     fontSize: 13,
     fontWeight: '700',
   },
@@ -675,7 +705,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   devButtonText: {
-    color: '#FFFFFF',
+    color: Colors.white,
     fontSize: 13,
     fontWeight: '700',
   },
@@ -687,7 +717,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   closeButtonText: {
-    color: '#FFFFFF',
+    color: Colors.white,
     fontSize: 13,
     fontWeight: '700',
   },

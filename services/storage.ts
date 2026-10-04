@@ -1,14 +1,26 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+﻿import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { GameState } from '../types/game';
 
 const SAVE_KEY = 'beslipatron_save';
 
-export async function saveGame(state: GameState): Promise<void> {
-  try {
-    await AsyncStorage.setItem(SAVE_KEY, JSON.stringify(state));
-  } catch (e) {
-    console.error('Save failed:', e);
-  }
+/*
+ * Kayıt kuyruğu:
+ * Aynı anda başlayan eski/yeni kayıtların birbirinin üzerine yazmasını önler.
+ * Sardur Technologies - Beşli Patron
+ */
+let saveQueue: Promise<void> = Promise.resolve();
+
+export function saveGame(state: GameState): Promise<void> {
+  const serialized = JSON.stringify(state);
+
+  saveQueue = saveQueue
+    .catch(() => {})
+    .then(() => AsyncStorage.setItem(SAVE_KEY, serialized))
+    .catch((e) => {
+      console.error('Save failed:', e);
+    });
+
+  return saveQueue;
 }
 
 export async function loadGame(): Promise<GameState | null> {

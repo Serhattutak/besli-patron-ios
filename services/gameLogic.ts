@@ -162,7 +162,7 @@ export function generateReservations(sahaKalitesi: number, upgrades: GameState['
     // Zirve saat primi: talep yüksekse fiyat da yüksek (x0.97 - x1.25)
     const talepPrimi = 0.85 + 0.25 * (SLOT_TALEP[slotId] ?? 1);
     const hamFiyat = randomInt(config.minFiyat, config.maxFiyat) * kisiCarpani * dusPrimi * safeNum(fiyatCarpan, 1) * sadikBonus * talepPrimi;
-    const fiyat = Math.max(50, Math.round(hamFiyat / 50) * 50);
+    const fiyat = Math.min(15000, Math.max(6000, Math.round(hamFiyat / 50) * 50));
 
     const slot = TIME_SLOTS.find(s => s.id === slotId);
     reservations.push({
@@ -220,7 +220,7 @@ export function pitchUpgradeEtkileri(upgrades?: Upgrades): PitchEtkiler {
   };
   if (!upgrades) return etki;
   for (const def of Object.values(PITCH_UPGRADE_CONFIG) as PitchUpgradeDef[]) {
-    const seviye = safeNum((upgrades as Record<string, number | undefined>)[def.id], 0);
+    const seviye = safeNum((upgrades as unknown as Record<string, number | undefined>)[def.id], 0);
     if (seviye <= 0) continue;
     etki.fiyatEki += safeNum(def.fiyatEki, 0) * seviye;
     etki.memnuniyetEki += safeNum(def.memnuniyetEki, 0) * seviye;
@@ -335,7 +335,7 @@ export function generatePitchReservations(pitch: PitchState, state: GameState, t
 
     const talepPrimi = 0.85 + 0.25 * (SLOT_TALEP[slotId] ?? 1);
     const hamFiyat = randomInt(config.minFiyat, config.maxFiyat) * kisiCarpani * dusPrimi * fiyatCarpan * sadikBonus * talepPrimi;
-    const fiyat = Math.max(50, Math.round(hamFiyat / 50) * 50);
+    const fiyat = Math.min(15000, Math.max(6000, Math.round(hamFiyat / 50) * 50));
 
     const slot = TIME_SLOTS.find(s => s.id === slotId);
     reservations.push({
@@ -488,11 +488,9 @@ export function processEndDay(state: GameState): { newState: GameState; result: 
   const olayCarpan = safeNum(state.olayGelirCarpani, 1);
   const gelirEtkili = Math.round(safeNum(state.bugunGelir, 0) * olayCarpan);
 
-  // Kantin geliri: kabul edilen müşteri başına, kademe başına artar
+  // Kantin geliri artik saha bazli: her sahan kantin seviyesi
+  // sahaGunlukPasifGelir uzerinden gunluk gelire yansir (Yildiz dahil - cifte gelir yok)
   const kabulSayisi = (state.kabulEdilenler ?? []).length;
-  const kantinLevel = safeNum(state.upgrades?.kantin, 0);
-  const kantinSeviye = kantinLevel > 0 ? (KANTIN_CONFIG as any)?.levels?.[kantinLevel - 1] : null;
-  const kantinGelir = kantinLevel > 0 ? kabulSayisi * safeNum(kantinSeviye?.musteriBasi, 40) : 0;
 
   // Çoklu saha: açık sahaların pasif geliri (reklam + akademi) ve gideri (elektrik/su/anton)
   const acik = acikSahalar(state);
@@ -507,7 +505,7 @@ export function processEndDay(state: GameState): { newState: GameState; result: 
     sahaOzet.push({ id: s.id, ad: sahaAdi(s, state), gelir: pGelir, gider: pGider });
   }
 
-  const gelirToplam = gelirEtkili + kantinGelir + sahaGelir;
+  const gelirToplam = gelirEtkili + sahaGelir;
 
   // === GİDER ===
   // Sahibisen kira kalkar, elektrik/su ödenmeye devam eder (ISLETME_YERI kuralı)
@@ -883,7 +881,7 @@ export function simulateTurnuva(state: GameState): TurnuvaResult {
   const aktifOlay = state.bugunOlayId && !state.olayCozuldu
     ? OLAY_HAVUZU.find(o => o.id === state.bugunOlayId)
     : null;
-  const olayMacEtkisi = safeNum(aktifOlay?.macEtkisi, 0);
+  const olayMacEtkisi = safeNum((aktifOlay as any)?.macEtkisi, 0);
 
   const performans = safeNum(state.sahaKalitesi, 0) * 8
     + safeNum(state.memnuniyet, 50) * 0.2
@@ -920,7 +918,7 @@ export function olayLigMemnuniyetEki(state: GameState): number {
   const aktifOlay = state.bugunOlayId && !state.olayCozuldu
     ? OLAY_HAVUZU.find(o => o.id === state.bugunOlayId)
     : null;
-  const gucEki = safeNum(aktifOlay?.macEtkisi, 0);
+  const gucEki = safeNum((aktifOlay as any)?.macEtkisi, 0);
   return gucEki === 0 ? 0 : Math.round(gucEki / 0.15);
 }
 

@@ -64,7 +64,7 @@ export function sfx(adi: EfektAdi): void {
 export async function muzikBaslat(): Promise<void> {
   try {
     if (!muzik) muzik = await guvenliYukle(MUZIK, 0.3, true);
-    if (muzik && !(await muzik.isPlayingAsync())) await muzik.playAsync();
+    if (muzik && !(await (muzik as any).isPlayingAsync())) await muzik.playAsync();
   } catch {}
 }
 

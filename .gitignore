@@ -1,8 +1,26 @@
-node_modules
-
-.expo/
-
-.expo/
-.expo/
-
+﻿node_modules/
 kod_dokumu.txt
+.expo/
+BACKUP_*/
+dist/
+
+# Local / generated
+*.keystore
+*.jks
+*.bak
+*.backup
+.expo/
+dist/
+node_modules/
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# Local reports / diagnostics
+tani_rapor*.txt
+test_dokumu.txt
+UI_AUDIT.txt
+UI_REV2_AUDIT.txt
+donma_son_kaynak_raporu.txt

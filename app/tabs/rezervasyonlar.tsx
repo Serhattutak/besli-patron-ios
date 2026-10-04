@@ -1,3 +1,4 @@
+﻿import { Colors } from '../../constants/colors';
 // ============================================
 // BEŞLİ PATRON — app/tabs/rezervasyonlar.tsx (ÇOKLU SAHA)
 // ============================================
@@ -71,7 +72,7 @@ export default function RezervasyonScreen() {
     const id = rez.sahaId ?? 'yildiz';
     const p = state.pitches?.[id];
     const up: Record<string, number> = id === 'yildiz'
-      ? ((state.upgrades ?? {}) as Record<string, number>)
+      ? ((state.upgrades ?? {}) as unknown as Record<string, number>)
       : ((p?.upgrades ?? {}) as Record<string, number>);
     return rezervasyonEnerjiMaliyeti(
       rez.kisiSayisi ?? 0,
@@ -158,7 +159,7 @@ export default function RezervasyonScreen() {
             return (
               <TouchableOpacity
                 key={p.id}
-                style={[st.cip, secili && { borderColor: b.renk, backgroundColor: '#1E293B' }]}
+                style={[st.cip, secili && { borderColor: b.renk, backgroundColor: Colors.card }]}
                 onPress={() => { setFiltre(p.id); setMesaj(null); }}
               >
                 <Text style={st.cipEmoji}>{b.emoji}</Text>
@@ -218,7 +219,7 @@ export default function RezervasyonScreen() {
                       <Text style={st.btnRedYazi}>❌ Reddet</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
-                      style={[st.btnYesil, !enerjiYetiyor && { backgroundColor: '#334155' }]}
+                      style={[st.btnYesil, !enerjiYetiyor && { backgroundColor: Colors.border }]}
                       disabled={!enerjiYetiyor}
                       onPress={() => kabulEt(rez)}
                       accessibilityRole="button"
@@ -272,34 +273,34 @@ export default function RezervasyonScreen() {
 // === STİLLER ===
 // ============================================
 const st = StyleSheet.create({
-  ekran: { flex: 1, backgroundColor: '#0F172A' },
+  ekran: { flex: 1, backgroundColor: Colors.background },
   icerik: { padding: 16, paddingBottom: 90 },
   baslik: { color: '#F8FAFC', fontSize: 20, fontWeight: '800', marginBottom: 12 },
-  sari: { color: '#F59E0B' },
-  muted: { color: '#94A3B8', fontSize: 12 },
+  sari: { color: Colors.primary },
+  muted: { color: Colors.textMuted, fontSize: 12 },
   kart: {
-    backgroundColor: '#1E293B', borderWidth: 1, borderColor: '#334155',
+    backgroundColor: Colors.card, borderWidth: 1, borderColor: Colors.border,
     borderRadius: 16, padding: 14, marginBottom: 12,
   },
   durumSatir: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 10 },
   durumDeger: { color: '#F8FAFC', fontWeight: '800', fontSize: 13 },
-  durumNot: { color: '#64748B', fontSize: 11, marginTop: 8, lineHeight: 16 },
+  durumNot: { color: Colors.textMuted, fontSize: 11, marginTop: 8, lineHeight: 16 },
   barArka: { height: 8, backgroundColor: '#0B1220', borderRadius: 999, overflow: 'hidden' },
-  barOn: { height: '100%', backgroundColor: '#22C55E' },
+  barOn: { height: '100%', backgroundColor: Colors.success },
   seri: { marginBottom: 12 },
   cip: {
     flexDirection: 'row', alignItems: 'center', gap: 8,
-    borderWidth: 2, borderColor: '#334155', borderRadius: 14,
+    borderWidth: 2, borderColor: Colors.border, borderRadius: 14,
     paddingHorizontal: 12, paddingVertical: 8, marginRight: 8, backgroundColor: '#0B1220',
   },
-  cipSecili: { borderColor: '#F59E0B', backgroundColor: '#1E293B' },
+  cipSecili: { borderColor: Colors.primary, backgroundColor: Colors.card },
   cipEmoji: { fontSize: 18 },
   cipAd: { color: '#F8FAFC', fontWeight: '700', fontSize: 13 },
-  cipAdet: { color: '#94A3B8', fontSize: 10, fontWeight: '600' },
+  cipAdet: { color: Colors.textMuted, fontSize: 10, fontWeight: '600' },
   kartBas: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   musteriEmoji: { fontSize: 28 },
   musteriAd: { color: '#F8FAFC', fontSize: 16, fontWeight: '800' },
-  musteriTur: { color: '#94A3B8', fontSize: 12, marginTop: 2 },
+  musteriTur: { color: Colors.textMuted, fontSize: 12, marginTop: 2 },
   sahaRozet: {
     borderWidth: 1.5, borderRadius: 999,
     paddingHorizontal: 10, paddingVertical: 4, backgroundColor: '#0B1220',
@@ -322,7 +323,7 @@ const st = StyleSheet.create({
   },
   btnRedYazi: { color: '#FCA5A5', fontWeight: '800', fontSize: 13 },
   btnYesil: {
-    backgroundColor: '#22C55E', borderRadius: 12,
+    backgroundColor: Colors.success, borderRadius: 12,
     paddingHorizontal: 14, paddingVertical: 11,
   },
   btnYesilYazi: { color: '#052E16', fontWeight: '800', fontSize: 13 },
@@ -332,12 +333,12 @@ const st = StyleSheet.create({
   },
   kabulSaha: { fontSize: 16 },
   kabulAd: { color: '#F8FAFC', fontWeight: '700', fontSize: 13, flex: 1 },
-  kabulSaat: { color: '#64748B', fontSize: 11 },
+  kabulSaat: { color: Colors.textMuted, fontSize: 11 },
   kabulFiyat: { color: '#34D399', fontWeight: '800', fontSize: 13 },
-  kabulToplam: { color: '#F59E0B', fontWeight: '800', fontSize: 12, marginTop: 8 },
+  kabulToplam: { color: Colors.primary, fontWeight: '800', fontSize: 12, marginTop: 8 },
   bolumBaslik: { color: '#F8FAFC', fontSize: 15, fontWeight: '800', marginBottom: 10 },
-  aciklama: { color: '#94A3B8', fontSize: 12, lineHeight: 18 },
-  bos: { color: '#94A3B8', fontSize: 13, textAlign: 'center', lineHeight: 20 },
+  aciklama: { color: Colors.textMuted, fontSize: 12, lineHeight: 18 },
+  bos: { color: Colors.textMuted, fontSize: 13, textAlign: 'center', lineHeight: 20 },
   toast: {
     position: 'absolute', left: 16, right: 16, bottom: 20,
     borderRadius: 12, padding: 12, flexDirection: 'row',
@@ -347,3 +348,4 @@ const st = StyleSheet.create({
 });
 
 // === DOSYA SONU — bu satırı görüyorsan yapıştırma tam demektir ===
+

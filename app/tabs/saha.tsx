@@ -1,9 +1,10 @@
-﻿// ============================================
+// ============================================
 // BEŞLİ PATRON — app/tabs/saha.tsx (2D SAHA GÖRSELİ + ÇOKLU SAHA + SPONSORLAR + GÜN DÖNGÜSÜ)
 // ============================================
-import React, { useRef,  useState } from 'react';
+import React, {
+  useEffect, useRef, useState } from 'react';
 import {
-  View, Text, ScrollView, TouchableOpacity, StyleSheet, Modal,
+  View, Text, ScrollView, TouchableOpacity, StyleSheet, Modal, InteractionManager,
 } from 'react-native';
 import { useGame } from '../../context/GameContext';
 import Saha2D from '../../components/Saha2D';
@@ -100,10 +101,15 @@ export default function SahaScreen() {
 
   const [mesaj, setMesaj] = useState<string | null>(null);
   const [hata, setHata] = useState(false);
-  const [canliIzle, setCanliIzle] = useState(true);
+  const [canliIzle, setCanliIzle] = useState(false);
   const [gunSonu, setGunSonu] = useState<any>(null);
   const scrollRef = useRef<ScrollView>(null);
   const panelKonum = useRef(0);
+  // === GÜN DEĞİŞİNCE CANLI MAÇ DURUMUNU SIFIRLA ===
+  useEffect(() => {
+    setCanliIzle(false);
+  }, [state?.gun]);
+
 
   const sahaListesi = Object.values(state?.pitches ?? {}).filter(Boolean) as PitchState[];
   const aktif = state?.pitches?.[state.activePitchId ?? 'yildiz'] ?? sahaListesi[0];
@@ -213,8 +219,18 @@ export default function SahaScreen() {
       bildir('Gün bitirilemedi — oyun durumu hazır değil.');
       return;
     }
+    InteractionManager.runAfterInteractions(() => {
     setGunSonu({ sonuc, sponsorGeliri });
+  });
   };
+
+  if (!state) {
+    return (
+      <View style={s.ekran}>
+        <Text style={s.muted}>Yükleniyor…</Text>
+      </View>
+    );
+  }
 
   if (!aktif) {
     return (
@@ -226,11 +242,11 @@ export default function SahaScreen() {
 
   // === AKTİF SAHA PANELİ VERİLERİ ===
   const yildiz = aktif.id === 'yildiz';
-  const tipBilgi = SAHA_TIP_BILGI[aktif.sahaTipi] ?? SAHA_TIP_BILGI.yildiz;
+  const tipBilgi = SAHA_TIP_BILGI[(aktif.sahaTipi ?? 'yildiz') as keyof typeof SAHA_TIP_BILGI] ?? SAHA_TIP_BILGI.yildiz;
   const acik = (aktif.asama ?? 0) >= 5;
   const gosterilenKalite = yildiz ? state.sahaKalitesi : (aktif.kalite ?? 0);
   const up: Record<string, number> = yildiz
-    ? ((state.upgrades ?? {}) as Record<string, number>)
+    ? ((state.upgrades ?? {}) as unknown as Record<string, number>)
     : ((aktif.upgrades ?? {}) as Record<string, number>);
   const etki = etkiHesapla(up);
   const pasifGelir = acik ? sahaGunlukPasifGelir(aktif, state) : 0;
@@ -413,7 +429,7 @@ export default function SahaScreen() {
             </Text>
           </View>
 
-          {/* 16 kalemlik saha yükseltme ızgarası */}
+          {/* 22 kalemlik saha yükseltme ızgarası */}
           <Text style={s.bolumBaslik}>Aktif Saha Yükseltmeleri</Text>
           <View style={s.yukseltmeIzgara}>
             {Object.values(PITCH_UPGRADE_CONFIG).map((ud: PitchUpgradeDef) => {
@@ -440,7 +456,7 @@ export default function SahaScreen() {
           </View>
 
           {/* Yıldız: tesis ana yükseltmeleri */}
-          {yildiz ? (
+          {false ? (
             <View style={s.kutu}>
               <Text style={s.kutuBaslik}>🏗️ Tesis Yükseltmeleri</Text>
               {Object.entries(UPGRADE_CONFIG).map(([anahtar, cfgRaw]) => {
@@ -818,3 +834,4 @@ const s = StyleSheet.create({
   katalogDetay: { color: RENK.yaziSoluk, fontSize: 11, lineHeight: 16, fontFamily: FONT.govde },
 });
 // === DOSYA SONU — bu satırı görüyorsan yapıştırma tam demektir ===
+

@@ -1,3 +1,4 @@
+import { useIsFocused } from '@react-navigation/native'; // Sardur Technologies
 // ============================================
 // BEŞLİ PATRON — components/Saha2D.tsx
 // 2D TESİS SAHNESİ — ölçeklenen stadyum çerçevesi + küçük adam fiziği + sponsor panoları
@@ -55,7 +56,7 @@ const TIP_VURGU: Record<string, string> = {
   yildiz: '#F59E0B', cocuk: '#34D399', akademi: '#60A5FA', vip: '#A78BFA', arena: '#F87171',
 };
 
-const TICK_MS = 55;
+const TICK_MS = 100; // Sardur Technologies: render yuku azaltildi (55 -> 100)
 const MAC_TIK = 1600;
 const ALAN = {
   minX: 2, maxX: 98, minY: 6, maxY: 94,
@@ -319,7 +320,7 @@ const Tribun = React.memo(function Tribun({ seviye, mini, vip, heyecan, k }:
       </View>
       {/* merdiven geçitleri */}
       {['16%', '38%', '60%', '82%'].map(g => (
-        <View key={g} style={{ position: 'absolute', top: '22%', bottom: 0, left: g, width: p(4), backgroundColor: BETON_KOYU, opacity: 0.9 }} />
+        <View key={g} style={{ position: 'absolute', top: '22%', bottom: 0, left: g as any, width: p(4), backgroundColor: BETON_KOYU, opacity: 0.9 }} />
       ))}
       {/* VIP loca */}
       {vip > 0 ? (
@@ -384,10 +385,10 @@ function Kale({ seviye, mini, taraf, k }: { seviye: number; mini: boolean; taraf
         {seviye >= 1 ? (
           <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
             {['25%', '50%', '75%'].map(t => (
-              <View key={`h${t}`} style={{ position: 'absolute', top: t, left: 0, right: 0, height: Math.max(0.5, p(0.7)), backgroundColor: 'rgba(255,255,255,0.55)' }} />
+              <View key={`h${t}`} style={{ position: 'absolute', top: t as any, left: 0, right: 0, height: Math.max(0.5, p(0.7)), backgroundColor: 'rgba(255,255,255,0.55)' }} />
             ))}
             {['20%', '40%', '60%', '80%'].map(l => (
-              <View key={`v${l}`} style={{ position: 'absolute', left: l, top: 0, bottom: 0, width: Math.max(0.5, p(0.7)), backgroundColor: 'rgba(255,255,255,0.55)' }} />
+              <View key={`v${l}`} style={{ position: 'absolute', left: l as any, top: 0, bottom: 0, width: Math.max(0.5, p(0.7)), backgroundColor: 'rgba(255,255,255,0.55)' }} />
             ))}
           </View>
         ) : null}
@@ -635,7 +636,7 @@ function BilgiPanel({ kalite, canli, oyuncuSayisi, sahaTipi, k }: {
 }
 
 /* ---------- ANA BİLEŞEN ---------- */
-export default function Saha2D({
+function Saha2D({
   asama,
   kalite = 0,
   sahaTipi = 'yildiz',
@@ -689,13 +690,22 @@ export default function Saha2D({
   const [golAni, setGolAni] = useState<{ takim: 0 | 1; t: number } | null>(null);
   const [macSonu, setMacSonu] = useState(false);
   const [macNo, setMacNo] = useState(1);
+  const macZamRef = useRef<ReturnType<typeof setTimeout> | null>(null); // Sardur Technologies
+  const odakli = useIsFocused(); // Sardur Technologies: sekme arkadayken animasyon durur
 
   useEffect(() => {
     simRef.current = simKur(oyuncuSayisi);
   }, [oyuncuSayisi]);
 
+  // Sardur Technologies: ekran kapanirken bekleyen mac sonu zamanlayicisi temizlenir
   useEffect(() => {
-    if (!canli) return;
+    return () => {
+      if (macZamRef.current) clearTimeout(macZamRef.current);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!canli || mini || !odakli) return; // Sardur Technologies: mini + arka planda animasyon yok
     const id = setInterval(() => {
       const sim = simRef.current;
       if (!sim) return;
@@ -710,7 +720,8 @@ export default function Saha2D({
       if (yeniTik % MAC_TIK === 0) {
         setMacSonu(true);
         sim.bekleme = 48;
-        setTimeout(() => {
+        if (macZamRef.current) clearTimeout(macZamRef.current);
+        macZamRef.current = setTimeout(() => {
           setSkor({ a: 0, b: 0 });
           setMacNo(m => m + 1);
           setMacSonu(false);
@@ -718,7 +729,7 @@ export default function Saha2D({
       }
     }, TICK_MS);
     return () => clearInterval(id);
-  }, [canli]);
+  }, [canli, mini, odakli]);
 
   const sim = simRef.current;
   const dakika = Math.min(90, Math.floor((tik % MAC_TIK) / (MAC_TIK / 90)));
@@ -892,7 +903,7 @@ export default function Saha2D({
               { top: '10%', left: '5%' }, { top: '10%', right: '5%' },
               { bottom: '9%', left: '5%' }, { bottom: '9%', right: '5%' },
             ].map((pos, i) => (
-              <View key={`cf${i}`} style={{ position: 'absolute', ...pos, alignItems: 'flex-start' }}>
+              <View key={`cf${i}`} style={{ position: 'absolute', ...(pos as any), alignItems: 'flex-start' }}>
                 <View style={{ flexDirection: 'row' }}>
                   <View style={{ width: Math.max(0.5, p(1.2)), height: p(7), backgroundColor: CIZGI }} />
                   <View style={{ width: p(5), height: p(3.5), backgroundColor: tipVurgu, borderRadius: p(1) }} />
@@ -959,7 +970,7 @@ export default function Saha2D({
             <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, borderWidth: Math.max(0.5, p(1.6)), borderStyle: 'dashed', borderColor: 'rgba(203,213,225,0.4)', borderRadius: p(6) }} />
             {yapiGoster && telSeviye >= 2 ? (
               ['0%', '25%', '50%', '75%', '100%'].map(pp => (
-                <View key={pp} style={{ position: 'absolute', top: -p(2.5), left: pp, width: p(3), height: p(3), borderRadius: p(1), backgroundColor: '#94A3B8' }} />
+                <View key={pp} style={{ position: 'absolute', top: -p(2.5), left: pp as any, width: p(3), height: p(3), borderRadius: p(1), backgroundColor: '#94A3B8' }} />
               ))
             ) : null}
             {yapiGoster && telSeviye >= 3 ? (
@@ -1007,7 +1018,8 @@ export default function Saha2D({
             ) : null}
 
             {/* küçük adamlar */}
-            {sim.oyuncular.map(o => (
+            {canli ? (
+              sim.oyuncular.map(o => (
               <View
                 key={o.id}
                 style={{
@@ -1023,10 +1035,12 @@ export default function Saha2D({
                   k={k}
                 />
               </View>
-            ))}
+              ))
+            ) : null}
 
             {/* vuruş efektleri */}
-            {sim.efektler.map(e => {
+            {canli ? (
+              sim.efektler.map(e => {
               const t = clamp((Date.now() - e.t0) / 350, 0, 1);
               const boy = p(18) * t + p(5);
               return (
@@ -1036,10 +1050,12 @@ export default function Saha2D({
                   transform: [{ translateX: -(boy / 2) }, { translateY: -(boy / 2) }],
                 }} />
               );
-            })}
+              })
+            ) : null}
 
             {/* top */}
-            <View style={{ position: 'absolute', left: `${sim.top.x}%`, top: `${sim.top.y}%` }}>
+            {canli ? (
+              <View style={{ position: 'absolute', left: `${sim.top.x}%`, top: `${sim.top.y}%` }}>
               <View style={{ position: 'absolute', left: -p(3), top: p(2), width: p(6), height: p(3), borderRadius: 999, backgroundColor: 'rgba(0,0,0,0.35)' }} />
               {(() => {
                 const sc = 1 + sim.top.z * 0.8;
@@ -1054,7 +1070,8 @@ export default function Saha2D({
                   </View>
                 );
               })()}
-            </View>
+              </View>
+            ) : null}
 
             {/* GOL pankartı + kale halkası */}
             {golVar && golAni ? (
@@ -1116,3 +1133,5 @@ const st = StyleSheet.create({
   },
 });
 // === DOSYA SONU — bu satırı görüyorsan yapıştırma tam demektir ===
+
+export default React.memo(Saha2D);
