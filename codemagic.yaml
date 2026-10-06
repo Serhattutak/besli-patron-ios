@@ -11,8 +11,8 @@
       ios_signing:
         distribution_type: app_store
         bundle_identifier: com.sardurtechnologies.beslipatron
-      node: v22.11.0
-      xcode: latest
+      node: v20.19.4
+      xcode: 16.4
       cocoapods: default
 
     scripts:
