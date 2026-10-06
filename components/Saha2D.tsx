@@ -30,6 +30,7 @@ interface Props {
   canli?: boolean;
   mini?: boolean;
   oyuncuSayisi?: number;
+  gun?: number;
   upgrades?: Record<string, number>;
   sponsorlar?: string[];
 }
@@ -643,7 +644,7 @@ function Saha2D({
   canli = false,
   mini = false,
   oyuncuSayisi = 5,
-  upgrades = {},
+  gun,  upgrades = {},
   sponsorlar = [],
 }: Props) {
   const sev = (id: string): number => upgrades?.[id] ?? 0;
@@ -695,7 +696,18 @@ function Saha2D({
 
   useEffect(() => {
     simRef.current = simKur(oyuncuSayisi);
-  }, [oyuncuSayisi]);
+    tikRef.current = 0;
+    setTik(0);
+    setSkor({ a: 0, b: 0 });
+    setGolAni(null);
+    setMacSonu(false);
+    setMacNo(1);
+
+    if (macZamRef.current) {
+      clearTimeout(macZamRef.current);
+      macZamRef.current = null;
+    }
+  }, [oyuncuSayisi, gun]);
 
   // Sardur Technologies: ekran kapanirken bekleyen mac sonu zamanlayicisi temizlenir
   useEffect(() => {
