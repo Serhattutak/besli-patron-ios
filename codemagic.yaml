@@ -32,7 +32,38 @@
 
       - name: Build IPA
         script: |
-          xcode-project build-ipa
+          set -euo pipefail
+
+          workspace="$(find "$CM_BUILD_DIR/ios" -type d -name '*.xcworkspace' -prune -print -quit)"
+          if [[ -z "$workspace" ]]; then
+            echo "Error: No .xcworkspace found in $CM_BUILD_DIR/ios"
+            exit 1
+          fi
+
+          schemes_json="$(xcodebuild -list -json -workspace "$workspace")"
+          scheme="$(printf '%s' "$schemes_json" | python3 -c '
+          import json, os, sys
+          data = json.load(sys.stdin)
+          workspace = data.get("workspace", {})
+          schemes = workspace.get("schemes", [])
+          workspace_name = os.path.basename(sys.argv[1])
+          stem = workspace_name[:-len(".xcworkspace")]
+          if stem in schemes:
+              print(stem)
+          else:
+              app_schemes = [name for name in schemes if not name.startswith("Pods-")]
+              if len(app_schemes) == 1:
+                  print(app_schemes[0])
+              else:
+                  print("Could not identify a unique app scheme. Available schemes: " + ", ".join(schemes), file=sys.stderr)
+                  sys.exit(1)
+          ' "$workspace")"
+
+          echo "Using workspace: $workspace"
+          echo "Using scheme: $scheme"
+          xcode-project build-ipa \
+            --workspace "$workspace" \
+            --scheme "$scheme"
 
     artifacts:
       - build/ios/ipa/*.ipa
