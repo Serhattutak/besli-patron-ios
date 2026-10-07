@@ -102,7 +102,20 @@ jobs:
           keychain_path="$RUNNER_TEMP/ios-build.keychain-db"
           keychain_password="$(openssl rand -base64 32)"
 
-          printf '%s' "$IOS_DISTRIBUTION_CERTIFICATE_BASE64" | python3 -c 'import base64,sys; sys.stdout.buffer.write(base64.b64decode(sys.stdin.read()))' > "$certificate_path"
+          printf '%s' "$IOS_DISTRIBUTION_CERTIFICATE_BASE64" | python3 -c '
+          import base64
+          import binascii
+          import sys
+
+          encoded = "".join(sys.stdin.read().split())
+          encoded += "=" * (-len(encoded) % 4)
+          try:
+              certificate = base64.b64decode(encoded, validate=True)
+          except (binascii.Error, ValueError):
+              print("Invalid IOS_DIST_CERT_BASE64 secret: expected valid Base64 data.", file=sys.stderr)
+              sys.exit(1)
+          sys.stdout.buffer.write(certificate)
+          ' > "$certificate_path"
           printf '%s' "$IOS_PROVISIONING_PROFILE_BASE64" | python3 -c 'import base64,sys; sys.stdout.buffer.write(base64.b64decode(sys.stdin.read()))' > "$profile_path"
 
           security create-keychain -p "$keychain_password" "$keychain_path"
