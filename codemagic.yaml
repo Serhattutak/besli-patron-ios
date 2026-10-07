@@ -191,7 +191,8 @@
           echo "Using scheme: $scheme"
           xcode-project build-ipa \
             --workspace "$workspace" \
-            --scheme "$scheme"
+            --scheme "$scheme" \
+            --archive-xcargs "SWIFT_ENABLE_EXPLICIT_MODULES=NO"
 
     artifacts:
       - build/ios/ipa/*.ipa
