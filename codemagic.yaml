@@ -22,6 +22,58 @@
       - name: Generate iOS project
         script: npx expo prebuild --platform ios --non-interactive
 
+      - name: Set Expo import access level
+        script: |
+          set -euo pipefail
+          app_delegates="$(find "$CM_BUILD_DIR/ios" -type f -name "AppDelegate.swift" -print)"
+          candidate_count=0
+          beli_patron_count=0
+          app_delegate=""
+          beli_patron_delegate=""
+
+          while IFS= read -r candidate; do
+            [ -n "$candidate" ] || continue
+            candidate_count=$((candidate_count + 1))
+            app_delegate="$candidate"
+            case "$candidate" in
+              */BeliPatron/*)
+                beli_patron_count=$((beli_patron_count + 1))
+                beli_patron_delegate="$candidate"
+                ;;
+            esac
+          done <<< "$app_delegates"
+
+          if [ "$candidate_count" -eq 0 ]; then
+            echo "Error: No AppDelegate.swift found under $CM_BUILD_DIR/ios"
+            exit 1
+          elif [ "$candidate_count" -gt 1 ]; then
+            if [ "$beli_patron_count" -eq 1 ]; then
+              app_delegate="$beli_patron_delegate"
+            else
+              echo "Error: Multiple AppDelegate.swift files found and no unique BeliPatron target could be selected"
+              printf '%s\n' "$app_delegates"
+              exit 1
+            fi
+          fi
+
+          if grep -q -E '^[[:space:]]*internal import Expo[[:space:]]*$' "$app_delegate"; then
+            echo "internal import Expo is already present"
+          elif grep -q -E '^[[:space:]]*import Expo[[:space:]]*$' "$app_delegate"; then
+            perl -0pi -e 's/^([ \t]*)import Expo[ \t]*\r?$/\1internal import Expo/m' "$app_delegate"
+          else
+            echo "Error: Exact import Expo line not found in $app_delegate"
+            exit 1
+          fi
+
+          if head -20 "$app_delegate" | grep -n -E '^[[:space:]]*internal import Expo[[:space:]]*$'; then
+            echo "Verified internal import Expo in the first lines"
+          else
+            echo "Error: internal import Expo verification failed"
+            exit 1
+          fi
+
+          echo "Using AppDelegate.swift: $app_delegate"
+
       - name: Install CocoaPods
         script: |
           cd ios
