@@ -27,6 +27,61 @@
           cd ios
           pod install
 
+      - name: Diagnose generated iOS CocoaPods project
+        script: |
+          set +e
+          cd "$CM_BUILD_DIR"
+
+          echo "===== Xcode version ====="
+          xcodebuild -version
+
+          echo "===== Expo version ====="
+          node -p "require('expo/package.json').version"
+
+          echo "===== Google Mobile Ads package version ====="
+          node -p "require('react-native-google-mobile-ads/package.json').version"
+
+          echo "===== ios/Podfile ====="
+          if [ -f ios/Podfile ]; then cat ios/Podfile; else echo "ios/Podfile not found"; fi
+
+          echo "===== ios/Podfile.properties.json ====="
+          if [ -f ios/Podfile.properties.json ]; then cat ios/Podfile.properties.json; else echo "ios/Podfile.properties.json not found"; fi
+
+          echo "===== Installed Expo and Google Mobile Ads pod directories ====="
+          find ios/Pods -type d \( -name "Expo" -o -name "ExpoModulesCore" -o -name "ExpoSplashScreen" -o -name "Google-Mobile-Ads-SDK" \) -print
+
+          echo "===== Target Support Files matching Expo, Google, or app Pods ====="
+          find "ios/Pods/Target Support Files" -type f -print 2>/dev/null | sort | grep -E "Expo|expo|Google|Pods-BeliPatron"
+
+          echo "===== Expo and Google module maps ====="
+          find ios/Pods -type f -name "*.modulemap" -print 2>/dev/null | sort | grep -E "Expo|expo|Google"
+
+          echo "===== Pod project files ====="
+          find ios/Pods -type d -name "*.xcodeproj" -print
+
+          echo "===== App workspace schemes ====="
+          workspace="$(find "$CM_BUILD_DIR/ios" -type d -name '*.xcworkspace' -prune -print | grep -v '/Pods/' | head -n 1)"
+          if [ -n "$workspace" ]; then
+            echo "Workspace: $workspace"
+            xcodebuild -list -workspace "$workspace"
+          else
+            echo "App .xcworkspace not found"
+          fi
+
+          echo "===== use_expo_modules! in ios/Podfile ====="
+          if [ -f ios/Podfile ] && grep -n "use_expo_modules!" ios/Podfile; then
+            echo "use_expo_modules! found"
+          else
+            echo "use_expo_modules! not found"
+          fi
+
+          echo "===== Expo and Google Mobile Ads entries in Podfile.lock (first 100 matches) ====="
+          if [ -f ios/Podfile.lock ]; then
+            grep -E "Expo|expo-|Google-Mobile-Ads" ios/Podfile.lock | head -100
+          else
+            echo "ios/Podfile.lock not found"
+          fi
+
       - name: Set up code signing
         script: xcode-project use-profiles
 
