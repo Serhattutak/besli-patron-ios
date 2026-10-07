@@ -158,7 +158,7 @@ jobs:
           import sys
 
           options = {
-              "method": "app-store",
+              "method": "ad-hoc",
               "signingStyle": "manual",
               "teamID": os.environ["APPLE_TEAM_ID"],
               "provisioningProfiles": {
