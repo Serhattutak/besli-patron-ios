@@ -133,20 +133,6 @@ jobs:
           echo "IOS_PROFILE_UUID=$profile_uuid" >> "$GITHUB_ENV"
           echo "IOS_PROFILE_NAME=$profile_name" >> "$GITHUB_ENV"
 
-          if /usr/libexec/PlistBuddy -c 'Print ProvisionsAllDevices' "$RUNNER_TEMP/profile.plist" 2>/dev/null | grep -qx true; then
-            export_method="enterprise"
-          elif /usr/libexec/PlistBuddy -c 'Print ProvisionedDevices' "$RUNNER_TEMP/profile.plist" >/dev/null 2>&1; then
-            if /usr/libexec/PlistBuddy -c 'Print Entitlements:get-task-allow' "$RUNNER_TEMP/profile.plist" 2>/dev/null | grep -qx true; then
-              export_method="development"
-            else
-              export_method="ad-hoc"
-            fi
-          else
-            export_method="app-store-connect"
-          fi
-          echo "Provisioning profile export method: $export_method"
-          echo "IOS_EXPORT_METHOD=$export_method" >> "$GITHUB_ENV"
-
       - name: Archive and export signed IPA
         if: ${{ env.APPLE_TEAM_ID != '' && env.IOS_DISTRIBUTION_CERTIFICATE_BASE64 != '' && env.IOS_DISTRIBUTION_CERTIFICATE_PASSWORD != '' && env.IOS_PROVISIONING_PROFILE_BASE64 != '' }}
         run: |
@@ -172,7 +158,7 @@ jobs:
           import sys
 
           options = {
-              "method": os.environ["IOS_EXPORT_METHOD"],
+              "method": "ad-hoc",
               "signingStyle": "manual",
               "teamID": os.environ["APPLE_TEAM_ID"],
               "provisioningProfiles": {
