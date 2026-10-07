@@ -12,7 +12,7 @@
         distribution_type: app_store
         bundle_identifier: com.sardurtechnologies.beslipatron
       node: v20.19.4
-      xcode: 16.4
+      xcode: 16.3
       cocoapods: default
 
     scripts:
