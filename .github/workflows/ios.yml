@@ -22,7 +22,7 @@ jobs:
       - name: Select Xcode 16.3
         run: |
           set -euo pipefail
-          xcode_path="/Applications/Xcode_16.3.app/Contents/Developer"
+          xcode_path="/Applications/Xcode_16.4.app/Contents/Developer"
           test -d "$xcode_path"
           sudo xcode-select --switch "$xcode_path"
           xcodebuild -version
