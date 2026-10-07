@@ -82,6 +82,79 @@
             echo "ios/Podfile.lock not found"
           fi
 
+      - name: Diagnose Expo Swift product and build settings
+        script: |
+          set +e
+          cd "$CM_BUILD_DIR"
+
+          echo "===== Expo pod target directories ====="
+          find "$CM_BUILD_DIR/ios/Pods" -type d -name "Expo" -print
+
+          echo "===== Expo products under ios/Pods (files and bundle directories) ====="
+          find "$CM_BUILD_DIR/ios/Pods" -type f \( -name "Expo.framework" -o -name "Expo.swiftmodule" -o -name "*.swiftmodule" \) -print | grep -E "/Expo/|Expo\.framework|Expo\.swiftmodule" || true
+          find "$CM_BUILD_DIR/ios/Pods" -type d \( -name "Expo.framework" -o -name "Expo.swiftmodule" -o -name "*.swiftmodule" \) -print | grep -E "/Expo/|Expo\.framework|Expo\.swiftmodule" || true
+
+          echo "===== Expo products in DerivedData before archive ====="
+          expo_derived_products="$(find "$HOME/Library/Developer/Xcode/DerivedData" \( -type f -o -type d \) \( -name "Expo.swiftmodule" -o -name "Expo.framework" -o -name "Expo" \) -print 2>/dev/null)"
+          if [ -n "$expo_derived_products" ]; then
+            printf '%s\n' "$expo_derived_products" | head -100
+          else
+            echo "Expo product not built before archive"
+          fi
+
+          echo "===== Pods-BeliPatron debug xcconfig Expo entries ====="
+          grep -n -A 30 -B 10 "Expo" "ios/Pods/Target Support Files/Pods-BeliPatron/Pods-BeliPatron.debug.xcconfig" || true
+
+          echo "===== Pods-BeliPatron release xcconfig Expo entries ====="
+          grep -n -A 30 -B 10 "Expo" "ios/Pods/Target Support Files/Pods-BeliPatron/Pods-BeliPatron.release.xcconfig" || true
+
+          echo "===== Pods project files containing Expo ====="
+          find ios/Pods -type f -name "project.pbxproj" -print0 | xargs -0 grep -l "Expo" | head -20
+
+          echo "===== Expo module/product build settings in Pods projects ====="
+          find ios/Pods -type f -name "project.pbxproj" -print0 | xargs -0 grep -n -E "PRODUCT_MODULE_NAME.*Expo|PRODUCT_NAME.*Expo|DEFINES_MODULE.*YES" | head -100
+
+          echo "===== Expo entries in Podfile.lock ====="
+          grep -n -A 5 -B 2 "^  - Expo" ios/Podfile.lock || true
+          grep -n -A 5 -B 2 "^  - ExpoModulesCore" ios/Podfile.lock || true
+
+          echo "===== BeliPatron Release build settings from workspace and scheme ====="
+          workspace="$(find "$CM_BUILD_DIR/ios" -type d -name '*.xcworkspace' -prune -print -quit)"
+          if [ -z "$workspace" ]; then
+            echo "No .xcworkspace found for build settings"
+          else
+            schemes_json="$(xcodebuild -list -json -workspace "$workspace")"
+            scheme="$(printf '%s' "$schemes_json" | python3 -c '
+          import json, os, sys
+          data = json.load(sys.stdin)
+          schemes = data.get("workspace", {}).get("schemes", [])
+          stem = os.path.basename(sys.argv[1])[:-len(".xcworkspace")]
+          if stem in schemes:
+              print(stem)
+          else:
+              app_schemes = [name for name in schemes if not name.startswith("Pods-")]
+              if len(app_schemes) == 1:
+                  print(app_schemes[0])
+              else:
+                  print("Could not identify a unique app scheme: " + ", ".join(schemes), file=sys.stderr)
+                  sys.exit(1)
+          ' "$workspace")"
+            if [ -n "$scheme" ]; then
+              echo "Workspace: $workspace"
+              echo "Scheme: $scheme"
+              xcodebuild -showBuildSettings -workspace "$workspace" -scheme "$scheme" -configuration Release | awk '
+                /^Build settings for action build and target / {
+                  show = ($0 ~ /BeliPatron|BesliPatron/)
+                  if (show) print
+                  next
+                }
+                show && /^[[:space:]]*(FRAMEWORK_SEARCH_PATHS|SWIFT_INCLUDE_PATHS|HEADER_SEARCH_PATHS|OTHER_SWIFT_FLAGS|SWIFT_OBJC_INTERFACE_HEADER_NAME|PRODUCT_MODULE_NAME|PRODUCT_NAME)[[:space:]]*=/ { print }
+              '
+            else
+              echo "App scheme not identified; skipped showBuildSettings"
+            fi
+          fi
+
       - name: Set up code signing
         script: xcode-project use-profiles
 
