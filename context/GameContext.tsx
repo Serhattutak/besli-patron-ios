@@ -223,6 +223,16 @@ export function GameProvider({ children }: { children: ReactNode }) {
   // GUN SONU KILIDI: ayni gunun iki kez islenmesini ve cift dokunmayi engeller (Sardur Technologies)
   const endDayKilitRef = useRef(false);
   const endDayGunRef = useRef(-1);
+  const previousStateGunTraceRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (state?.gun == null) return;
+    console.log("[END_DAY_TRACE] STATE_GUN_CHANGED", {
+      oldGun: previousStateGunTraceRef.current,
+      newGun: state.gun,
+    });
+    previousStateGunTraceRef.current = state.gun;
+  }, [state?.gun]);
 
   // Otomatik kayıt: state her güncellendiğinde diske yazılır
   const autoSave = useCallback(async (yeni: GameState) => {
@@ -351,18 +361,30 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
   // === GÜN SONU ===
   const endDay = useCallback((): DayEndResult | null => {
+    console.log("[END_DAY_TRACE] ENTER", {
+      gun: state?.gun ?? null,
+      isGameOver: state?.isGameOver ?? null,
+      endDayKilitRef: endDayKilitRef.current,
+    });
+
 if (!state) {
+      console.error("[END_DAY_TRACE] STATE_NULL");
+      console.error("[END_DAY_TRACE] RETURN_NULL", { reason: "STATE_NULL" });
       console.error("[END_DAY] STATE_NULL");
       return null;
     }
 
     if (state.isGameOver) {
+      console.warn("[END_DAY_TRACE] GAME_OVER", { gun: state.gun });
+      console.error("[END_DAY_TRACE] RETURN_NULL", { reason: "GAME_OVER", gun: state.gun });
       console.error("[END_DAY] GAME_OVER", state.gun);
       return null;
     }
 
     // Aynı anda ikinci gün geçişini engelle.
     if (endDayKilitRef.current) {
+      console.warn("[END_DAY_TRACE] LOCK_ACTIVE", { gun: state.gun });
+      console.error("[END_DAY_TRACE] RETURN_NULL", { reason: "LOCK_ACTIVE", gun: state.gun });
       console.warn("[END_DAY] LOCK_ACTIVE - ikinci çağrı engellendi");
       return null;
     }
@@ -385,9 +407,20 @@ if (!state) {
             }
           : g
       );
+      console.log("[END_DAY_TRACE] BEFORE_PROCESS", {
+        gun: state.gun,
+        nakit: state.nakit,
+        isGameOver: state.isGameOver,
+      });
 const { newState, result } = processEndDay({
         ...state,
         gunlukGorevler: gorevler,
+      });
+      console.log("[END_DAY_TRACE] AFTER_PROCESS", {
+        oldGun: state.gun,
+        newGun: newState.gun,
+        nakit: newState.nakit,
+        isGameOver: newState.isGameOver,
       });
 const sponsorGeliri = toplamSponsorGeliri(imzali);
 
@@ -396,11 +429,18 @@ const sponsorGeliri = toplamSponsorGeliri(imzali);
         nakit: safeNum(newState.nakit, 0) + sponsorGeliri,
         sponsorlar: imzali,
       };
+      console.log("[END_DAY_TRACE] BEFORE_PREPARE", { gun: sonraki.gun });
 const tomorrow = gunuHazirla(sonraki);
+      console.log("[END_DAY_TRACE] AFTER_PREPARE", { gun: tomorrow.gun });
 
       // YENİ GÜNÜ ÖNCE STATE'E UYGULA.
       // Böylece gün sayısı ve yeni gün verileri ekrana hemen yansır.
+      console.log("[END_DAY_TRACE] BEFORE_SET_STATE", {
+        oldGun: state.gun,
+        newGun: tomorrow.gun,
+      });
       setState(tomorrow);
+      console.log("[END_DAY_TRACE] AFTER_SET_STATE", { newGun: tomorrow.gun });
 // KAYIT: Gün geçişinin kritik UI yolunu bloke etme.
       // saveGame içinde JSON.stringify senkron çalıştığı için
       // kaydı yeni gün ekranı oluşturulduktan sonra başlatıyoruz.
@@ -412,6 +452,13 @@ const tomorrow = gunuHazirla(sonraki);
 return result;
 
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorStack = error instanceof Error ? error.stack : undefined;
+      console.error("[END_DAY_TRACE] ERROR", {
+        message: errorMessage,
+        stack: errorStack,
+      });
+      console.error("[END_DAY_TRACE] RETURN_NULL", { reason: "ERROR" });
       console.error("[END_DAY_ERROR]", error);
 
       // Hatanın gerçek sebebini iOS logunda görebilmek için.
@@ -425,7 +472,15 @@ return result;
     } finally {
       // Gün geçişi tamamlandıktan sonra kilidi aç.
       setTimeout(() => {
+        console.log("[END_DAY_TRACE] LOCK_RESET_START", {
+          gun: state?.gun ?? null,
+          endDayKilitRef: endDayKilitRef.current,
+        });
         endDayKilitRef.current = false;
+        console.log("[END_DAY_TRACE] LOCK_RESET_DONE", {
+          gun: state?.gun ?? null,
+          endDayKilitRef: endDayKilitRef.current,
+        });
 }, 700);
     }
   }, [state]);

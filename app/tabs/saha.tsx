@@ -1,5 +1,5 @@
 ﻿// ============================================
-// BEÅLÄ° PATRON â€” app/tabs/saha.tsx (2D SAHA GÃ–RSELÄ° + Ã‡OKLU SAHA + SPONSORLAR + GÃœN DÃ–NGÃœSÃœ)
+// BEŞLİ PATRON — app/tabs/saha.tsx (2D SAHA GÖRSELİ + ÇOKLU SAHA + SPONSORLAR + GÜN DÖNGÜSÜ)
 // ============================================
 import React, {
   useEffect, useRef, useState } from 'react';
@@ -24,18 +24,18 @@ import {
 } from '../../services/gameLogic';
 import type { PitchState } from '../../types/game';
 
-// GameContext'teki BAKIM_COST ile aynÄ± deÄŸer (orada export edilmediÄŸi iÃ§in burada da tanÄ±mlÄ±)
+// GameContext'teki BAKIM_COST ile aynı değer (orada export edilmediği için burada da tanımlı)
 const BAKIM_UCRETI = 500;
 
 function para(n: number): string {
-  return `${Math.round(n).toLocaleString('tr-TR')}â‚º`;
+  return `${Math.round(n).toLocaleString('tr-TR')}₺`;
 }
 
 function asamaEtiketi(asama: number): string {
-  if (asama <= 0) return 'ğŸŒ± Arsa Yok';
-  if (asama === 1) return 'ğŸ  Arsa AlÄ±ndÄ±';
-  if (asama < 5) return 'ğŸš§ Ä°nÅŸaat';
-  return 'âœ… Hizmette';
+  if (asama <= 0) return '🌱 Arsa Yok';
+  if (asama === 1) return '🏠 Arsa Alındı';
+  if (asama < 5) return '🚧 İnşaat';
+  return '✅ Hizmette';
 }
 
 function asamaRengi(asama: number): string {
@@ -45,7 +45,7 @@ function asamaRengi(asama: number): string {
   return RENK.basari;
 }
 
-// Sahadaki yÃ¼kseltmelerin toplu etkisi â€” pitchConfig tanÄ±mlarÄ±ndan yerelde hesaplanÄ±r
+// Sahadaki yükseltmelerin toplu etkisi — pitchConfig tanımlarından yerelde hesaplanır
 function etkiHesapla(up: Record<string, number>) {
   let fiyat = 0, memnuniyet = 0, talep = 0, pasifGelir = 0, prestij = 0, enerjiIndirimi = 0, havaKoruma = false;
   Object.entries(up ?? {}).forEach(([id, seviye]) => {
@@ -62,22 +62,22 @@ function etkiHesapla(up: Record<string, number>) {
   return { fiyat, memnuniyet, talep, pasifGelir, prestij, enerjiIndirimi, havaKoruma };
 }
 
-// Sponsor kartÄ±ndaki ÅŸart satÄ±rlarÄ± â€” saÄŸlananlar âœ…, eksikler â¬œ
+// Sponsor kartındaki şart satırları — sağlananlar ✅, eksikler ⬜
 function sponsorKosulSatirlari(sp: SponsorAnlasma, anaSahaAsama: number, anaSahaUp: Record<string, number>): string[] {
   const satirlar: string[] = [];
   if (sp.kosul.asama != null) {
-    satirlar.push(`${anaSahaAsama >= sp.kosul.asama ? 'âœ…' : 'â¬œ'} Ana saha aÅŸama ${sp.kosul.asama}`);
+    satirlar.push(`${anaSahaAsama >= sp.kosul.asama ? '✅' : '⬜'} Ana saha aşama ${sp.kosul.asama}`);
   }
   if (sp.kosul.upgrade) {
     const d = PITCH_UPGRADE_CONFIG[sp.kosul.upgrade.id];
     const sev = anaSahaUp[sp.kosul.upgrade.id] ?? 0;
-    satirlar.push(`${sev >= sp.kosul.upgrade.seviye ? 'âœ…' : 'â¬œ'} ${d?.ad ?? sp.kosul.upgrade.id} Sv.${sp.kosul.upgrade.seviye}`);
+    satirlar.push(`${sev >= sp.kosul.upgrade.seviye ? '✅' : '⬜'} ${d?.ad ?? sp.kosul.upgrade.id} Sv.${sp.kosul.upgrade.seviye}`);
   }
-  if (satirlar.length === 0) satirlar.push('âœ… Åart yok');
+  if (satirlar.length === 0) satirlar.push('✅ Şart yok');
   return satirlar;
 }
 
-// Kart Ä±zgarasÄ±nÄ±n satÄ±r verisi
+// Kart ızgarasının satır verisi
 interface SahaKarti {
   id: string;
   ad: string;
@@ -105,7 +105,7 @@ export default function SahaScreen() {
   const [gunSonu, setGunSonu] = useState<any>(null);
   const scrollRef = useRef<ScrollView>(null);
   const panelKonum = useRef(0);
-  // === GÃœN DEÄÄ°ÅÄ°NCE CANLI MAÃ‡ DURUMUNU SIFIRLA ===
+  // === GÜN DEĞİŞİNCE CANLI MAÇ DURUMUNU SIFIRLA ===
   useEffect(() => {
     setCanliIzle(false);
   }, [state?.gun]);
@@ -119,7 +119,7 @@ export default function SahaScreen() {
   const anaSahaAsama = state?.pitches?.yildiz?.asama ?? 0;
   const anaSahaUp = ((state?.upgrades ?? {}) as Record<string, number>);
 
-  // === TÃœM SAHALAR (sahip olunanlar + kilitliler) ===
+  // === TÜM SAHALAR (sahip olunanlar + kilitliler) ===
   const yildizPitch = state?.pitches?.['yildiz'];
   const toplamSaha = 1 + PITCH_DEFS.length;
   const tumSahalar: SahaKarti[] = [];
@@ -168,7 +168,7 @@ export default function SahaScreen() {
     const d = PITCH_DEFS.find(x => x.id === defId);
     const sonuc = buyPitchArsa(defId);
     if (sonuc) bildir(sonuc);
-    else bildir(null, `${d?.ad ?? 'Saha'} arsasÄ± alÄ±ndÄ±! Åimdi inÅŸaatÄ± ilerlet â€” karta dokunup sahayÄ± aktif et.`);
+    else bildir(null, `${d?.ad ?? 'Saha'} arsası alındı! Şimdi inşaatı ilerlet — karta dokunup sahayı aktif et.`);
   };
 
   const insaatAdim = () => {
@@ -176,49 +176,49 @@ export default function SahaScreen() {
     const siradaki = (aktif.asama ?? 0) + 1;
     const sonuc = insaatIlerlet(aktif.id);
     if (sonuc) bildir(sonuc);
-    else bildir(null, siradaki >= 5 ? 'ğŸ‰ Ä°nÅŸaat tamamlandÄ± â€” saha artÄ±k hizmette!' : 'Ä°nÅŸaat bir aÅŸama ilerledi. ğŸš§');
+    else bildir(null, siradaki >= 5 ? '🎉 İnşaat tamamlandı — saha artık hizmette!' : 'İnşaat bir aşama ilerledi. 🚧');
   };
 
   const yukseltAl = (upgradeId: string) => {
     if (!aktif) return;
     const sonuc = pitchUpgradeAl(aktif.id, upgradeId);
     if (sonuc) bildir(sonuc);
-    else bildir(null, 'YÃ¼kseltme tamamlandÄ±! ğŸ’ª');
+    else bildir(null, 'Yükseltme tamamlandı! 💪');
   };
 
   const bakimYap = () => {
     const sonuc = doMaintenance();
     if (sonuc) bildir(sonuc);
-    else bildir(null, 'Saha bakÄ±mÄ± yapÄ±ldÄ±. âš½');
+    else bildir(null, 'Saha bakımı yapıldı. ⚽');
   };
 
   const anaYukseltAl = (t: UpgradeType) => {
     const sonuc = purchaseUpgrade(t);
     if (sonuc) bildir(sonuc);
-    else bildir(null, 'YÃ¼kseltme tamamlandÄ±! ğŸ’ª');
+    else bildir(null, 'Yükseltme tamamlandı! 💪');
   };
 
   const sponsorImzala = (id: string) => {
     const sonuc = imzaSponsor(id);
     if (sonuc) bildir(sonuc);
-    else bildir(null, 'Sponsor imzalandÄ±! ğŸ’¼ PeÅŸin Ã¶deme kasaya girdi, gÃ¼nlÃ¼k gelir her gÃ¼n yatacak.');
+    else bildir(null, 'Sponsor imzalandı! 💼 Peşin ödeme kasaya girdi, günlük gelir her gün yatacak.');
   };
 
   const sponsorFesih = (id: string) => {
     const sonuc = iptalSponsor(id);
     if (sonuc) bildir(sonuc);
-    else bildir(null, 'AnlaÅŸma feshedildi â€” gÃ¼nlÃ¼k gelir durdu.');
+    else bildir(null, 'Anlaşma feshedildi — günlük gelir durdu.');
   };
 
-  // === GÃœNÃœ BÄ°TÄ°R â€” gÃ¼n dÃ¶ngÃ¼sÃ¼ buradan dÃ¶ner ===
+  // === GÜNÜ BİTİR — gün döngüsü buradan döner ===
   const gunuBitir = () => {
         // Gün geçişinden önce canlı saha simülasyonunu durdur.
     setCanliIzle(false);
-// Sponsor geliri gÃ¼n kapanmadan hesaplanÄ±r (GameContext de aynÄ± listeyi kullanÄ±r)
+// Sponsor geliri gün kapanmadan hesaplanır (GameContext de aynı listeyi kullanır)
     const sponsorGeliri = toplamSponsorGeliri(imzaliSponsorlar);
     const sonuc = endDay();
     if (!sonuc) {
-      bildir('GÃ¼n bitirilemedi â€” oyun durumu hazÄ±r deÄŸil.');
+      bildir('Gün bitirilemedi — oyun durumu hazır değil.');
       return;
     }
     InteractionManager.runAfterInteractions(() => {
@@ -229,7 +229,7 @@ export default function SahaScreen() {
   if (!state) {
     return (
       <View style={s.ekran}>
-        <Text style={s.muted}>YÃ¼kleniyorâ€¦</Text>
+        <Text style={s.muted}>Yükleniyor…</Text>
       </View>
     );
   }
@@ -237,12 +237,12 @@ export default function SahaScreen() {
   if (!aktif) {
     return (
       <View style={s.ekran}>
-        <Text style={s.muted}>HenÃ¼z sahan yok. AÅŸaÄŸÄ±dan arsa al!</Text>
+        <Text style={s.muted}>Henüz sahan yok. Aşağıdan arsa al!</Text>
       </View>
     );
   }
 
-  // === AKTÄ°F SAHA PANELÄ° VERÄ°LERÄ° ===
+  // === AKTİF SAHA PANELİ VERİLERİ ===
   const yildiz = aktif.id === 'yildiz';
   const tipBilgi = SAHA_TIP_BILGI[(aktif.sahaTipi ?? 'yildiz') as keyof typeof SAHA_TIP_BILGI] ?? SAHA_TIP_BILGI.yildiz;
   const acik = (aktif.asama ?? 0) >= 5;
@@ -262,7 +262,7 @@ export default function SahaScreen() {
     : null;
   const insaatYuzde = Math.round(((aktif.asama ?? 0) / 5) * 100);
 
-  // HenÃ¼z alÄ±nmamÄ±ÅŸ saha kataloÄŸu
+  // Henüz alınmamış saha kataloğu
   const katalog = PITCH_DEFS.filter(d => !state.pitches?.[d.id]);
 
   return (
@@ -276,14 +276,14 @@ export default function SahaScreen() {
           </View>
         ) : null}
 
-        {/* === GÃœNÃœ BÄ°TÄ°R â€” GÃœN DÃ–NGÃœSÃœ BURADAN DÃ–NER === */}
+        {/* === GÜNÜ BİTİR — GÜN DÖNGÜSÜ BURADAN DÖNER === */}
         <TouchableOpacity style={s.gunBitirButon} onPress={gunuBitir} activeOpacity={0.85}>
-          <Text style={s.gunBitirYazi}>ğŸŒ™ GÃœNÃœ BÄ°TÄ°R â€” GÃ¼n {state?.gun ?? 1}</Text>
-          <Text style={s.gunBitirAlt}>Gelir/gider hesaplanÄ±r Â· Sponsor gelirleri kasaya yatar</Text>
+          <Text style={s.gunBitirYazi}>🌙 GÜNÜ BİTİR — Gün {state?.gun ?? 1}</Text>
+          <Text style={s.gunBitirAlt}>Gelir/gider hesaplanır · Sponsor gelirleri kasaya yatar</Text>
         </TouchableOpacity>
 
-        {/* === TÃœM SAHALAR â€” HER EKLENEN BURADA GÃ–RÃœNÃœR === */}
-        <Text style={s.baslik}>ğŸŸï¸ SahalarÄ±m ({sahaListesi.length}/{toplamSaha})</Text>
+        {/* === TÜM SAHALAR — HER EKLENEN BURADA GÖRÜNÜR === */}
+        <Text style={s.baslik}>🏟️ Sahalarım ({sahaListesi.length}/{toplamSaha})</Text>
         <View style={s.sahaIzgara}>
           {tumSahalar.map(k => (
             <TouchableOpacity
@@ -295,20 +295,20 @@ export default function SahaScreen() {
                   aktifYap(k.id);
                   setTimeout(() => scrollRef.current?.scrollTo({ y: Math.max(0, panelKonum.current - 8), animated: true }), 60);
                 } else {
-                  bildir(null, `${k.ad} henÃ¼z satÄ±n alÄ±nmadÄ± â€” aÅŸaÄŸÄ±daki katalogdan arsa al.`);
+                  bildir(null, `${k.ad} henüz satın alınmadı — aşağıdaki katalogdan arsa al.`);
                 }
               }}
             >
               <View style={s.sahaKartUst}>
-                <Text style={s.sahaKartEmoji}>{k.sahip ? k.emoji : 'ğŸ”’'}</Text>
+                <Text style={s.sahaKartEmoji}>{k.sahip ? k.emoji : '🔒'}</Text>
                 {k.aktifMi ? (
                   <View style={s.aktifRozet}>
-                    <Text style={s.aktifRozetYazi}>AKTÄ°F</Text>
+                    <Text style={s.aktifRozetYazi}>AKTİF</Text>
                   </View>
                 ) : null}
               </View>
 
-              {/* KartÄ±n iÃ§inde 2D mini saha */}
+              {/* Kartın içinde 2D mini saha */}
               <Saha2D
                 mini
                 asama={k.asama}
@@ -327,26 +327,26 @@ export default function SahaScreen() {
                 </View>
               ) : null}
               {k.sahip && k.asama >= 5 ? (
-                <Text style={s.sahaKartAlt}>â­ {k.kalite}/10 kalite</Text>
+                <Text style={s.sahaKartAlt}>⭐ {k.kalite}/10 kalite</Text>
               ) : null}
               {!k.sahip ? (
-                <Text style={s.sahaKartAlt}>YatÄ±rÄ±m: {para(k.toplamYatirim)}</Text>
+                <Text style={s.sahaKartAlt}>Yatırım: {para(k.toplamYatirim)}</Text>
               ) : null}
             </TouchableOpacity>
           ))}
         </View>
-        <Text style={s.ipucu}>Karta dokun â†’ sahayÄ± aktif yap; yÃ¶netim paneli o sahaya dÃ¶ner.</Text>
+        <Text style={s.ipucu}>Karta dokun → sahayı aktif yap; yönetim paneli o sahaya döner.</Text>
 
-        {/* === AKTÄ°F SAHA YÃ–NETÄ°M PANELÄ° === */}
+        {/* === AKTİF SAHA YÖNETİM PANELİ === */}
         <View style={s.panel} onLayout={e => { panelKonum.current = e.nativeEvent.layout.y; }}>
           <View style={s.panelBaslikSatir}>
-            <Text style={s.panelBaslik}>{tipBilgi.emoji} {aktif.ad} â€” YÃ¶netim</Text>
+            <Text style={s.panelBaslik}>{tipBilgi.emoji} {aktif.ad} — Yönetim</Text>
             <View style={[s.durumRozet, { backgroundColor: asamaRengi(aktif.asama ?? 0) }]}>
               <Text style={s.durumRozetYazi}>{asamaEtiketi(aktif.asama ?? 0)}</Text>
             </View>
           </View>
 
-          {/* === 2D BÃœYÃœK SAHA + CANLI MAÃ‡ === */}
+          {/* === 2D BÜYÜK SAHA + CANLI MAÇ === */}
           <Saha2D
             asama={aktif.asama ?? 0}
             kalite={gosterilenKalite}
@@ -357,16 +357,16 @@ export default function SahaScreen() {
           />
           <View style={s.canliSatir}>
             <TouchableOpacity style={s.canliButon} onPress={() => setCanliIzle(v => !v)} activeOpacity={0.8}>
-              <Text style={s.canliButonYazi}>{canliIzle ? 'â¸ Duraklat' : 'â–¶ï¸ MaÃ§Ä± Ä°zle'}</Text>
+              <Text style={s.canliButonYazi}>{canliIzle ? '⏸ Duraklat' : '▶️ Maçı İzle'}</Text>
             </TouchableOpacity>
             <Text style={s.canliBilgi}>
               {acik
-                ? (canliIzle ? 'Oyuncular sahada â€” canlÄ± maÃ§!' : 'MaÃ§ duraklatÄ±ldÄ±.')
-                : 'MaÃ§, hizmette olan sahalarda oynanÄ±r.'}
+                ? (canliIzle ? 'Oyuncular sahada — canlı maç!' : 'Maç duraklatıldı.')
+                : 'Maç, hizmette olan sahalarda oynanır.'}
             </Text>
           </View>
 
-          {/* === KURULU YAPILAR (gerÃ§ek yÃ¼kseltme verileri) === */}
+          {/* === KURULU YAPILAR (gerçek yükseltme verileri) === */}
           {Object.entries(up).some(([, v]) => v > 0) ? (
             <View style={s.rozetSatir}>
               {Object.entries(up).filter(([, v]) => v > 0).map(([id, seviye]) => {
@@ -374,33 +374,33 @@ export default function SahaScreen() {
                 if (!yd) return null;
                 return (
                   <View key={id} style={s.rozet}>
-                    <Text style={s.rozetYazi}>{yd.emoji} {yd.ad} Â· {seviye}/{yd.maksSeviye}</Text>
+                    <Text style={s.rozetYazi}>{yd.emoji} {yd.ad} · {seviye}/{yd.maksSeviye}</Text>
                   </View>
                 );
               })}
             </View>
           ) : null}
 
-          {/* Ä°statistikler */}
+          {/* İstatistikler */}
           <View style={s.istatistikSatiri}>
             <View style={s.istatistikKutu}>
-              <Text style={s.istatistikDeger}>â­ {gosterilenKalite}/10</Text>
+              <Text style={s.istatistikDeger}>⭐ {gosterilenKalite}/10</Text>
               <Text style={s.istatistikEtiket}>Kalite</Text>
             </View>
             <View style={s.istatistikKutu}>
               <Text style={s.istatistikDeger}>{para(gunlukGider)}</Text>
-              <Text style={s.istatistikEtiket}>GÃ¼nlÃ¼k Gider</Text>
+              <Text style={s.istatistikEtiket}>Günlük Gider</Text>
             </View>
             <View style={s.istatistikKutu}>
-              <Text style={s.istatistikDeger}>{acik ? para(pasifGelir) : 'â€”'}</Text>
+              <Text style={s.istatistikDeger}>{acik ? para(pasifGelir) : '—'}</Text>
               <Text style={s.istatistikEtiket}>Pasif Gelir</Text>
             </View>
           </View>
 
-          {/* Ä°nÅŸaat durumu */}
+          {/* İnşaat durumu */}
           {(aktif.asama ?? 0) >= 1 && (aktif.asama ?? 0) < 5 ? (
             <View style={s.kutu}>
-              <Text style={s.kutuBaslik}>ğŸš§ Ä°nÅŸaat â€” %{insaatYuzde} tamam</Text>
+              <Text style={s.kutuBaslik}>🚧 İnşaat — %{insaatYuzde} tamam</Text>
               <View style={s.bar}>
                 <View style={[s.barDolgu, { width: `${Math.max(4, insaatYuzde)}%` }]} />
               </View>
@@ -411,7 +411,7 @@ export default function SahaScreen() {
                   <TouchableOpacity style={s.butonYesil} onPress={insaatAdim} activeOpacity={0.8}>
                     <Text style={s.butonBeyaz}>
                       {state.nakit >= sonrakiAsama.cost
-                        ? `Ä°nÅŸaatÄ± Ä°lerlet â€” ${para(sonrakiAsama.cost)} (âš¡${sonrakiAsama.enerji})`
+                        ? `İnşaatı İlerlet — ${para(sonrakiAsama.cost)} (⚡${sonrakiAsama.enerji})`
                         : `Nakit yetersiz (${para(sonrakiAsama.cost)})`}
                     </Text>
                   </TouchableOpacity>
@@ -420,20 +420,20 @@ export default function SahaScreen() {
             </View>
           ) : null}
 
-          {/* BakÄ±m (YÄ±ldÄ±z) */}
-{/* YÃ¼kseltme etkileri Ã¶zeti */}
+          {/* Bakım (Yıldız) */}
+{/* Yükseltme etkileri özeti */}
           <View style={s.etkiKutu}>
-            <Text style={s.kutuBaslik}>ğŸ“ˆ YÃ¼kseltme Etkileri</Text>
+            <Text style={s.kutuBaslik}>📈 Yükseltme Etkileri</Text>
             <Text style={s.muted}>
-              Fiyat +{Math.round(etki.fiyat * 100)}% Â· Memnuniyet +{etki.memnuniyet} Â· Prestij +{etki.prestij}
-              {etki.pasifGelir > 0 ? ` Â· Pasif gelir ${para(etki.pasifGelir)}/gÃ¼n` : ''}
-              {etki.enerjiIndirimi > 0 ? ` Â· Enerji -${etki.enerjiIndirimi}` : ''}
-              {etki.havaKoruma ? ' Â· â„ï¸ Hava korumasÄ±' : ''}
+              Fiyat +{Math.round(etki.fiyat * 100)}% · Memnuniyet +{etki.memnuniyet} · Prestij +{etki.prestij}
+              {etki.pasifGelir > 0 ? ` · Pasif gelir ${para(etki.pasifGelir)}/gün` : ''}
+              {etki.enerjiIndirimi > 0 ? ` · Enerji -${etki.enerjiIndirimi}` : ''}
+              {etki.havaKoruma ? ' · ❄️ Hava koruması' : ''}
             </Text>
           </View>
 
-          {/* 22 kalemlik saha yÃ¼kseltme Ä±zgarasÄ± */}
-          <Text style={s.bolumBaslik}>Aktif Saha YÃ¼kseltmeleri</Text>
+          {/* 22 kalemlik saha yükseltme ızgarası */}
+          <Text style={s.bolumBaslik}>Aktif Saha Yükseltmeleri</Text>
           <View style={s.yukseltmeIzgara}>
             {Object.values(PITCH_UPGRADE_CONFIG).map((ud: PitchUpgradeDef) => {
               const seviye = up[ud.id] ?? 0;
@@ -446,7 +446,7 @@ export default function SahaScreen() {
                   <Text style={s.yukseltmeEtki}>{ud.etki}</Text>
                   {maliyet != null ? (
                     <TouchableOpacity style={s.butonKucuk} onPress={() => yukseltAl(ud.id)} activeOpacity={0.8}>
-                      <Text style={s.butonKucukYazi}>YÃ¼kselt â€” {para(maliyet)}</Text>
+                      <Text style={s.butonKucukYazi}>Yükselt — {para(maliyet)}</Text>
                     </TouchableOpacity>
                   ) : (
                     <View style={[s.butonKucuk, s.butonKucukPasif]}>
@@ -458,10 +458,10 @@ export default function SahaScreen() {
             })}
           </View>
 
-          {/* YÄ±ldÄ±z: tesis ana yÃ¼kseltmeleri */}
+          {/* Yıldız: tesis ana yükseltmeleri */}
           {false ? (
             <View style={s.kutu}>
-              <Text style={s.kutuBaslik}>ğŸ—ï¸ Tesis YÃ¼kseltmeleri</Text>
+              <Text style={s.kutuBaslik}>🏗️ Tesis Yükseltmeleri</Text>
               {Object.entries(UPGRADE_CONFIG).map(([anahtar, cfgRaw]) => {
                 const cfg = cfgRaw as any;
                 const seviye = up[anahtar] ?? 0;
@@ -472,7 +472,7 @@ export default function SahaScreen() {
                   <View key={anahtar} style={s.anaYukseltmeSatir}>
                     <View style={s.anaYukseltmeBilgi}>
                       <Text style={s.anaYukseltmeAd}>
-                        {cfg?.emoji ?? 'ğŸ”§'} {cfg?.ad ?? cfg?.baslik ?? anahtar}{' '}
+                        {cfg?.emoji ?? '🔧'} {cfg?.ad ?? cfg?.baslik ?? anahtar}{' '}
                         <Text style={s.muted}>(Seviye {seviye}/{maks || '?'})</Text>
                       </Text>
                       {cfg?.aciklama ? <Text style={s.muted}>{String(cfg.aciklama)}</Text> : null}
@@ -496,17 +496,17 @@ export default function SahaScreen() {
             </View>
           ) : null}
 
-          {/* === SPONSORLAR (tesis genelinde) â€” HER ZAMAN GÃ–RÃœNÃœR === */}
+          {/* === SPONSORLAR (tesis genelinde) — HER ZAMAN GÖRÜNÜR === */}
           <View style={s.kutu}>
             <View style={s.sponsorBaslikSatir}>
-              <Text style={s.kutuBaslik}>ğŸ’¼ Sponsorlar ({imzaliSponsorlar.length}/{MAX_SPONSOR})</Text>
+              <Text style={s.kutuBaslik}>💼 Sponsorlar ({imzaliSponsorlar.length}/{MAX_SPONSOR})</Text>
               {imzaliSponsorlar.length > 0 ? (
-                <Text style={s.sponsorGelir}>+{para(toplamSponsorGeliri(imzaliSponsorlar))}/gÃ¼n</Text>
+                <Text style={s.sponsorGelir}>+{para(toplamSponsorGeliri(imzaliSponsorlar))}/gün</Text>
               ) : null}
             </View>
             <Text style={s.muted}>
-              Tesis genelinde anlaÅŸma â€” imzaladÄ±ÄŸÄ±n sponsorlar sahadaki reklam bantlarÄ±na yazÄ±lÄ±r,
-              gÃ¼nlÃ¼k geliri gÃ¼n sonunda otomatik yatar. AynÄ± anda en fazla {MAX_SPONSOR} sponsor.
+              Tesis genelinde anlaşma — imzaladığın sponsorlar sahadaki reklam bantlarına yazılır,
+              günlük geliri gün sonunda otomatik yatar. Aynı anda en fazla {MAX_SPONSOR} sponsor.
             </Text>
             <View style={s.sponsorIzgara}>
               {SPONSORLAR.map(sp => {
@@ -528,7 +528,7 @@ export default function SahaScreen() {
                     </View>
                     <Text style={s.sponsorAciklama} numberOfLines={2}>{sp.aciklama}</Text>
                     <Text style={s.sponsorPara}>
-                      PeÅŸin {para(sp.onOdeme)} Â· GÃ¼nlÃ¼k +{para(sp.gunlukGelir)}
+                      Peşin {para(sp.onOdeme)} · Günlük +{para(sp.gunlukGelir)}
                     </Text>
                     {sponsorKosulSatirlari(sp, anaSahaAsama, anaSahaUp).map((satir, i) => (
                       <Text key={i} style={s.sponsorKosul}>{satir}</Text>
@@ -539,15 +539,15 @@ export default function SahaScreen() {
                         onPress={() => sponsorFesih(sp.id)}
                         activeOpacity={0.8}
                       >
-                        <Text style={s.sponsorButonYazi}>Fesih Et â€” gelir durur</Text>
+                        <Text style={s.sponsorButonYazi}>Fesih Et — gelir durur</Text>
                       </TouchableOpacity>
                     ) : !uygun ? (
                       <View style={[s.sponsorButon, s.sponsorButonPasif]}>
-                        <Text style={s.sponsorButonYazi}>Åartlar saÄŸlanmadÄ±</Text>
+                        <Text style={s.sponsorButonYazi}>Şartlar sağlanmadı</Text>
                       </View>
                     ) : !nakitYetiyor ? (
                       <View style={[s.sponsorButon, s.sponsorButonPasif]}>
-                        <Text style={s.sponsorButonYazi}>Nakit yetersiz (peÅŸin {para(sp.onOdeme)})</Text>
+                        <Text style={s.sponsorButonYazi}>Nakit yetersiz (peşin {para(sp.onOdeme)})</Text>
                       </View>
                     ) : (
                       <TouchableOpacity
@@ -555,7 +555,7 @@ export default function SahaScreen() {
                         onPress={() => sponsorImzala(sp.id)}
                         activeOpacity={0.8}
                       >
-                        <Text style={s.sponsorButonYazi}>Ä°mzala â€” PeÅŸin {para(sp.onOdeme)}</Text>
+                        <Text style={s.sponsorButonYazi}>İmzala — Peşin {para(sp.onOdeme)}</Text>
                       </TouchableOpacity>
                     )}
                   </View>
@@ -565,10 +565,10 @@ export default function SahaScreen() {
           </View>
         </View>
 
-        {/* === YATIRIM: YENÄ° SAHA KATALOÄU === */}
-        <Text style={s.bolumBaslik}>YatÄ±rÄ±m: Yeni Saha KataloÄŸu</Text>
+        {/* === YATIRIM: YENİ SAHA KATALOĞU === */}
+        <Text style={s.bolumBaslik}>Yatırım: Yeni Saha Kataloğu</Text>
         {katalog.length === 0 ? (
-          <Text style={s.muted}>TÃ¼m sahalar aÃ§Ä±ldÄ± â€” iÅŸletme tam kapasitede! ğŸ†</Text>
+          <Text style={s.muted}>Tüm sahalar açıldı — işletme tam kapasitede! 🏆</Text>
         ) : null}
         {katalog.map(d => {
           const tip = SAHA_TIP_BILGI[d.sahaTipi] ?? SAHA_TIP_BILGI.yildiz;
@@ -580,15 +580,15 @@ export default function SahaScreen() {
                 <Text style={s.katalogFiyat}>{para(d.arsaBedeli)}</Text>
               </View>
 
-              {/* Katalogda da 2D Ã¶nizleme: "bunu alÄ±rsan bÃ¶yle gÃ¶rÃ¼necek" */}
+              {/* Katalogda da 2D önizleme: "bunu alırsan böyle görünecek" */}
               <Saha2D mini asama={0} kalite={d.baslangicKalitesi} sahaTipi={d.sahaTipi} canli={false} />
 
               <Text style={s.muted}>{d.aciklama}</Text>
               <Text style={s.katalogDetay}>
-                â­ BaÅŸlangÄ±Ã§ kalitesi {d.baslangicKalitesi}/10 Â· Kapasite {d.kapasite} kiÅŸi Â· GÃ¼nlÃ¼k gider {para(d.gunlukGider)}
+                ⭐ Başlangıç kalitesi {d.baslangicKalitesi}/10 · Kapasite {d.kapasite} kişi · Günlük gider {para(d.gunlukGider)}
               </Text>
               <Text style={s.katalogDetay}>
-                YatÄ±rÄ±m: arsa {para(d.arsaBedeli)} + inÅŸaat {para(d.insaatBedeli)} ={' '}
+                Yatırım: arsa {para(d.arsaBedeli)} + inşaat {para(d.insaatBedeli)} ={' '}
                 <Text style={s.sari}>{para(d.arsaBedeli + d.insaatBedeli)}</Text>
               </Text>
               <TouchableOpacity
@@ -598,7 +598,7 @@ export default function SahaScreen() {
               >
                 <Text style={s.butonBeyaz}>
                   {nakitYetiyor
-                    ? `ArsayÄ± Al â€” ${para(d.arsaBedeli)}`
+                    ? `Arsayı Al — ${para(d.arsaBedeli)}`
                     : `Nakit yetersiz (${para(d.arsaBedeli)})`}
                 </Text>
               </TouchableOpacity>
@@ -608,46 +608,46 @@ export default function SahaScreen() {
 
       </ScrollView>
 
-      {/* === GÃœN SONU Ã–ZETÄ° (MODAL) === */}
+      {/* === GÜN SONU ÖZETİ (MODAL) === */}
       <Modal visible={!!gunSonu} transparent animationType="fade" onRequestClose={() => setGunSonu(null)}>
         <View style={s.modalKaplama}>
           <View style={s.modalKutu}>
             {gunSonu?.sonuc?.isGameOver ? (
-              <Text style={s.modalIflos}>ğŸ’€ Ä°FLAS ETTÄ°N!</Text>
+              <Text style={s.modalIflos}>💀 İFLAS ETTİN!</Text>
             ) : (
-              <Text style={s.modalBaslik}>ğŸŒ™ GÃ¼n {gunSonu?.sonuc?.gun ?? '?'} Bitti!</Text>
+              <Text style={s.modalBaslik}>🌙 Gün {gunSonu?.sonuc?.gun ?? '?'} Bitti!</Text>
             )}
 
             <View style={s.modalSatir}>
-              <Text style={s.modalEtiket}>ğŸ’µ Toplam Gelir</Text>
+              <Text style={s.modalEtiket}>💵 Toplam Gelir</Text>
               <Text style={[s.modalDeger, { color: RENK.basari }]}>+{para(gunSonu?.sonuc?.gelir ?? 0)}</Text>
             </View>
             <View style={s.modalSatir}>
-              <Text style={s.modalEtiket}>ğŸŸï¸ Saha Geliri</Text>
+              <Text style={s.modalEtiket}>🏟️ Saha Geliri</Text>
               <Text style={s.modalSoluk}>{para(gunSonu?.sonuc?.sahaGelir ?? 0)}</Text>
             </View>
             <View style={s.modalSatir}>
-              <Text style={s.modalEtiket}>ğŸ§¾ Toplam Gider (kira, elektrik, bakÄ±m)</Text>
+              <Text style={s.modalEtiket}>🧾 Toplam Gider (kira, elektrik, bakım)</Text>
               <Text style={[s.modalDeger, { color: RENK.hata }]}>-{para(gunSonu?.sonuc?.gider ?? 0)}</Text>
             </View>
             <View style={s.modalSatir}>
-              <Text style={s.modalEtiket}>ğŸ‘¥ Personel MaaÅŸÄ± (giderin iÃ§inde)</Text>
+              <Text style={s.modalEtiket}>👥 Personel Maaşı (giderin içinde)</Text>
               <Text style={s.modalSoluk}>{para(gunSonu?.sonuc?.personelMaas ?? 0)}</Text>
             </View>
             <View style={s.modalSatir}>
-              <Text style={s.modalEtiket}>ğŸ’¼ Sponsor Geliri (kasaya yattÄ±)</Text>
+              <Text style={s.modalEtiket}>💼 Sponsor Geliri (kasaya yattı)</Text>
               <Text style={[s.modalDeger, { color: RENK.basari }]}>+{para(gunSonu?.sponsorGeliri ?? 0)}</Text>
             </View>
 
             {(gunSonu?.sonuc?.gorevOdul ?? 0) > 0 ? (
               <View style={s.modalSatir}>
-                <Text style={s.modalEtiket}>ğŸ GÃ¶rev Ã–dÃ¼lÃ¼</Text>
+                <Text style={s.modalEtiket}>🎁 Görev Ödülü</Text>
                 <Text style={[s.modalDeger, { color: RENK.basari }]}>+{para(gunSonu.sonuc.gorevOdul)}</Text>
               </View>
             ) : null}
             {(gunSonu?.sonuc?.jetonOdul ?? 0) > 0 ? (
               <View style={s.modalSatir}>
-                <Text style={s.modalEtiket}>ğŸŸï¸ Jeton Ã–dÃ¼lÃ¼</Text>
+                <Text style={s.modalEtiket}>🎟️ Jeton Ödülü</Text>
                 <Text style={[s.modalDeger, { color: RENK.basari }]}>+{gunSonu.sonuc.jetonOdul} jeton</Text>
               </View>
             ) : null}
@@ -655,36 +655,36 @@ export default function SahaScreen() {
             <View style={s.modalAyirici} />
 
             <View style={s.modalSatir}>
-              <Text style={s.modalEtiket}>ğŸ“Š Net KÃ¢r / Zarar</Text>
+              <Text style={s.modalEtiket}>📊 Net Kâr / Zarar</Text>
               <Text style={[s.modalDeger, { color: (gunSonu?.sonuc?.net ?? 0) >= 0 ? RENK.basari : RENK.hata }]}>
                 {para(gunSonu?.sonuc?.net ?? 0)}
               </Text>
             </View>
             <View style={s.modalSatir}>
-              <Text style={s.modalEtiket}>ğŸ’° Kasadaki Para</Text>
+              <Text style={s.modalEtiket}>💰 Kasadaki Para</Text>
               <Text style={s.modalKasa}>
                 {para((gunSonu?.sonuc?.nakit ?? 0) + (gunSonu?.sponsorGeliri ?? 0))}
               </Text>
             </View>
             <View style={s.modalSatir}>
-              <Text style={s.modalEtiket}>ğŸ˜Š Memnuniyet</Text>
-              <Text style={s.modalSoluk}>%{gunSonu?.sonuc?.yeniMemnuniyet ?? 'â€”'}</Text>
+              <Text style={s.modalEtiket}>😊 Memnuniyet</Text>
+              <Text style={s.modalSoluk}>%{gunSonu?.sonuc?.yeniMemnuniyet ?? '—'}</Text>
             </View>
             {(gunSonu?.sonuc?.sadikKazanci ?? 0) > 0 ? (
               <View style={s.modalSatir}>
-                <Text style={s.modalEtiket}>â¤ï¸ SadÄ±k MÃ¼ÅŸteri</Text>
+                <Text style={s.modalEtiket}>❤️ Sadık Müşteri</Text>
                 <Text style={[s.modalDeger, { color: RENK.basari }]}>+{gunSonu.sonuc.sadikKazanci}</Text>
               </View>
             ) : null}
 
             {gunSonu?.sonuc?.isGameOver ? (
               <Text style={s.modalIflosNot}>
-                Nakit eksiye dÃ¼ÅŸtÃ¼ ve iflas limiti aÅŸÄ±ldÄ±. Ana ekrandan oyunu sÄ±fÄ±rlayÄ±p yeniden baÅŸlayabilirsin.
+                Nakit eksiye düştü ve iflas limiti aşıldı. Ana ekrandan oyunu sıfırlayıp yeniden başlayabilirsin.
               </Text>
             ) : null}
 
             <TouchableOpacity style={s.modalKapat} onPress={() => setGunSonu(null)} activeOpacity={0.85}>
-              <Text style={s.modalKapatYazi}>â˜€ï¸ Yeni GÃ¼ne BaÅŸla</Text>
+              <Text style={s.modalKapatYazi}>☀️ Yeni Güne Başla</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -694,7 +694,7 @@ export default function SahaScreen() {
 }
 
 // ============================================
-// STÄ°LLER
+// STİLLER
 // ============================================
 const s = StyleSheet.create({
   ekran: { flex: 1, backgroundColor: RENK.arkaPlan },
@@ -705,7 +705,7 @@ const s = StyleSheet.create({
   bolumBaslik: { color: RENK.yaziAcik, fontSize: 14, fontFamily: FONT.baslik, marginTop: 6 },
   ipucu: { color: RENK.yaziMat, fontSize: 11, fontStyle: 'italic', fontFamily: FONT.govde },
 
-  // GÃ¼nÃ¼ Bitir butonu
+  // Günü Bitir butonu
   gunBitirButon: {
     backgroundColor: RENK.vurgu, borderRadius: 14, paddingVertical: 14, paddingHorizontal: 14,
     alignItems: 'center', borderWidth: 2, borderColor: '#FCD34D',
@@ -713,7 +713,7 @@ const s = StyleSheet.create({
   gunBitirYazi: { color: RENK.arkaPlan, fontSize: 16, fontFamily: FONT.buyuk },
   gunBitirAlt: { color: RENK.arkaPlan, opacity: 0.8, fontSize: 10, fontFamily: FONT.govde, marginTop: 2 },
 
-  // GÃ¼n sonu modalÄ±
+  // Gün sonu modalı
   modalKaplama: { flex: 1, backgroundColor: 'rgba(0,0,0,0.80)', alignItems: 'center', justifyContent: 'center', padding: 20 },
   modalKutu: {
     width: '100%', maxWidth: 420, backgroundColor: RENK.panel, borderRadius: 16,
@@ -736,7 +736,7 @@ const s = StyleSheet.create({
   mesajHata: { backgroundColor: RENK.hataKoyu, borderColor: RENK.hata, borderWidth: 1, borderRadius: 10, padding: 10 },
   mesajYazi: { color: RENK.yazi, fontSize: 12, fontFamily: FONT.vurgu },
 
-  // Sahalar Ä±zgarasÄ±
+  // Sahalar ızgarası
   sahaIzgara: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
   sahaKart: {
     width: '49%', backgroundColor: RENK.kart, borderRadius: 12, padding: 10,
@@ -754,13 +754,13 @@ const s = StyleSheet.create({
   miniBar: { height: 6, backgroundColor: RENK.cizgi, borderRadius: 3, marginTop: 6, overflow: 'hidden' },
   miniBarDolgu: { height: 6, backgroundColor: RENK.basari, borderRadius: 3 },
 
-  // CanlÄ± maÃ§ satÄ±rÄ±
+  // Canlı maç satırı
   canliSatir: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 8 },
   canliButon: { backgroundColor: RENK.vurgu, borderRadius: 10, paddingVertical: 8, paddingHorizontal: 12 },
   canliButonYazi: { color: RENK.arkaPlan, fontSize: 12, fontFamily: FONT.buyuk },
   canliBilgi: { color: RENK.yaziSoluk, fontSize: 11, flex: 1, fontFamily: FONT.govde },
 
-  // Kurulu yapÄ±lar rozetleri
+  // Kurulu yapılar rozetleri
   rozetSatir: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
   rozet: { backgroundColor: RENK.kart, borderColor: RENK.cizgi, borderWidth: 1, borderRadius: 8, paddingHorizontal: 8, paddingVertical: 4 },
   rozetYazi: { color: RENK.yaziAcik, fontSize: 10, fontFamily: FONT.vurgu },
@@ -793,7 +793,7 @@ const s = StyleSheet.create({
   butonKucukPasif: { backgroundColor: RENK.pasif },
   butonKucukYazi: { color: RENK.arkaPlan, fontSize: 11, fontFamily: FONT.buyuk },
 
-  // YÃ¼kseltme Ä±zgarasÄ±
+  // Yükseltme ızgarası
   yukseltmeIzgara: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
   yukseltmeKart: {
     width: '49%', backgroundColor: RENK.kart, borderRadius: 12, padding: 10,
@@ -804,7 +804,7 @@ const s = StyleSheet.create({
   yukseltmeSeviye: { color: RENK.vurgu, fontSize: 11, fontFamily: FONT.vurgu, marginTop: 2 },
   yukseltmeEtki: { color: RENK.yaziSoluk, fontSize: 11, marginTop: 4, minHeight: 30, fontFamily: FONT.govde },
 
-  // Ana yÃ¼kseltmeler
+  // Ana yükseltmeler
   anaYukseltmeSatir: { flexDirection: 'row', alignItems: 'center', paddingVertical: 6, borderTopWidth: 1, borderTopColor: RENK.cizgi },
   anaYukseltmeBilgi: { flex: 1, marginRight: 8 },
   anaYukseltmeAd: { color: RENK.yazi, fontSize: 12, fontFamily: FONT.vurgu },
@@ -836,6 +836,6 @@ const s = StyleSheet.create({
   katalogFiyat: { color: RENK.vurgu, fontSize: 14, fontFamily: FONT.baslik },
   katalogDetay: { color: RENK.yaziSoluk, fontSize: 11, lineHeight: 16, fontFamily: FONT.govde },
 });
-// === DOSYA SONU â€” bu satÄ±rÄ± gÃ¶rÃ¼yorsan yapÄ±ÅŸtÄ±rma tam demektir ===
+// === DOSYA SONU — bu satırı görüyorsan yapıştırma tam demektir ===
 
 
