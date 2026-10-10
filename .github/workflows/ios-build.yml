@@ -46,6 +46,35 @@ jobs:
             -T /usr/bin/codesign \
             -T /usr/bin/security
 
+          if SIGNING_IDENTITIES=$(security find-identity -v -p codesigning "$RUNNER_TEMP/build.keychain-db" 2>/dev/null); then
+            SIGNING_IDENTITY_CHECK_STATUS=0
+          else
+            SIGNING_IDENTITY_CHECK_STATUS=$?
+            SIGNING_IDENTITIES=""
+          fi
+
+          if [ "$SIGNING_IDENTITY_CHECK_STATUS" -ne 0 ]; then
+            echo "[SIGNING_VERIFY] VALID_CODE_SIGNING_IDENTITY=UNVERIFIABLE"
+            echo "[SIGNING_VERIFY] APPLE_DISTRIBUTION_TEAM_MATCH=UNVERIFIABLE"
+            echo "::error::Signing identity verification failed; result is unverifiable."
+            exit "$SIGNING_IDENTITY_CHECK_STATUS"
+          fi
+
+          VALID_IDENTITY_COUNT=$(printf "%s\n" "$SIGNING_IDENTITIES" | awk '/^[[:space:]]*[0-9]+\)/ { count++ } END { print count+0 }')
+          if [ "$VALID_IDENTITY_COUNT" -gt 0 ]; then
+            echo "[SIGNING_VERIFY] VALID_CODE_SIGNING_IDENTITY=YES"
+          else
+            echo "[SIGNING_VERIFY] VALID_CODE_SIGNING_IDENTITY=NO"
+          fi
+
+          if printf "%s\n" "$SIGNING_IDENTITIES" | grep -Eq '"Apple Distribution:.*\(WNF86CPGX5\)"'; then
+            echo "[SIGNING_VERIFY] APPLE_DISTRIBUTION_TEAM_MATCH=YES"
+          else
+            echo "[SIGNING_VERIFY] APPLE_DISTRIBUTION_TEAM_MATCH=NO"
+            echo "::error::No Apple Distribution signing identity matched the configured team."
+            exit 1
+          fi
+
           echo "[SIGNING_TRACE] Provisioning profile processing: START"
           mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
 
