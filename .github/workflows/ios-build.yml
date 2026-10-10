@@ -51,7 +51,7 @@ jobs:
 
           echo "[SIGNING_TRACE] Profile UUID/name extraction: START"
           echo "[SIGNING_TRACE] security cms for UUID: START"
-          if PROFILE_UUID_PLIST=$(security cms -D -i "$RUNNER_TEMP/signing/profile.mobileprovision"); then
+          if security cms -D -i "$RUNNER_TEMP/signing/profile.mobileprovision" > "$RUNNER_TEMP/signing/profile.plist"; then
             echo "[SIGNING_TRACE] security cms for UUID: SUCCESS (exit 0)"
           else
             SECURITY_CMS_UUID_STATUS=$?
@@ -60,7 +60,7 @@ jobs:
           fi
 
           echo "[SIGNING_TRACE] PlistBuddy for UUID: START"
-          if PROFILE_UUID=$(printf "%s" "$PROFILE_UUID_PLIST" | /usr/libexec/PlistBuddy -c "Print:UUID"); then
+          if PROFILE_UUID=$(/usr/libexec/PlistBuddy -c "Print:UUID" "$RUNNER_TEMP/signing/profile.plist"); then
             echo "[SIGNING_TRACE] PlistBuddy for UUID: SUCCESS (exit 0)"
           else
             PLISTBUDDY_UUID_STATUS=$?
@@ -69,7 +69,7 @@ jobs:
           fi
 
           echo "[SIGNING_TRACE] security cms for profile name: START"
-          if PROFILE_NAME_PLIST=$(security cms -D -i "$RUNNER_TEMP/signing/profile.mobileprovision"); then
+          if security cms -D -i "$RUNNER_TEMP/signing/profile.mobileprovision" > "$RUNNER_TEMP/signing/profile.plist"; then
             echo "[SIGNING_TRACE] security cms for profile name: SUCCESS (exit 0)"
           else
             SECURITY_CMS_NAME_STATUS=$?
@@ -78,7 +78,7 @@ jobs:
           fi
 
           echo "[SIGNING_TRACE] PlistBuddy for profile name: START"
-          if PROFILE_NAME=$(printf "%s" "$PROFILE_NAME_PLIST" | /usr/libexec/PlistBuddy -c "Print:Name"); then
+          if PROFILE_NAME=$(/usr/libexec/PlistBuddy -c "Print:Name" "$RUNNER_TEMP/signing/profile.plist"); then
             echo "[SIGNING_TRACE] PlistBuddy for profile name: SUCCESS (exit 0)"
           else
             PLISTBUDDY_NAME_STATUS=$?
