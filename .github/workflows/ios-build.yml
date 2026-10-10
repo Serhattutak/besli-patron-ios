@@ -50,15 +50,41 @@ jobs:
           mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
 
           echo "[SIGNING_TRACE] Profile UUID/name extraction: START"
-          PROFILE_UUID=$(
-            security cms -D -i "$RUNNER_TEMP/signing/profile.mobileprovision" |
-            /usr/libexec/PlistBuddy -c "Print:UUID"
-          )
+          echo "[SIGNING_TRACE] security cms for UUID: START"
+          if PROFILE_UUID_PLIST=$(security cms -D -i "$RUNNER_TEMP/signing/profile.mobileprovision"); then
+            echo "[SIGNING_TRACE] security cms for UUID: SUCCESS (exit 0)"
+          else
+            SECURITY_CMS_UUID_STATUS=$?
+            echo "[SIGNING_TRACE] security cms for UUID: FAILED (exit ${SECURITY_CMS_UUID_STATUS})"
+            exit "$SECURITY_CMS_UUID_STATUS"
+          fi
 
-          PROFILE_NAME=$(
-            security cms -D -i "$RUNNER_TEMP/signing/profile.mobileprovision" |
-            /usr/libexec/PlistBuddy -c "Print:Name"
-          )
+          echo "[SIGNING_TRACE] PlistBuddy for UUID: START"
+          if PROFILE_UUID=$(printf "%s" "$PROFILE_UUID_PLIST" | /usr/libexec/PlistBuddy -c "Print:UUID"); then
+            echo "[SIGNING_TRACE] PlistBuddy for UUID: SUCCESS (exit 0)"
+          else
+            PLISTBUDDY_UUID_STATUS=$?
+            echo "[SIGNING_TRACE] PlistBuddy for UUID: FAILED (exit ${PLISTBUDDY_UUID_STATUS})"
+            exit "$PLISTBUDDY_UUID_STATUS"
+          fi
+
+          echo "[SIGNING_TRACE] security cms for profile name: START"
+          if PROFILE_NAME_PLIST=$(security cms -D -i "$RUNNER_TEMP/signing/profile.mobileprovision"); then
+            echo "[SIGNING_TRACE] security cms for profile name: SUCCESS (exit 0)"
+          else
+            SECURITY_CMS_NAME_STATUS=$?
+            echo "[SIGNING_TRACE] security cms for profile name: FAILED (exit ${SECURITY_CMS_NAME_STATUS})"
+            exit "$SECURITY_CMS_NAME_STATUS"
+          fi
+
+          echo "[SIGNING_TRACE] PlistBuddy for profile name: START"
+          if PROFILE_NAME=$(printf "%s" "$PROFILE_NAME_PLIST" | /usr/libexec/PlistBuddy -c "Print:Name"); then
+            echo "[SIGNING_TRACE] PlistBuddy for profile name: SUCCESS (exit 0)"
+          else
+            PLISTBUDDY_NAME_STATUS=$?
+            echo "[SIGNING_TRACE] PlistBuddy for profile name: FAILED (exit ${PLISTBUDDY_NAME_STATUS})"
+            exit "$PLISTBUDDY_NAME_STATUS"
+          fi
           echo "[SIGNING_TRACE] Profile UUID/name extraction: DONE"
 
           echo "[SIGNING_TRACE] Provisioning profile copy: START"
