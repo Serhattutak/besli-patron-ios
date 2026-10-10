@@ -25,6 +25,7 @@ jobs:
           IOS_DIST_CERT_BASE64: ${{ secrets.IOS_DIST_CERT_BASE64 }}
           IOS_DIST_CERT_PASSWORD: ${{ secrets.IOS_DIST_CERT_PASSWORD }}
           IOS_PROVISIONING_PROFILE_BASE64: ${{ secrets.IOS_PROVISIONING_PROFILE_BASE64 }}
+          IOS_DEVICE_UDID: ${{ secrets.IOS_DEVICE_UDID }}
         run: |
           set -e
 
@@ -115,6 +116,28 @@ jobs:
             exit "$PLISTBUDDY_NAME_STATUS"
           fi
           echo "[SIGNING_TRACE] Profile UUID/name extraction: DONE"
+
+          python3 - <<'PY'
+          import os
+          import plistlib
+
+          try:
+              udid = os.environ.get("IOS_DEVICE_UDID", "").strip()
+              if not udid:
+                  print("[DEVICE_CHECK] UNVERIFIED")
+              else:
+                  with open(os.path.join(os.environ["RUNNER_TEMP"], "signing", "profile.plist"), "rb") as profile_file:
+                      profile = plistlib.load(profile_file)
+                  devices = profile.get("ProvisionedDevices")
+                  if not isinstance(devices, list):
+                      print("[DEVICE_CHECK] UNVERIFIED")
+                  elif any(isinstance(device, str) and device == udid for device in devices):
+                      print("[DEVICE_CHECK] MATCH")
+                  else:
+                      print("[DEVICE_CHECK] NO_MATCH")
+          except Exception:
+              print("[DEVICE_CHECK] UNVERIFIED")
+          PY
 
           echo "[SIGNING_TRACE] Provisioning profile copy: START"
           cp "$RUNNER_TEMP/signing/profile.mobileprovision" \
