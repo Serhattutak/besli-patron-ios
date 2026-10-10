@@ -31,8 +31,8 @@ jobs:
           mkdir -p "$RUNNER_TEMP/signing"
 
           CERT_LEN=${#IOS_DIST_CERT_BASE64}
-echo "DIST_CERT_BASE64_LENGTH=$CERT_LEN"
-printf "%s" "$IOS_DIST_CERT_BASE64" | tr -d "[:space:]" | base64 -D > "$RUNNER_TEMP/signing/dist-cert.p12"
+          echo "DIST_CERT_BASE64_LENGTH=$CERT_LEN"
+          printf "%s" "$IOS_DIST_CERT_BASE64" | tr -d "[:space:]" | base64 -D > "$RUNNER_TEMP/signing/dist-cert.p12"
           printf "%s" "$IOS_PROVISIONING_PROFILE_BASE64" | tr -d "[:space:]" | base64 -D > "$RUNNER_TEMP/signing/profile.mobileprovision"
 
           security create-keychain -p "" "$RUNNER_TEMP/build.keychain-db"
