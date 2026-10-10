@@ -46,8 +46,10 @@ jobs:
             -T /usr/bin/codesign \
             -T /usr/bin/security
 
+          echo "[SIGNING_TRACE] Provisioning profile processing: START"
           mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
 
+          echo "[SIGNING_TRACE] Profile UUID/name extraction: START"
           PROFILE_UUID=$(
             security cms -D -i "$RUNNER_TEMP/signing/profile.mobileprovision" |
             /usr/libexec/PlistBuddy -c "Print:UUID"
@@ -57,12 +59,18 @@ jobs:
             security cms -D -i "$RUNNER_TEMP/signing/profile.mobileprovision" |
             /usr/libexec/PlistBuddy -c "Print:Name"
           )
+          echo "[SIGNING_TRACE] Profile UUID/name extraction: DONE"
 
+          echo "[SIGNING_TRACE] Provisioning profile copy: START"
           cp "$RUNNER_TEMP/signing/profile.mobileprovision" \
             "$HOME/Library/MobileDevice/Provisioning Profiles/$PROFILE_UUID.mobileprovision"
+          echo "[SIGNING_TRACE] Provisioning profile copy: DONE"
 
+          echo "[SIGNING_TRACE] GITHUB_ENV write: START"
           echo "PROFILE_UUID=$PROFILE_UUID" >> "$GITHUB_ENV"
           echo "PROFILE_NAME=$PROFILE_NAME" >> "$GITHUB_ENV"
+          echo "[SIGNING_TRACE] GITHUB_ENV write: DONE"
+          echo "[SIGNING_TRACE] Provisioning profile processing: DONE"
 
       - name: Generate iOS project
         run: npx expo prebuild --platform ios --no-install
