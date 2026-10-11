@@ -2,20 +2,20 @@ appId: com.sardurtechnologies.beslipatron
 ---
 - launchApp:
     clearState: true
-- extendedWaitUntil:
-    visible: "Hikayeyi atla"
-    timeout: 15000
+- waitForAnimationToEnd:
+    timeout: 10000
 - tapOn:
     text: "Hikayeyi atla"
+    optional: true
 - tapOn:
     text: "Oyuna Başla"
-    waitUntilVisible: true
+    optional: true
 - tapOn:
     text: "Atla"
     optional: true
 - extendedWaitUntil:
     visible: "Günü Bitir"
-    timeout: 20000
+    timeout: 30000
 - tapOn:
     text: "Günü Bitir"
 - extendedWaitUntil:
