@@ -248,4 +248,3 @@ jobs:
             --file "$IPA_FILE" \
             --apiKey "$APP_STORE_CONNECT_KEY_ID" \
             --apiIssuer "$APP_STORE_CONNECT_ISSUER_ID"
-```
