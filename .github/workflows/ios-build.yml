@@ -2,6 +2,9 @@ name: iOS Ad Hoc Build
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - master
 
 jobs:
   build-ios:
@@ -163,7 +166,7 @@ jobs:
           WORKSPACE=$(find ios -maxdepth 1 -name "*.xcworkspace" -print -quit)
 
           if [ -z "$WORKSPACE" ]; then
-            echo "iOS workspace bulunamadý."
+            echo "iOS workspace bulunamadÃ½."
             exit 1
           fi
 
@@ -171,7 +174,7 @@ jobs:
             awk '/Schemes:/ {found=1; next} found && NF {print $1; exit}')
 
           if [ -z "$SCHEME" ]; then
-            echo "Xcode scheme bulunamadý."
+            echo "Xcode scheme bulunamadÃ½."
             exit 1
           fi
 
@@ -214,7 +217,7 @@ jobs:
             -scheme "$IOS_SCHEME" \
             -configuration Release \
             -sdk iphoneos \
-            -archivePath "$RUNNER_TEMP/archive/BeþliPatron.xcarchive" \
+            -archivePath "$RUNNER_TEMP/archive/BeÃ¾liPatron.xcarchive" \
             -allowProvisioningUpdates \
             DEVELOPMENT_TEAM=WNF86CPGX5 \
             CODE_SIGN_STYLE=Manual \
@@ -230,7 +233,7 @@ jobs:
 
           xcodebuild \
             -exportArchive \
-            -archivePath "$RUNNER_TEMP/archive/BeþliPatron.xcarchive" \
+            -archivePath "$RUNNER_TEMP/archive/BeÃ¾liPatron.xcarchive" \
             -exportPath "$RUNNER_TEMP/export" \
             -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist"
 
