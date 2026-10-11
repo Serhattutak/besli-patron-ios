@@ -317,7 +317,7 @@ export default function SahaScreen() {
             {gunSonu?.sonuc?.isGameOver ? (
               <Text style={s.modalIflosNot}>Nakit eksiye düştü ve iflas limiti aşıldı. Ana ekrandan oyunu sıfırlayıp yeniden başlayabilirsin.</Text>
             ) : null}
-            <TouchableOpacity style={s.modalKapat} onPress={() => setGunSonu(null)} activeOpacity={0.85}>
+            <TouchableOpacity style={s.modalKapat} onPress={() => setGunSonu(null)} activeOpacity={0.85} accessibilityLabel="Kapat ve Devam Et" accessibilityRole="button">
               <Text style={s.modalKapatYazi}>☀️ Kapat ve Devam Et</Text>
             </TouchableOpacity>
           </View>
@@ -331,7 +331,7 @@ export default function SahaScreen() {
         ) : null}
 
         {/* === GÜNÜ BİTİR — GÜN DÖNGÜSÜ BURADAN DÖNER === */}
-        <TouchableOpacity style={s.gunBitirButon} onPress={gunuBitir} activeOpacity={0.85}>
+        <TouchableOpacity style={s.gunBitirButon} onPress={gunuBitir} activeOpacity={0.85} accessibilityLabel="Günü Bitir" accessibilityRole="button">
           <Text style={s.gunBitirYazi}>🌙 GÜNÜ BİTİR — Gün {state?.gun ?? 1}</Text>
           <Text style={s.gunBitirAlt}>Gelir/gider hesaplanır · Sponsor gelirleri kasaya yatar</Text>
         </TouchableOpacity>
