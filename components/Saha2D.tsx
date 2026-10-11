@@ -1146,6 +1146,3 @@ const st = StyleSheet.create({
 // === DOSYA SONU — bu satırı görüyorsan yapıştırma tam demektir ===
 
 export default React.memo(Saha2D);
-
-
-export default React.memo(Saha2D);
