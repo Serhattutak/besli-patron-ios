@@ -91,3 +91,15 @@ jobs:
           name: ios-simulator-launch-evidence
           path: ${{ runner.temp }}/simulator-evidence/
           if-no-files-found: ignore
+
+      - name: Install Maestro UI test runner
+        run: |
+          set -euo pipefail
+          curl -Ls "https://get.maestro.mobile.dev" | bash
+          echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
+
+      - name: Exercise day-end flow and verify tab interaction
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.maestro/bin:$PATH"
+          maestro test .maestro/day-cycle.yaml
