@@ -57,7 +57,7 @@ export default function OlayModal() {
               <TouchableOpacity
                 key={i}
                 style={[st.secenek, { paddingVertical: 12 * k, borderRadius: 12 * k, paddingHorizontal: 14 * k }]}
-                onPress={() => cozOlay(i)}
+                onPress={() => cozOlay(i)} accessibilityLabel={`Olay seçeneği ${i + 1}`} accessibilityRole="button"
               >
                 <Text style={[st.secenekYazi, { fontSize: 14 * k }]}>{etiket}</Text>
                 {ozet ? <Text style={[st.secenekOzet, { fontSize: 12 * k }]}>{ozet}</Text> : null}
