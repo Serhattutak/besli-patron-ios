@@ -68,7 +68,7 @@ export default function Ogretici() {
           </View>
           <Text style={st.marka}>SARDUR TECHNOLOGIES</Text>
           <View style={st.butonSatir}>
-            <TouchableOpacity style={st.atla} onPress={kapat}>
+            <TouchableOpacity style={st.atla} onPress={kapat} accessibilityLabel="Öğreticiyi Atla" accessibilityRole="button">
               <Text style={st.atlaYazi}>Atla</Text>
             </TouchableOpacity>
             <TouchableOpacity style={[st.ileri, son && st.ileriSon]} onPress={ileri}>
