@@ -4,7 +4,7 @@
 import React, {
   useEffect, useRef, useState } from 'react';
 import {
-  View, Text, ScrollView, TouchableOpacity, StyleSheet, Modal,
+  View, Text, ScrollView, TouchableOpacity, StyleSheet,
 } from 'react-native';
 import { useGame } from '../../context/GameContext';
 import Saha2D from '../../components/Saha2D';
@@ -268,6 +268,60 @@ export default function SahaScreen() {
   return (
     <View style={s.ekran}>
       <ScrollView ref={scrollRef} contentContainerStyle={s.icerik} showsVerticalScrollIndicator={false}>
+
+        {/* Gün sonu raporu artık native Modal değil: iOS'ta tüm uygulamanın dokunmalarını bloke etmesin. */}
+        {gunSonu ? (
+          <View style={s.gunSonuKart}>
+            <Text style={s.modalBaslik}>
+              {gunSonu?.sonuc?.isGameOver ? '💀 İFLAS ETTİN!' : `🌙 Gün ${gunSonu?.sonuc?.gun ?? '?'} Bitti!`}
+            </Text>
+            <View style={s.modalSatir}>
+              <Text style={s.modalEtiket}>💵 Toplam Gelir</Text>
+              <Text style={[s.modalDeger, { color: RENK.basari }]}>+{para(gunSonu?.sonuc?.gelir ?? 0)}</Text>
+            </View>
+            <View style={s.modalSatir}>
+              <Text style={s.modalEtiket}>🧾 Toplam Gider</Text>
+              <Text style={[s.modalDeger, { color: RENK.hata }]}>-{para(gunSonu?.sonuc?.gider ?? 0)}</Text>
+            </View>
+            <View style={s.modalSatir}>
+              <Text style={s.modalEtiket}>💼 Sponsor Geliri</Text>
+              <Text style={[s.modalDeger, { color: RENK.basari }]}>+{para(gunSonu?.sponsorGeliri ?? 0)}</Text>
+            </View>
+            <View style={s.modalAyirici} />
+            <View style={s.modalSatir}>
+              <Text style={s.modalEtiket}>📊 Net Kâr / Zarar</Text>
+              <Text style={[s.modalDeger, { color: (gunSonu?.sonuc?.net ?? 0) >= 0 ? RENK.basari : RENK.hata }]}>
+                {para(gunSonu?.sonuc?.net ?? 0)}
+              </Text>
+            </View>
+            <View style={s.modalSatir}>
+              <Text style={s.modalEtiket}>💰 Kasadaki Para</Text>
+              <Text style={s.modalKasa}>{para((gunSonu?.sonuc?.nakit ?? 0) + (gunSonu?.sponsorGeliri ?? 0))}</Text>
+            </View>
+            <View style={s.modalSatir}>
+              <Text style={s.modalEtiket}>😊 Memnuniyet</Text>
+              <Text style={s.modalSoluk}>%{gunSonu?.sonuc?.yeniMemnuniyet ?? '—'}</Text>
+            </View>
+            {(gunSonu?.sonuc?.gorevOdul ?? 0) > 0 ? (
+              <View style={s.modalSatir}>
+                <Text style={s.modalEtiket}>🎁 Görev Ödülü</Text>
+                <Text style={[s.modalDeger, { color: RENK.basari }]}>+{para(gunSonu.sonuc.gorevOdul)}</Text>
+              </View>
+            ) : null}
+            {(gunSonu?.sonuc?.jetonOdul ?? 0) > 0 ? (
+              <View style={s.modalSatir}>
+                <Text style={s.modalEtiket}>🎟️ Jeton Ödülü</Text>
+                <Text style={[s.modalDeger, { color: RENK.basari }]}>+{gunSonu.sonuc.jetonOdul} jeton</Text>
+              </View>
+            ) : null}
+            {gunSonu?.sonuc?.isGameOver ? (
+              <Text style={s.modalIflosNot}>Nakit eksiye düştü ve iflas limiti aşıldı. Ana ekrandan oyunu sıfırlayıp yeniden başlayabilirsin.</Text>
+            ) : null}
+            <TouchableOpacity style={s.modalKapat} onPress={() => setGunSonu(null)} activeOpacity={0.85}>
+              <Text style={s.modalKapatYazi}>☀️ Kapat ve Devam Et</Text>
+            </TouchableOpacity>
+          </View>
+        ) : null}
 
         {/* === MESAJ === */}
         {mesaj ? (
@@ -607,94 +661,7 @@ export default function SahaScreen() {
 
       </ScrollView>
 
-      {/* === GÜN SONU ÖZETİ (MODAL) === */}
-      <Modal visible={!!gunSonu} transparent animationType="fade" onRequestClose={() => setGunSonu(null)}>
-        <View style={s.modalKaplama}>
-          <View style={s.modalKutu}>
-            <ScrollView
-              style={{ maxHeight: '75%' }}
-              contentContainerStyle={{ gap: 6 }}
-              showsVerticalScrollIndicator
-              keyboardShouldPersistTaps="handled"
-            >
-            {gunSonu?.sonuc?.isGameOver ? (
-              <Text style={s.modalIflos}>💀 İFLAS ETTİN!</Text>
-            ) : (
-              <Text style={s.modalBaslik}>🌙 Gün {gunSonu?.sonuc?.gun ?? '?'} Bitti!</Text>
-            )}
 
-            <View style={s.modalSatir}>
-              <Text style={s.modalEtiket}>💵 Toplam Gelir</Text>
-              <Text style={[s.modalDeger, { color: RENK.basari }]}>+{para(gunSonu?.sonuc?.gelir ?? 0)}</Text>
-            </View>
-            <View style={s.modalSatir}>
-              <Text style={s.modalEtiket}>🏟️ Saha Geliri</Text>
-              <Text style={s.modalSoluk}>{para(gunSonu?.sonuc?.sahaGelir ?? 0)}</Text>
-            </View>
-            <View style={s.modalSatir}>
-              <Text style={s.modalEtiket}>🧾 Toplam Gider (kira, elektrik, bakım)</Text>
-              <Text style={[s.modalDeger, { color: RENK.hata }]}>-{para(gunSonu?.sonuc?.gider ?? 0)}</Text>
-            </View>
-            <View style={s.modalSatir}>
-              <Text style={s.modalEtiket}>👥 Personel Maaşı (giderin içinde)</Text>
-              <Text style={s.modalSoluk}>{para(gunSonu?.sonuc?.personelMaas ?? 0)}</Text>
-            </View>
-            <View style={s.modalSatir}>
-              <Text style={s.modalEtiket}>💼 Sponsor Geliri (kasaya yattı)</Text>
-              <Text style={[s.modalDeger, { color: RENK.basari }]}>+{para(gunSonu?.sponsorGeliri ?? 0)}</Text>
-            </View>
-
-            {(gunSonu?.sonuc?.gorevOdul ?? 0) > 0 ? (
-              <View style={s.modalSatir}>
-                <Text style={s.modalEtiket}>🎁 Görev Ödülü</Text>
-                <Text style={[s.modalDeger, { color: RENK.basari }]}>+{para(gunSonu.sonuc.gorevOdul)}</Text>
-              </View>
-            ) : null}
-            {(gunSonu?.sonuc?.jetonOdul ?? 0) > 0 ? (
-              <View style={s.modalSatir}>
-                <Text style={s.modalEtiket}>🎟️ Jeton Ödülü</Text>
-                <Text style={[s.modalDeger, { color: RENK.basari }]}>+{gunSonu.sonuc.jetonOdul} jeton</Text>
-              </View>
-            ) : null}
-
-            <View style={s.modalAyirici} />
-
-            <View style={s.modalSatir}>
-              <Text style={s.modalEtiket}>📊 Net Kâr / Zarar</Text>
-              <Text style={[s.modalDeger, { color: (gunSonu?.sonuc?.net ?? 0) >= 0 ? RENK.basari : RENK.hata }]}>
-                {para(gunSonu?.sonuc?.net ?? 0)}
-              </Text>
-            </View>
-            <View style={s.modalSatir}>
-              <Text style={s.modalEtiket}>💰 Kasadaki Para</Text>
-              <Text style={s.modalKasa}>
-                {para((gunSonu?.sonuc?.nakit ?? 0) + (gunSonu?.sponsorGeliri ?? 0))}
-              </Text>
-            </View>
-            <View style={s.modalSatir}>
-              <Text style={s.modalEtiket}>😊 Memnuniyet</Text>
-              <Text style={s.modalSoluk}>%{gunSonu?.sonuc?.yeniMemnuniyet ?? '—'}</Text>
-            </View>
-            {(gunSonu?.sonuc?.sadikKazanci ?? 0) > 0 ? (
-              <View style={s.modalSatir}>
-                <Text style={s.modalEtiket}>❤️ Sadık Müşteri</Text>
-                <Text style={[s.modalDeger, { color: RENK.basari }]}>+{gunSonu.sonuc.sadikKazanci}</Text>
-              </View>
-            ) : null}
-
-            {gunSonu?.sonuc?.isGameOver ? (
-              <Text style={s.modalIflosNot}>
-                Nakit eksiye düştü ve iflas limiti aşıldı. Ana ekrandan oyunu sıfırlayıp yeniden başlayabilirsin.
-              </Text>
-            ) : null}
-
-            </ScrollView>
-            <TouchableOpacity style={s.modalKapat} onPress={() => setGunSonu(null)} activeOpacity={0.85}>
-              <Text style={s.modalKapatYazi}>☀️ Yeni Güne Başla</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
     </View>
   );
 }
@@ -719,7 +686,8 @@ const s = StyleSheet.create({
   gunBitirYazi: { color: RENK.arkaPlan, fontSize: 16, fontFamily: FONT.buyuk },
   gunBitirAlt: { color: RENK.arkaPlan, opacity: 0.8, fontSize: 10, fontFamily: FONT.govde, marginTop: 2 },
 
-  // Gün sonu modalı
+  // Gün sonu özeti ana ekran akışında gösterilir; ekranı bloke eden modal yok.
+  gunSonuKart: { backgroundColor: RENK.panel, borderRadius: 16, borderWidth: 1.5, borderColor: RENK.vurgu, padding: 14, gap: 8 },
   modalKaplama: { flex: 1, backgroundColor: 'rgba(0,0,0,0.80)', alignItems: 'center', justifyContent: 'center', padding: 20 },
   modalKutu: {
     width: '100%', maxWidth: 420, maxHeight: '90%',
