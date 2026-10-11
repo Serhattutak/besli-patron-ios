@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { createInitialState, processEndDay } from '../services/gameLogic';
 
-// Pure game-logic smoke test: process multiple consecutive day transitions
+// Pure game-logic smoke test: process multiple consecutive day transitions in CI
 // without React Native UI or device-specific APIs.
 let state = createInitialState();
 const firstDay = state.gun;
