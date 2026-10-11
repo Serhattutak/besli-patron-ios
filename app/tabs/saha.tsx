@@ -4,7 +4,7 @@
 import React, {
   useEffect, useRef, useState } from 'react';
 import {
-  View, Text, ScrollView, TouchableOpacity, StyleSheet, Modal, InteractionManager,
+  View, Text, ScrollView, TouchableOpacity, StyleSheet, Modal,
 } from 'react-native';
 import { useGame } from '../../context/GameContext';
 import Saha2D from '../../components/Saha2D';
@@ -221,9 +221,9 @@ export default function SahaScreen() {
       bildir('Gün bitirilemedi — oyun durumu hazır değil.');
       return;
     }
-    InteractionManager.runAfterInteractions(() => {
+    // Gün sonu özetini InteractionManager kuyruğuna bırakma.
+    // iOS'ta bekleyen animasyon/interaction kuyruğu tamamlanmazsa callback hiç çalışmayabilir.
     setGunSonu({ sonuc, sponsorGeliri });
-  });
   };
 
   if (!state) {
