@@ -610,7 +610,12 @@ export default function SahaScreen() {
       {/* === GÜN SONU ÖZETİ (MODAL) === */}
       <Modal visible={!!gunSonu} transparent animationType="fade" onRequestClose={() => setGunSonu(null)}>
         <View style={s.modalKaplama}>
-          <View style={s.modalKutu}>
+          <ScrollView
+            style={s.modalKutu}
+            contentContainerStyle={{ gap: 6 }}
+            showsVerticalScrollIndicator
+            keyboardShouldPersistTaps="handled"
+          >
             {gunSonu?.sonuc?.isGameOver ? (
               <Text style={s.modalIflos}>💀 İFLAS ETTİN!</Text>
             ) : (
@@ -685,7 +690,7 @@ export default function SahaScreen() {
             <TouchableOpacity style={s.modalKapat} onPress={() => setGunSonu(null)} activeOpacity={0.85}>
               <Text style={s.modalKapatYazi}>☀️ Yeni Güne Başla</Text>
             </TouchableOpacity>
-          </View>
+          </ScrollView>
         </View>
       </Modal>
     </View>
@@ -715,8 +720,9 @@ const s = StyleSheet.create({
   // Gün sonu modalı
   modalKaplama: { flex: 1, backgroundColor: 'rgba(0,0,0,0.80)', alignItems: 'center', justifyContent: 'center', padding: 20 },
   modalKutu: {
-    width: '100%', maxWidth: 420, backgroundColor: RENK.panel, borderRadius: 16,
-    borderWidth: 1.5, borderColor: RENK.vurgu, padding: 16, gap: 6,
+    width: '100%', maxWidth: 420, maxHeight: '90%',
+    backgroundColor: RENK.panel, borderRadius: 16,
+    borderWidth: 1.5, borderColor: RENK.vurgu, padding: 16,
   },
   modalBaslik: { color: RENK.yazi, fontSize: 18, fontFamily: FONT.baslik, marginBottom: 6, textAlign: 'center' },
   modalIflos: { color: RENK.hata, fontSize: 18, fontFamily: FONT.baslik, marginBottom: 6, textAlign: 'center' },
