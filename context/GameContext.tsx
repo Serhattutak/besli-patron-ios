@@ -448,15 +448,12 @@ const tomorrow = gunuHazirla(sonraki);
       });
       setState(tomorrow);
       console.log("[END_DAY_TRACE] AFTER_SET_STATE", { newGun: tomorrow.gun });
-// KAYIT: Gün geçişinin kritik UI yolunu bloke etme.
-      // saveGame içinde JSON.stringify senkron çalıştığı için
-      // kaydı yeni gün ekranı oluşturulduktan sonra başlatıyoruz.
-      setTimeout(() => {
-        void saveGame(tomorrow).catch(error => {
-          console.error("[END_DAY_SAVE_ERROR]", error);
-        });
-      }, 2500);
-return result;
+// Yeni günün kaydını geciktirme: gecikme sırasında uygulama kapanırsa
+      // ekranda ilerleyen gün diske yazılmayabilir. saveGame kuyruğu kayıtları sıralar.
+      void saveGame(tomorrow).catch(error => {
+        console.error("[END_DAY_SAVE_ERROR]", error);
+      });
+      return result;
 
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
