@@ -1,0 +1,93 @@
+name: iOS Simulator Smoke Test
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+
+jobs:
+  simulator-smoke:
+    runs-on: macos-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Test ten consecutive game-day transitions
+        run: npx --yes tsx scripts/day-cycle-smoke.ts
+
+      - name: Generate iOS project
+        run: npx expo prebuild --platform ios --no-install
+
+      - name: Install CocoaPods
+        run: npx pod-install
+
+      - name: Build for iOS Simulator
+        run: |
+          set -euo pipefail
+          WORKSPACE="$(find ios -maxdepth 1 -name '*.xcworkspace' -print -quit)"
+          if [ -z "$WORKSPACE" ]; then
+            echo "::error::No iOS workspace was generated."
+            exit 1
+          fi
+
+          SCHEME="$(xcodebuild -workspace "$WORKSPACE" -list | awk '/Schemes:/ {found=1; next} found && NF {print $1; exit}')"
+          if [ -z "$SCHEME" ]; then
+            echo "::error::No Xcode scheme was found."
+            exit 1
+          fi
+
+          echo "Workspace: $WORKSPACE"
+          echo "Scheme: $SCHEME"
+          xcodebuild \
+            -workspace "$WORKSPACE" \
+            -scheme "$SCHEME" \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath "$RUNNER_TEMP/DerivedData" \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+
+      - name: Boot simulator and launch app
+        run: |
+          set -euo pipefail
+          DEVICE_ID="$(xcrun simctl list devices available | awk -F '[()]' '/iPhone/ {print $2; exit}')"
+          if [ -z "$DEVICE_ID" ]; then
+            echo "::error::No available iPhone simulator was found."
+            xcrun simctl list devices available
+            exit 1
+          fi
+
+          xcrun simctl boot "$DEVICE_ID" || true
+          xcrun simctl bootstatus "$DEVICE_ID" -b
+          APP_PATH="$(find "$RUNNER_TEMP/DerivedData/Build/Products/Debug-iphonesimulator" -maxdepth 1 -name '*.app' -print -quit)"
+          if [ -z "$APP_PATH" ]; then
+            echo "::error::Simulator .app bundle was not produced."
+            exit 1
+          fi
+
+          xcrun simctl install "$DEVICE_ID" "$APP_PATH"
+          xcrun simctl launch "$DEVICE_ID" com.sardurtechnologies.beslipatron
+          sleep 15
+          mkdir -p "$RUNNER_TEMP/simulator-evidence"
+          xcrun simctl io "$DEVICE_ID" screenshot "$RUNNER_TEMP/simulator-evidence/launch.png"
+
+      - name: Upload simulator launch evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-simulator-launch-evidence
+          path: ${{ runner.temp }}/simulator-evidence/
+          if-no-files-found: ignore
