@@ -381,6 +381,12 @@ if (!state) {
       return null;
     }
 
+    // Aynı günün ikinci kez işlenmesini engelle. Ref, React render zamanlamasından bağımsızdır.
+    if (endDayGunRef.current === state.gun) {
+      console.warn("[END_DAY_TRACE] DAY_ALREADY_PROCESSED", { gun: state.gun });
+      return null;
+    }
+
     // Aynı anda ikinci gün geçişini engelle.
     if (endDayKilitRef.current) {
       console.warn("[END_DAY_TRACE] LOCK_ACTIVE", { gun: state.gun });
@@ -390,6 +396,7 @@ if (!state) {
     }
 
     endDayKilitRef.current = true;
+    endDayGunRef.current = state.gun;
 
     try {
 // Sponsorları güvenli şekilde al.
@@ -460,6 +467,8 @@ return result;
       });
       console.error("[END_DAY_TRACE] RETURN_NULL", { reason: "ERROR" });
       console.error("[END_DAY_ERROR]", error);
+      // İşlem hata verdiyse aynı gün yeniden denenebilsin.
+      if (endDayGunRef.current === state.gun) endDayGunRef.current = -1;
 
       // Hatanın gerçek sebebini iOS logunda görebilmek için.
       if (error instanceof Error) {
