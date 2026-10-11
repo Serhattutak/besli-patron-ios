@@ -1,5 +1,4 @@
 name: iOS TestFlight Upload
-name: iOS TestFlight Upload
 
 on:
   workflow_dispatch:
