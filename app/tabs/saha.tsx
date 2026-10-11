@@ -352,7 +352,6 @@ export default function SahaScreen() {
             kalite={gosterilenKalite}
             sahaTipi={aktif.sahaTipi ?? 'yildiz'}
             canli={canliIzle && acik}
-              gun={state.gun}
             upgrades={up}
           />
           <View style={s.canliSatir}>
