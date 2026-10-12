@@ -1,4 +1,4 @@
-﻿import {
+import mobileAds, {
   AdEventType,
   RewardedAd,
   RewardedAdEventType,
@@ -9,74 +9,97 @@ const REWARDED_AD_UNIT_ID = __DEV__
   ? TestIds.REWARDED
   : 'ca-app-pub-4873666267587702/1435662670';
 
+let adsInitialization: Promise<unknown> | null = null;
+
+/**
+ * Initialize Google Mobile Ads once before requesting any ad.
+ * Keep this explicit: having the SDK installed alone does not start it.
+ */
 export async function reklamlariBaslat(): Promise<void> {
-  return;
+  if (!adsInitialization) {
+    adsInitialization = mobileAds().initialize().catch((error) => {
+      adsInitialization = null;
+      console.log('Google Mobile Ads baslatilamadi:', error);
+      throw error;
+    });
+  }
+
+  await adsInitialization;
 }
 
 export function gecisReklamGoster(): boolean {
+  // Interstitial ads intentionally remain disabled until a suitable
+  // in-game placement is explicitly implemented and tested.
   return false;
 }
 
 export async function gunSonuReklamKontrol(): Promise<void> {
-  return;
+  // No automatic end-of-session ad is shown.
 }
 
-export function odulluReklamIzle(): Promise<boolean> {
-  return new Promise((resolve) => {
-    const ad = RewardedAd.createForAdRequest(REWARDED_AD_UNIT_ID);
+export async function odulluReklamIzle(): Promise<boolean> {
+  try {
+    await reklamlariBaslat();
 
-    let odulVerildi = false;
-    let tamamlandi = false;
+    return await new Promise<boolean>((resolve) => {
+      const ad = RewardedAd.createForAdRequest(REWARDED_AD_UNIT_ID);
+      let odulVerildi = false;
+      let tamamlandi = false;
 
-    const temizle = () => {
-      unsubscribeLoaded();
-      unsubscribeReward();
-      unsubscribeClosed();
-      unsubscribeError();
-    };
+      let unsubscribeLoaded = () => {};
+      let unsubscribeReward = () => {};
+      let unsubscribeClosed = () => {};
+      let unsubscribeError = () => {};
 
-    const bitir = (sonuc: boolean) => {
-      if (tamamlandi) return;
+      const temizle = () => {
+        unsubscribeLoaded();
+        unsubscribeReward();
+        unsubscribeClosed();
+        unsubscribeError();
+      };
 
-      tamamlandi = true;
-      temizle();
-      resolve(sonuc);
-    };
+      const bitir = (sonuc: boolean) => {
+        if (tamamlandi) return;
+        tamamlandi = true;
+        temizle();
+        resolve(sonuc);
+      };
 
-    const unsubscribeLoaded = ad.addAdEventListener(
-      RewardedAdEventType.LOADED,
-      () => {
-        ad.show();
-      }
-    );
+      unsubscribeLoaded = ad.addAdEventListener(
+        RewardedAdEventType.LOADED,
+        () => {
+          ad.show().catch((error) => {
+            console.log('Rewarded reklam gosterilemedi:', error);
+            bitir(false);
+          });
+        }
+      );
 
-    const unsubscribeReward = ad.addAdEventListener(
-      RewardedAdEventType.EARNED_REWARD,
-      () => {
-        odulVerildi = true;
-      }
-    );
+      unsubscribeReward = ad.addAdEventListener(
+        RewardedAdEventType.EARNED_REWARD,
+        () => {
+          odulVerildi = true;
+        }
+      );
 
-    const unsubscribeClosed = ad.addAdEventListener(
-      AdEventType.CLOSED,
-      () => {
+      unsubscribeClosed = ad.addAdEventListener(AdEventType.CLOSED, () => {
         bitir(odulVerildi);
-      }
-    );
+      });
 
-    const unsubscribeError = ad.addAdEventListener(
-      AdEventType.ERROR,
-      (error) => {
+      unsubscribeError = ad.addAdEventListener(AdEventType.ERROR, (error) => {
         console.log('Rewarded reklam hatasi:', error);
         bitir(false);
-      }
-    );
+      });
 
-    try {
-      ad.load();
-    } catch (error) {
-      console.log('Rewarded reklam yuklenemedi:', error);
-      bitir(false);
-    }
-  });
+      try {
+        ad.load();
+      } catch (error) {
+        console.log('Rewarded reklam yuklenemedi:', error);
+        bitir(false);
+      }
+    });
+  } catch (error) {
+    console.log('Reklam sistemi hazir degil:', error);
+    return false;
+  }
 }
