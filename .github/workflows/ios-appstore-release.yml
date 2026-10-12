@@ -194,6 +194,15 @@ jobs:
             CURRENT_PROJECT_VERSION=27 \
             archive
 
+      - name: Enforce App Store bundle version 27 in archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          APP_PLIST="$RUNNER_TEMP/archive/BesliPatron.xcarchive/Products/Applications/BeliPatron.app/Info.plist"
+          test -f "$APP_PLIST"
+          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion 27" "$APP_PLIST"
+          echo "Archived app CFBundleVersion: $(/usr/libexec/PlistBuddy -c \"Print :CFBundleVersion\" "$APP_PLIST")"
+
       - name: Export App Store IPA
         shell: bash
         run: |
