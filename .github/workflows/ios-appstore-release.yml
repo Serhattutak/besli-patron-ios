@@ -95,7 +95,7 @@ jobs:
           fi
 
           # Compare public certificate fingerprints without printing or exposing private key material.
-          openssl pkcs12 -in "$RUNNER_TEMP/signing/dist-cert.p12" -clcerts -nokeys \
+          openssl pkcs12 -legacy -in "$RUNNER_TEMP/signing/dist-cert.p12" -clcerts -nokeys \
             -passin env:IOS_DIST_CERT_PASSWORD -out "$RUNNER_TEMP/signing/dist-cert.pem"
           openssl x509 -in "$RUNNER_TEMP/signing/dist-cert.pem" -outform DER \
             -out "$RUNNER_TEMP/signing/dist-cert.der"
