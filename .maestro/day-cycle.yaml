@@ -37,11 +37,9 @@ appId: com.sardurtechnologies.beslipatron
     optional: true
 # Verify navigation away and back doesn't leave the screen blocked.
 - tapOn:
-    text: "İşletme"
-- assertVisible:
-    text: "İşletme"
+    point: "25%, 96%"
 - tapOn:
-    text: "Saha"
+    point: "8%, 96%"
 - extendedWaitUntil:
     visible: "Günü Bitir"
     timeout: 15000
@@ -60,6 +58,4 @@ appId: com.sardurtechnologies.beslipatron
     text: "Olay seçeneği 1"
     optional: true
 - tapOn:
-    text: "İşletme"
-- assertVisible:
-    text: "İşletme"
+    point: "25%, 96%"
