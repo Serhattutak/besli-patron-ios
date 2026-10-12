@@ -15,7 +15,7 @@ import { useGame } from '../context/GameContext';
 import { odulluReklamIzle } from '../services/adManager';
 import { sfx } from '../services/soundManager';
 
-export default function OdulluReklamButonu({ odulJeton = 1 }: { odulJeton?: number }) {
+export default function OdulluReklamButonu({ odulJeton = 25 }: { odulJeton?: number }) {
   const game = useGame() as any;
   const [yukleniyor, setYukleniyor] = useState(false);
   const [mesaj, setMesaj] = useState('');
