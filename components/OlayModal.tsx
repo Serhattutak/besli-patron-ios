@@ -12,7 +12,7 @@ function gs(v: unknown, yedek = 0): number {
 }
 
 export default function OlayModal() {
-  const { state, cozOlay } = useGame();
+  const { state, cozOlay, gunSonuRaporuAcik } = useGame();
   const pathname = usePathname() ?? '';
   const { width } = useWindowDimensions();
   const k = Math.max(0.85, Math.min(1.4, width / 375));
@@ -21,6 +21,8 @@ export default function OlayModal() {
   const sablon: any = OLAY_HAVUZU?.find((o: any) => o?.id === olayId) as any;
 
   if (!state || state.isGameOver || !olayId || state.olayCozuldu || !sablon) return null;
+  // Gün sonu raporu önce kapatılmalı; olay modalı rapor düğmesini örtmemeli.
+  if (gunSonuRaporuAcik) return null;
   if (!pathname.startsWith('/tabs')) return null;
 
   const baslik = sablon.ad ?? sablon.baslik ?? sablon.title ?? 'Günün Olayı';
