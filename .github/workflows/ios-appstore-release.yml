@@ -192,6 +192,7 @@ jobs:
             CODE_SIGN_IDENTITY="Apple Distribution" \
             PROVISIONING_PROFILE_SPECIFIER="$PROFILE_NAME" \
             CURRENT_PROJECT_VERSION=27 \
+            INFOPLIST_KEY_CFBundleVersion=27 \
             archive
 
       - name: Enforce App Store bundle version 27 in archive
@@ -213,7 +214,16 @@ jobs:
             -archivePath "$RUNNER_TEMP/archive/BesliPatron.xcarchive" \
             -exportPath "$RUNNER_TEMP/export" \
             -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist"
-          test -n "$(find "$RUNNER_TEMP/export" -maxdepth 1 -name "*.ipa" -print -quit)"
+          IPA_PATH="$(find "$RUNNER_TEMP/export" -maxdepth 1 -name "*.ipa" -print -quit)"
+          test -n "$IPA_PATH"
+          VERIFY_DIR="$RUNNER_TEMP/ipa-version-check"
+          mkdir -p "$VERIFY_DIR"
+          ditto -x -k "$IPA_PATH" "$VERIFY_DIR"
+          EXPORTED_PLIST="$VERIFY_DIR/Payload/BeliPatron.app/Info.plist"
+          test -f "$EXPORTED_PLIST"
+          EXPORTED_VERSION="$(/usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$EXPORTED_PLIST")"
+          echo "Exported IPA CFBundleVersion: $EXPORTED_VERSION"
+          test "$EXPORTED_VERSION" = "27"
 
       - name: Save IPA artifact
         uses: actions/upload-artifact@v4
