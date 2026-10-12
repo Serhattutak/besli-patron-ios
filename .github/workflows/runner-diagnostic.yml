@@ -1,9 +1,6 @@
 name: GitHub Actions Runner Diagnostic
 
 on:
-  push:
-    branches:
-      - master
   workflow_dispatch:
 
 permissions:
