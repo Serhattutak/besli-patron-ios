@@ -8,7 +8,7 @@ import mobileAds, {
 
 const INTERSTITIAL_AD_UNIT_ID = __DEV__
   ? TestIds.INTERSTITIAL
-  : ''; // Set the real AdMob interstitial unit ID before monetizing.
+  : 'ca-app-pub-4873666267587702/9741126127';
 
 const REWARDED_AD_UNIT_ID = __DEV__
   ? TestIds.REWARDED
