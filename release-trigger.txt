@@ -1,3 +1,4 @@
 Trigger App Store release workflow on ios-appstore-release. No application source code changed.
 Run timestamp: 2026-10-12; retry with the newly verified matching App Store provisioning profile.
 Retry App Store upload with bundle version 27; signing and IPA export previously succeeded.
+Retry with explicit archived Info.plist CFBundleVersion=27 before IPA export.
