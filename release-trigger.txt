@@ -1,6 +1,3 @@
-Trigger App Store release workflow on ios-appstore-release. No application source code changed.
-Run timestamp: 2026-10-12; retry with the newly verified matching App Store provisioning profile.
-Retry App Store upload with bundle version 27; signing and IPA export previously succeeded.
-Retry with explicit archived Info.plist CFBundleVersion=27 before IPA export.
-Rebuild with explicit INFOPLIST_KEY_CFBundleVersion=27 and verify exported IPA metadata.
-Set app.json ios.buildNumber to 27 as the source of truth; verify exported IPA version before upload.
+Trigger App Store release workflow on ios-appstore-release.
+Run timestamp: 2026-10-13; rebuild after initializing Google Mobile Ads before rewarded-ad requests.
+Application source update: services/adManager.ts initializes the SDK once; rewarded ads wait for initialization and return no reward on load/presentation errors.
