@@ -2,6 +2,9 @@ name: iOS Ad Hoc Build
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - ios-adhoc-diawi
 
 jobs:
   build-ios:
