@@ -24,14 +24,15 @@ appId: com.sardurtechnologies.beslipatron
 # Day 1 -> Day 2
 - tapOn:
     text: "Günü Bitir"
-- tapOn:
-    text: "Olay seçeneği 1"
-    optional: true
 - extendedWaitUntil:
     visible: "Kapat ve Devam Et"
     timeout: 15000
 - tapOn:
     text: "Kapat ve Devam Et"
+# The new-day event is shown after the report closes, never on top of it.
+- tapOn:
+    text: "Olay seçeneği 1"
+    optional: true
 # Verify navigation away and back doesn't leave the screen blocked.
 - tapOn:
     text: "İşletme"
@@ -45,14 +46,15 @@ appId: com.sardurtechnologies.beslipatron
 # Day 2 -> Day 3 (catches a stale day-end lock or state closure).
 - tapOn:
     text: "Günü Bitir"
-- tapOn:
-    text: "Olay seçeneği 1"
-    optional: true
 - extendedWaitUntil:
     visible: "Kapat ve Devam Et"
     timeout: 15000
 - tapOn:
     text: "Kapat ve Devam Et"
+# The new-day event is shown after the report closes, never on top of it.
+- tapOn:
+    text: "Olay seçeneği 1"
+    optional: true
 - tapOn:
     text: "İşletme"
 - assertVisible:
