@@ -11,7 +11,7 @@ appId: com.sardurtechnologies.beslipatron
     text: "Oyuna Başla"
     optional: true
 - tapOn:
-    text: "Atla"
+    text: "Öğreticiyi Atla"
     optional: true
 - extendedWaitUntil:
     visible: "Günü Bitir"
