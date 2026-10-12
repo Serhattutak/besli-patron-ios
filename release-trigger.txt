@@ -1,3 +1,5 @@
 Trigger App Store release workflow on ios-appstore-release.
 Run timestamp: 2026-10-13; rebuild after initializing Google Mobile Ads before rewarded-ad requests.
 Application source update: services/adManager.ts initializes the SDK once; rewarded ads wait for initialization and return no reward on load/presentation errors.
+
+Build 28: initialize Google Mobile Ads and verify rewarded-ad loading on TestFlight. Avoid duplicate build number 27.
