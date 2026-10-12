@@ -1,2 +1,2 @@
 Trigger App Store release workflow on ios-appstore-release. No application source code changed.
-Run timestamp: 2026-10-12 22:10 Europe/Istanbul; provisioning profile updated by user; trigger after profile secret update.
+Run timestamp: 2026-10-12; added signing certificate fingerprint diagnostics before archive.
