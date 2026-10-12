@@ -5,7 +5,7 @@ import type { Reservation, DailyTask, GameState, LifeItem, CityData, StaffMember
 import {
   MUSTERI_TIPLERI, TIME_SLOTS, GOREV_HAVUZU,
   ENERJI_REZERVASYON, ENERJI_GUN_SONU, MAX_ENERJI,
-  JETON_GOREV_ODUL, IFLAS_GUN_LIMIT, INITIAL_NAKIT,
+  IFLAS_GUN_LIMIT, INITIAL_NAKIT,
   INITIAL_ENERJI, INITIAL_SAHA_KALITESI, INITIAL_GUN,
   LIFE_ITEMS, CITIES, STAFF_CONFIG, TURNUVA_CONFIG, MEMNUNIYET_CONFIG,
   KANTIN_CONFIG, OLAY_HAVUZU,
@@ -478,7 +478,7 @@ export interface DayEndResult {
 // Sezon sistemi (30 gün) — gameConfig'deki SEZON_CONFIG ile aynı değerler
 const SEZON_UZUNLUK = 30;
 const SEZON_HEDEF = 650000;
-const SEZON_JETON = 200;
+const SEZON_JETON = 0;
 const SEZON_PRESTIJ = 50;
 
 export function processEndDay(state: GameState): { newState: GameState; result: DayEndResult } {
@@ -518,7 +518,8 @@ export function processEndDay(state: GameState): { newState: GameState; result: 
   // === GÖREVLER ===
   const completedTasks = (state.gunlukGorevler ?? []).filter(t => t?.tamamlandi);
   const gorevOdul = completedTasks.reduce((toplam, t) => toplam + safeNum(t.odul, 0), 0);
-  const jetonOdul = completedTasks.length > 0 ? safeNum(JETON_GOREV_ODUL, 50) * completedTasks.length : 0;
+  // Jetonlar artık yalnızca tamamlanan ödüllü reklamlardan kazanılır.
+  const jetonOdul = 0;
 
   // === MEMNUNİYET ===
   const bekleyen = (state.bugunRezervasyonlar ?? []).filter(r => r?.durum === 'bekliyor').length;
