@@ -17,10 +17,30 @@ appId: com.sardurtechnologies.beslipatron
 - extendedWaitUntil:
     visible: "Günü Bitir"
     timeout: 30000
+# Day 1 -> Day 2
 - tapOn:
     text: "Günü Bitir"
-# A random new-day event uses a native Modal and can cover the inline report.
-# Resolve it first if present, then close the report.
+- tapOn:
+    text: "Olay seçeneği 1"
+    optional: true
+- extendedWaitUntil:
+    visible: "Kapat ve Devam Et"
+    timeout: 15000
+- tapOn:
+    text: "Kapat ve Devam Et"
+# Verify navigation away and back doesn't leave the screen blocked.
+- tapOn:
+    text: "İşletme"
+- assertVisible:
+    text: "İşletme"
+- tapOn:
+    text: "Saha"
+- extendedWaitUntil:
+    visible: "Günü Bitir"
+    timeout: 15000
+# Day 2 -> Day 3 (catches a stale day-end lock or state closure).
+- tapOn:
+    text: "Günü Bitir"
 - tapOn:
     text: "Olay seçeneği 1"
     optional: true
