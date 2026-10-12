@@ -23,6 +23,7 @@ import {
   sahaGunlukGideri, sahaGunlukPasifGelir,
 } from '../../services/gameLogic';
 import type { PitchState } from '../../types/game';
+import { gecisReklamGoster } from '../../services/adManager';
 
 // GameContext'teki BAKIM_COST ile aynı değer (orada export edilmediği için burada da tanımlı)
 const BAKIM_UCRETI = 500;
@@ -217,7 +218,7 @@ export default function SahaScreen() {
   };
 
   // === GÜNÜ BİTİR — gün döngüsü buradan döner ===
-  const gunuBitir = () => {
+  const gunuBitir = async () => {
         // Gün geçişinden önce canlı saha simülasyonunu durdur.
     setCanliIzle(false);
 // Sponsor geliri gün kapanmadan hesaplanır (GameContext de aynı listeyi kullanır)
@@ -227,6 +228,9 @@ export default function SahaScreen() {
       bildir('Gün bitirilemedi — oyun durumu hazır değil.');
       return;
     }
+    // Reklam yalnızca 4 dakikalık aralık dolduysa doğal gün geçişinde değerlendirilir.
+    // Reklam yüklenmezse gün sonu akışı devam eder.
+    try { await gecisReklamGoster(); } catch { /* Reklam hatası oyunu durdurmamalı. */ }
     // Gün sonu özetini InteractionManager kuyruğuna bırakma.
     // iOS'ta bekleyen animasyon/interaction kuyruğu tamamlanmazsa callback hiç çalışmayabilir.
     setGunSonuRaporuAcik(true);
