@@ -14,6 +14,10 @@ appId: com.sardurtechnologies.beslipatron
     timeout: 15000
 - tapOn:
     text: "Oyuna Başla"
+# A random event can appear immediately when the new game starts.
+- tapOn:
+    text: "Olay seçeneği 1"
+    optional: true
 - extendedWaitUntil:
     visible: "Günü Bitir"
     timeout: 30000
