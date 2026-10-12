@@ -3,3 +3,4 @@ Run timestamp: 2026-10-12; retry with the newly verified matching App Store prov
 Retry App Store upload with bundle version 27; signing and IPA export previously succeeded.
 Retry with explicit archived Info.plist CFBundleVersion=27 before IPA export.
 Rebuild with explicit INFOPLIST_KEY_CFBundleVersion=27 and verify exported IPA metadata.
+Set app.json ios.buildNumber to 27 as the source of truth; verify exported IPA version before upload.
