@@ -27,6 +27,8 @@ appId: com.sardurtechnologies.beslipatron
 - extendedWaitUntil:
     visible: "Kapat ve Devam Et"
     timeout: 15000
+- assertVisible:
+    text: "Gün 1 Bitti!"
 - tapOn:
     text: "Kapat ve Devam Et"
 # The new-day event is shown after the report closes, never on top of it.
@@ -49,6 +51,8 @@ appId: com.sardurtechnologies.beslipatron
 - extendedWaitUntil:
     visible: "Kapat ve Devam Et"
     timeout: 15000
+- assertVisible:
+    text: "Gün 2 Bitti!"
 - tapOn:
     text: "Kapat ve Devam Et"
 # The new-day event is shown after the report closes, never on top of it.
