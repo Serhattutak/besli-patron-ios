@@ -97,6 +97,7 @@ export default function SahaScreen() {
     buyPitchArsa, insaatIlerlet, pitchUpgradeAl, setActivePitch,
     imzaSponsor, iptalSponsor,
     endDay,
+    setGunSonuRaporuAcik,
   } = useGame();
 
   const [mesaj, setMesaj] = useState<string | null>(null);
@@ -151,6 +152,11 @@ export default function SahaScreen() {
       sahaTipi: d.sahaTipi,
     });
   });
+
+  const gunSonuRaporunuKapat = () => {
+    setGunSonu(null);
+    setGunSonuRaporuAcik(false);
+  };
 
   const bildir = (sonuc: string | null, basari?: string) => {
     if (sonuc) { setHata(true); setMesaj(sonuc); }
@@ -223,6 +229,7 @@ export default function SahaScreen() {
     }
     // Gün sonu özetini InteractionManager kuyruğuna bırakma.
     // iOS'ta bekleyen animasyon/interaction kuyruğu tamamlanmazsa callback hiç çalışmayabilir.
+    setGunSonuRaporuAcik(true);
     setGunSonu({ sonuc, sponsorGeliri });
   };
 
@@ -317,7 +324,7 @@ export default function SahaScreen() {
             {gunSonu?.sonuc?.isGameOver ? (
               <Text style={s.modalIflosNot}>Nakit eksiye düştü ve iflas limiti aşıldı. Ana ekrandan oyunu sıfırlayıp yeniden başlayabilirsin.</Text>
             ) : null}
-            <TouchableOpacity style={s.modalKapat} onPress={() => setGunSonu(null)} activeOpacity={0.85} accessibilityLabel="Kapat ve Devam Et" accessibilityRole="button">
+            <TouchableOpacity style={s.modalKapat} onPress={gunSonuRaporunuKapat} activeOpacity={0.85} accessibilityLabel="Kapat ve Devam Et" accessibilityRole="button">
               <Text style={s.modalKapatYazi}>☀️ Kapat ve Devam Et</Text>
             </TouchableOpacity>
           </View>
