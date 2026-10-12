@@ -1,2 +1,2 @@
 Trigger App Store release workflow on ios-appstore-release. No application source code changed.
-Run timestamp: 2026-10-12; added signing certificate fingerprint diagnostics before archive.
+Run timestamp: 2026-10-12; retry certificate fingerprint diagnostics with OpenSSL legacy P12 support.
