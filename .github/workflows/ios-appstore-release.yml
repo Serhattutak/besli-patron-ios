@@ -195,7 +195,7 @@ jobs:
             INFOPLIST_KEY_CFBundleVersion=29 \
             archive
 
-      - name: Enforce App Store bundle version 28 in archive
+      - name: Enforce App Store bundle version 29 in archive
         shell: bash
         run: |
           set -euo pipefail
@@ -204,7 +204,7 @@ jobs:
           /usr/libexec/PlistBuddy -c "Set :CFBundleVersion 29" "$APP_PLIST"
           ARCHIVE_VERSION="$(/usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$APP_PLIST")"
           echo "Archived app CFBundleVersion: $ARCHIVE_VERSION"
-          test "$ARCHIVE_VERSION" = "28"
+          test "$ARCHIVE_VERSION" = "29"
 
       - name: Export App Store IPA
         shell: bash
@@ -225,7 +225,7 @@ jobs:
           test -f "$EXPORTED_PLIST"
           EXPORTED_VERSION="$(/usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$EXPORTED_PLIST")"
           echo "Exported IPA CFBundleVersion: $EXPORTED_VERSION"
-          test "$EXPORTED_VERSION" = "28"
+          test "$EXPORTED_VERSION" = "29"
 
       - name: Save IPA artifact
         uses: actions/upload-artifact@v4
