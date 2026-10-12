@@ -2,6 +2,11 @@ name: iOS App Store Build and Upload
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - ios-appstore-release
+    paths:
+      - 'release-trigger.txt'
 
 permissions:
   contents: read
