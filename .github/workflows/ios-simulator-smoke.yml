@@ -2,9 +2,6 @@ name: iOS Simulator Smoke Test
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - master
 
 jobs:
   simulator-smoke:
