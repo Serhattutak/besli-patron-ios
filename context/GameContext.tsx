@@ -179,6 +179,8 @@ function eskiKayitOnar(s: GameState): GameState {
 interface GameContextType {
   state: GameState | null;
   loading: boolean;
+  gunSonuRaporuAcik: boolean;
+  setGunSonuRaporuAcik: (acik: boolean) => void;
   initNewGame: () => Promise<void>;
   loadSavedGame: () => Promise<boolean>;
   acceptReservation: (id: string) => string | null;
@@ -219,6 +221,8 @@ const GameContext = createContext<GameContextType | null>(null);
 export function GameProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<GameState | null>(null);
   const [loading, setLoading] = useState(true);
+  // Gün sonu raporu açıkken yeni gün olayı raporun üzerini kapatmasın.
+  const [gunSonuRaporuAcik, setGunSonuRaporuAcik] = useState(false);
 
   // GUN SONU KILIDI: ayni gunun iki kez islenmesini ve cift dokunmayi engeller (Sardur Technologies)
   const endDayKilitRef = useRef(false);
@@ -1040,6 +1044,8 @@ const tomorrow = gunuHazirla(sonraki);
   const value: GameContextType = {
     state,
     loading,
+    gunSonuRaporuAcik,
+    setGunSonuRaporuAcik,
     initNewGame,
     loadSavedGame,
     acceptReservation,
