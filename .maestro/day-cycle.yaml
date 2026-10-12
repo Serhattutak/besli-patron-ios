@@ -4,15 +4,17 @@ appId: com.sardurtechnologies.beslipatron
     clearState: true
 - waitForAnimationToEnd:
     timeout: 10000
-- tapOn:
-    text: "Hikayeyi atla"
-    optional: true
-- tapOn:
-    text: "Oyuna Başla"
-    optional: true
+# The tutorial is mounted globally and can cover the intro screen.
+# Dismiss it before trying to skip the story or start the game.
 - tapOn:
     text: "Öğreticiyi Atla"
-    optional: true
+- tapOn:
+    text: "Hikayeyi atla"
+- extendedWaitUntil:
+    visible: "Oyuna Başla"
+    timeout: 15000
+- tapOn:
+    text: "Oyuna Başla"
 - extendedWaitUntil:
     visible: "Günü Bitir"
     timeout: 30000
@@ -28,6 +30,5 @@ appId: com.sardurtechnologies.beslipatron
     optional: true
 - tapOn:
     text: "İşletme"
-    optional: true
 - assertVisible:
     text: "İşletme"
