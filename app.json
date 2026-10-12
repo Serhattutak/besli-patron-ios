@@ -1,4 +1,4 @@
-﻿{
+{
   "expo": {
     "name": "Beşli Patron",
     "slug": "abacusai-mobile-apps",
@@ -6,16 +6,14 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.sardurtechnologies.beslipatron",
-      "buildNumber": "21",
+      "buildNumber": "22",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
     },
-
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
@@ -36,19 +34,14 @@
               "host": "*"
             }
           ],
-          "category": [
-            "BROWSABLE",
-            "DEFAULT"
-          ]
+          "category": ["BROWSABLE", "DEFAULT"]
         }
       ]
     },
-
     "web": {
       "favicon": "./assets/favicon.png",
       "output": "single"
     },
-
     "plugins": [
       "expo-router",
       "expo-font",
@@ -60,9 +53,7 @@
         }
       ]
     ],
-
     "scheme": "abacusai1789939013",
-
     "extra": {
       "router": {},
       "eas": {
