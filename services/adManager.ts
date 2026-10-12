@@ -8,7 +8,7 @@ import mobileAds, {
 
 const INTERSTITIAL_AD_UNIT_ID = __DEV__
   ? TestIds.INTERSTITIAL
-  : 'ca-app-pub-4873666267587702/0000000000';
+  : ''; // Set the real AdMob interstitial unit ID before monetizing.
 
 const REWARDED_AD_UNIT_ID = __DEV__
   ? TestIds.REWARDED
@@ -41,7 +41,7 @@ export async function reklamlariBaslat(): Promise<void> {
  * gameplay continues without blocking the player.
  */
 export async function gecisReklamGoster(): Promise<boolean> {
-  if (gecisReklamiDevamEdiyor || Date.now() - sonGecisReklamiZamani < GECIS_REKLAM_ARALIGI_MS) {
+  if (!INTERSTITIAL_AD_UNIT_ID || gecisReklamiDevamEdiyor || Date.now() - sonGecisReklamiZamani < GECIS_REKLAM_ARALIGI_MS) {
     return false;
   }
 
