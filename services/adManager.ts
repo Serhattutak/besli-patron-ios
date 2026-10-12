@@ -50,6 +50,12 @@ export async function odulluReklamIzle(): Promise<boolean> {
       let unsubscribeReward = () => {};
       let unsubscribeClosed = () => {};
       let unsubscribeError = () => {};
+      // Prevent the reward button from spinning forever if the SDK never
+      // emits LOADED/ERROR (for example, no fill or a network timeout).
+      let watchdog: ReturnType<typeof setTimeout> | undefined = setTimeout(() => {
+        console.log('Rewarded reklam zaman asimina ugradi (45 sn).');
+        bitir(false);
+      }, 45000);
 
       const temizle = () => {
         unsubscribeLoaded();
@@ -61,6 +67,10 @@ export async function odulluReklamIzle(): Promise<boolean> {
       const bitir = (sonuc: boolean) => {
         if (tamamlandi) return;
         tamamlandi = true;
+        if (watchdog) {
+          clearTimeout(watchdog);
+          watchdog = undefined;
+        }
         temizle();
         resolve(sonuc);
       };
