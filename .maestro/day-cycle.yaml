@@ -20,14 +20,16 @@ appId: com.sardurtechnologies.beslipatron
     timeout: 30000
 - tapOn:
     text: "Günü Bitir"
+# A new-day event is shown in a native Modal above the inline day-end report.
+# Resolve it first if present, otherwise it can block the report's close button.
+- tapOn:
+    text: "Olay seçeneği 1"
+    optional: true
 - extendedWaitUntil:
     visible: "Kapat ve Devam Et"
     timeout: 15000
 - tapOn:
     text: "Kapat ve Devam Et"
-- tapOn:
-    text: "Olay seçeneği 1"
-    optional: true
 - tapOn:
     text: "İşletme"
 - assertVisible:
