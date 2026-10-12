@@ -4,8 +4,7 @@ appId: com.sardurtechnologies.beslipatron
     clearState: true
 - waitForAnimationToEnd:
     timeout: 10000
-# The tutorial is mounted globally and can cover the intro screen.
-# Dismiss it before trying to skip the story or start the game.
+# Dismiss the globally mounted tutorial before leaving the intro.
 - tapOn:
     text: "Öğreticiyi Atla"
 - tapOn:
@@ -20,14 +19,14 @@ appId: com.sardurtechnologies.beslipatron
     timeout: 30000
 - tapOn:
     text: "Günü Bitir"
-# Wait until the inline report is rendered before checking for the new-day
-# event. The event is random and its native Modal can cover the report button.
-- extendedWaitUntil:
-    visible: "Kapat ve Devam Et"
-    timeout: 15000
+# A random new-day event uses a native Modal and can cover the inline report.
+# Resolve it first if present, then close the report.
 - tapOn:
     text: "Olay seçeneği 1"
     optional: true
+- extendedWaitUntil:
+    visible: "Kapat ve Devam Et"
+    timeout: 15000
 - tapOn:
     text: "Kapat ve Devam Et"
 - tapOn:
