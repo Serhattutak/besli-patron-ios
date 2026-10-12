@@ -15,7 +15,7 @@ export const ENERJI_REZERVASYON = 5;
 export const ENERJI_BAKIM = 10;
 export const ENERJI_UPGRADE = 15;
 export const ENERJI_GUN_SONU = 40;
-export const JETON_GOREV_ODUL = 50;
+// Jeton ödülü yalnızca tamamlanan ödüllü reklamlardan verilir.
 export const JETON_ENERJI_COST = 20;
 export const JETON_ENERJI_GAIN = 30;
 export const IFLAS_GUN_LIMIT = 3;
@@ -418,7 +418,7 @@ export const SEZON_CONFIG = {
   uzunluk: 30,
   hedefTaban: 650000,
   hedefArtis: 450000,
-  odulJeton: 200,
+  odulJeton: 0,
   odulPrestij: 50,
 };
 
