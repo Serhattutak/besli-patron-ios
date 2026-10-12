@@ -1,1 +1,2 @@
 Trigger App Store release workflow on ios-appstore-release. No application source code changed.
+Run timestamp: 2026-10-12 retry after signing secrets setup.
