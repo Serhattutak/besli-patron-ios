@@ -191,20 +191,20 @@ jobs:
             CODE_SIGN_STYLE=Manual \
             CODE_SIGN_IDENTITY="Apple Distribution" \
             PROVISIONING_PROFILE_SPECIFIER="$PROFILE_NAME" \
-            CURRENT_PROJECT_VERSION=27 \
-            INFOPLIST_KEY_CFBundleVersion=27 \
+            CURRENT_PROJECT_VERSION=28 \
+            INFOPLIST_KEY_CFBundleVersion=28 \
             archive
 
-      - name: Enforce App Store bundle version 27 in archive
+      - name: Enforce App Store bundle version 28 in archive
         shell: bash
         run: |
           set -euo pipefail
           APP_PLIST="$RUNNER_TEMP/archive/BesliPatron.xcarchive/Products/Applications/BeliPatron.app/Info.plist"
           test -f "$APP_PLIST"
-          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion 27" "$APP_PLIST"
+          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion 28" "$APP_PLIST"
           ARCHIVE_VERSION="$(/usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$APP_PLIST")"
           echo "Archived app CFBundleVersion: $ARCHIVE_VERSION"
-          test "$ARCHIVE_VERSION" = "27"
+          test "$ARCHIVE_VERSION" = "28"
 
       - name: Export App Store IPA
         shell: bash
@@ -225,7 +225,7 @@ jobs:
           test -f "$EXPORTED_PLIST"
           EXPORTED_VERSION="$(/usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$EXPORTED_PLIST")"
           echo "Exported IPA CFBundleVersion: $EXPORTED_VERSION"
-          test "$EXPORTED_VERSION" = "27"
+          test "$EXPORTED_VERSION" = "28"
 
       - name: Save IPA artifact
         uses: actions/upload-artifact@v4
