@@ -56,13 +56,23 @@ jobs:
           node <<'NODE'
           const fs = require('fs');
           const path = process.env.RUNNER_TEMP + '/audit-fix-preview.json';
+          const raw = fs.readFileSync(path, 'utf8');
           try {
-            const data = JSON.parse(fs.readFileSync(path, 'utf8'));
-            console.log('Dry-run summary:', JSON.stringify(data.audit?.metadata?.vulnerabilities ?? data.metadata?.vulnerabilities ?? {}));
+            // npm audit fix --dry-run prints package operations before its trailing JSON summary.
+            const jsonStart = raw.lastIndexOf('\\n{');
+            const candidate = jsonStart >= 0 ? raw.slice(jsonStart + 1).trim() : raw.trim();
+            const data = JSON.parse(candidate);
+            console.log('Dry-run package changes:', JSON.stringify({
+              added: data.added,
+              removed: data.removed,
+              changed: data.changed,
+              audited: data.audited
+            }));
+            console.log('Dry-run vulnerability totals:', JSON.stringify(data.audit?.metadata?.vulnerabilities ?? data.metadata?.vulnerabilities ?? {}));
             console.log('Dry-run error:', data.error?.summary ?? 'none');
           } catch (error) {
-            console.log('Could not parse dry-run output:', String(error));
-            console.log(fs.readFileSync(path, 'utf8').slice(0, 3000));
+            console.log('Could not parse dry-run JSON summary:', String(error));
+            console.log(raw.slice(-3000));
           }
           NODE
       - name: Confirm diagnostics do not write to clipboard
