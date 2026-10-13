@@ -89,6 +89,8 @@ jobs:
             echo "::error::Automatic clipboard writes remain in diagnostics."
             exit 1
           fi
+      - name: Export web bundle
+        run: npx expo export --platform web
       - name: TypeScript check (report pre-existing errors separately)
         shell: bash
         run: |
