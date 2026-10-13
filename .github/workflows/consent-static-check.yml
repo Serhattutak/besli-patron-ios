@@ -46,6 +46,25 @@ jobs:
             console.log(`- ${name}: severity=${item.severity}; direct=${item.isDirect}; fixAvailable=${JSON.stringify(item.fixAvailable)}; via=${via.join('; ')}`);
           }
           NODE
+      - name: Trace critical dependency and preview non-mutating fixes
+        shell: bash
+        run: |
+          echo "=== Dependency chain for critical shell-quote finding ==="
+          npm explain shell-quote || true
+          echo "=== Non-mutating audit fix preview ==="
+          npm audit fix --dry-run --json > "$RUNNER_TEMP/audit-fix-preview.json" || true
+          node <<'NODE'
+          const fs = require('fs');
+          const path = process.env.RUNNER_TEMP + '/audit-fix-preview.json';
+          try {
+            const data = JSON.parse(fs.readFileSync(path, 'utf8'));
+            console.log('Dry-run summary:', JSON.stringify(data.audit?.metadata?.vulnerabilities ?? data.metadata?.vulnerabilities ?? {}));
+            console.log('Dry-run error:', data.error?.summary ?? 'none');
+          } catch (error) {
+            console.log('Could not parse dry-run output:', String(error));
+            console.log(fs.readFileSync(path, 'utf8').slice(0, 3000));
+          }
+          NODE
       - name: Confirm diagnostics do not write to clipboard
         run: |
           if grep -n "Clipboard\\|setStringAsync" utils/hataYakala.ts; then
