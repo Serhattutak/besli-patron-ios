@@ -5,7 +5,7 @@
 **Son gözden geçirme:** 13 Ekim 2026  
 **Uygulama:** Beşli Patron  
 **Paket kimliği:** `com.sardurtechnologies.beslipatron`  
-**Veri sorumlusu / yayıncı:** [YAYINCI ADI VE HUKUKİ BİLGİLER EKLENECEK]  
+**Veri sorumlusu / yayıncı:** Serhat Can Tutak (bireysel geliştirici; şirket unvanı yok)  
 **İletişim:** serhattutak2@gmail.com
 
 ## 1. Kapsam
