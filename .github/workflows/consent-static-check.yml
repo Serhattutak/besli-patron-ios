@@ -30,6 +30,8 @@ jobs:
           cache: npm
       - name: Install dependencies
         run: npm ci
+      - name: Verify patched shell-quote version
+        run: node -e "const p = require('./node_modules/shell-quote/package.json'); console.log('shell-quote version:', p.version); if (p.version !== '1.12.0') process.exit(1)"
       - name: Validate app.json
         run: node -e "JSON.parse(require('fs').readFileSync('app.json', 'utf8').replace(/^\\uFEFF/, ''))"
       - name: Report dependency audit findings (non-blocking)
@@ -41,6 +43,10 @@ jobs:
           const audit = JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP + '/audit.json', 'utf8'));
           const meta = audit.metadata?.vulnerabilities ?? {};
           console.log('Dependency audit totals:', JSON.stringify(meta));
+          if (Object.prototype.hasOwnProperty.call(audit.vulnerabilities ?? {}, 'shell-quote')) {
+            console.error('::error::shell-quote is still reported by npm audit.');
+            process.exitCode = 1;
+          }
           for (const [name, item] of Object.entries(audit.vulnerabilities ?? {})) {
             const via = (item.via ?? []).map(v => typeof v === 'string' ? v : v.name + (v.title ? ': ' + v.title : ''));
             console.log(`- ${name}: severity=${item.severity}; direct=${item.isDirect}; fixAvailable=${JSON.stringify(item.fixAvailable)}; via=${via.join('; ')}`);
