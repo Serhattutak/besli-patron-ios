@@ -16,6 +16,7 @@ const REWARDED_AD_UNIT_ID = __DEV__
   : 'ca-app-pub-4873666267587702/1435662670';
 
 let adsInitialization: Promise<boolean> | null = null;
+let adsSdkInitialized = false;
 const GECIS_REKLAM_ARALIGI_MS = 4 * 60 * 1000;
 let sonGecisReklamiZamani = Date.now();
 let gecisReklamiDevamEdiyor = false;
@@ -34,7 +35,10 @@ export async function reklamlariBaslat(): Promise<boolean> {
           console.log('Reklam isteği yapılmadı: UMP izin vermiyor.');
           return false;
         }
-        await mobileAds().initialize();
+        if (!adsSdkInitialized) {
+          await mobileAds().initialize();
+          adsSdkInitialized = true;
+        }
         return true;
       } catch (error) {
         console.log('Reklam rızası kontrolü başarısız:', error);
@@ -42,7 +46,10 @@ export async function reklamlariBaslat(): Promise<boolean> {
         try {
           const consentInfo = await AdsConsent.getConsentInfo();
           if (!consentInfo.canRequestAds) return false;
-          await mobileAds().initialize();
+          if (!adsSdkInitialized) {
+            await mobileAds().initialize();
+            adsSdkInitialized = true;
+          }
           return true;
         } catch (fallbackError) {
           console.log('Reklam rızası doğrulanamadı:', fallbackError);
@@ -119,6 +126,25 @@ export async function gecisReklamGoster(): Promise<boolean> {
   } catch (error) {
     console.log('Gecis reklami sistemi hazir degil:', error);
     gecisReklamiDevamEdiyor = false;
+    return false;
+  }
+}
+
+/** Open the UMP privacy choices form from an explicit user action. */
+export async function gizlilikTercihleriniAc(): Promise<boolean> {
+  try {
+    const info = await AdsConsent.getConsentInfo();
+    if (info.privacyOptionsRequirementStatus !== 'REQUIRED') {
+      // Refresh the consent state even when no separate privacy form is required.
+      adsInitialization = null;
+      return await reklamlariBaslat();
+    }
+    await AdsConsent.showPrivacyOptionsForm();
+    // Re-evaluate ad eligibility after the user changes their choices.
+    adsInitialization = null;
+    return await reklamlariBaslat();
+  } catch (error) {
+    console.log('Gizlilik tercihleri açılamadı:', error);
     return false;
   }
 }
