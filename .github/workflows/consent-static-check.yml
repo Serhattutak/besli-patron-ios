@@ -36,6 +36,30 @@ jobs:
         run: node -e "const p = require('./node_modules/shell-quote/package.json'); console.log('shell-quote version:', p.version); if (p.version !== '1.12.0') process.exit(1)"
       - name: Validate app.json
         run: node -e "JSON.parse(require('fs').readFileSync('app.json', 'utf8').replace(/^\\uFEFF/, ''))"
+      - name: Validate resolved native AdMob configuration
+        shell: bash
+        run: |
+          npx expo config --type prebuild --json > "$RUNNER_TEMP/expo-config.json"
+          node <<'NODE'
+          const fs = require('fs');
+          const config = JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP + '/expo-config.json', 'utf8'));
+          const plugins = config.plugins ?? [];
+          const ads = plugins.find((entry) =>
+            Array.isArray(entry) &&
+            String(entry[0]).includes('react-native-google-mobile-ads')
+          );
+          const options = ads?.[1] ?? {};
+          const checks = {
+            androidAppId: typeof options.androidAppId === 'string' && options.androidAppId.startsWith('ca-app-pub-'),
+            iosAppId: typeof options.iosAppId === 'string' && options.iosAppId.startsWith('ca-app-pub-'),
+            delayAppMeasurementInit: options.delayAppMeasurementInit === true,
+          };
+          console.log('Resolved native AdMob configuration:', JSON.stringify(checks));
+          if (Object.values(checks).some((ok) => !ok)) {
+            console.error('::error::Resolved native AdMob configuration is incomplete.');
+            process.exit(1);
+          }
+          NODE
       - name: Report dependency audit findings (non-blocking)
         shell: bash
         run: |
