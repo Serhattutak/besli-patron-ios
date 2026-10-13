@@ -12,6 +12,7 @@ import { router } from 'expo-router';
 import { useGame } from '../../context/GameContext';
 import { taniOku, islemKaydet } from '../../services/tani';
 import { Colors } from '../../constants/colors';
+import { gizlilikTercihleriniAc } from '../../services/adManager';
 import {
   JETON_ENERJI_COST,
   JETON_ENERJI_GAIN,
@@ -87,6 +88,14 @@ export default function ProfilScreen() {
   const handleSave = async () => {
     await manualSave();
     showMsg('Oyun kaydedildi!');
+  };
+
+  const handlePrivacyOptions = async () => {
+    showMsg('Gizlilik tercihleri kontrol ediliyor...');
+    const canRequestAds = await gizlilikTercihleriniAc();
+    showMsg(canRequestAds
+      ? 'Gizlilik tercihin kaydedildi.'
+      : 'Reklam izni verilmedi veya gizlilik formu şu anda kullanılamıyor.');
   };
 
   const handleReset = async () => {
@@ -277,6 +286,16 @@ export default function ProfilScreen() {
             <Text style={[styles.buttonText, { fontFamily: font }]}>
               💾 Oyunu Kaydet
             </Text>
+          </Pressable>
+        </View>
+
+        <View style={styles.card}>
+          <Text style={[styles.cardTitle, { fontFamily: font }]}> 
+            🔐 Gizlilik ve Reklam Tercihleri
+          </Text>
+          <Text style={[styles.statLabel, { fontFamily: font, marginBottom: 10 }]}>Google'ın sunduğu gizlilik seçeneklerini açabilir ve reklam izinlerini yönetebilirsin.</Text>
+          <Pressable style={styles.actionButton} onPress={handlePrivacyOptions}>
+            <Text style={[styles.buttonText, { fontFamily: font }]}>Gizlilik Tercihlerini Yönet</Text>
           </Pressable>
         </View>
 
