@@ -72,7 +72,10 @@ export async function gecisReklamGoster(): Promise<boolean> {
 
   gecisReklamiDevamEdiyor = true;
   try {
-    if (!(await reklamlariBaslat())) return false;
+    if (!(await reklamlariBaslat())) {
+      gecisReklamiDevamEdiyor = false;
+      return false;
+    }
     return await new Promise<boolean>((resolve) => {
       const ad = InterstitialAd.createForAdRequest(INTERSTITIAL_AD_UNIT_ID);
       let tamamlandi = false;
