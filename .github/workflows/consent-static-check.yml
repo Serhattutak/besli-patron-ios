@@ -6,6 +6,7 @@ on:
       - fix/ad-consent-gating
     paths:
       - "services/adManager.ts"
+      - "services/adManager.web.ts"
       - "app/tabs/profil.tsx"
       - "app/tabs/yasam.tsx"
       - "components/OdulluReklamButonu.tsx"
@@ -60,6 +61,12 @@ jobs:
             process.exit(1);
           }
           NODE
+      - name: Check native/web privacy API parity
+        shell: bash
+        run: |
+          grep -Fq 'export async function gizlilikTercihleriniAc' services/adManager.ts
+          grep -Fq 'export async function gizlilikTercihleriniAc' services/adManager.web.ts
+          echo 'Native and web privacy settings exports are present.'
       - name: Report dependency audit findings (non-blocking)
         shell: bash
         run: |
