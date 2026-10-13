@@ -7,6 +7,8 @@ on:
     paths:
       - "services/adManager.ts"
       - "app/tabs/profil.tsx"
+      - "app/tabs/yasam.tsx"
+      - "components/OdulluReklamButonu.tsx"
       - "utils/hataYakala.ts"
       - "app.json"
       - "package.json"
@@ -65,7 +67,7 @@ jobs:
           const raw = fs.readFileSync(path, 'utf8');
           try {
             // npm audit fix --dry-run prints package operations before its trailing JSON summary.
-          const jsonStart = raw.lastIndexOf(String.fromCharCode(10) + '{');
+            const jsonStart = raw.lastIndexOf(String.fromCharCode(10) + '{');
             const candidate = jsonStart >= 0 ? raw.slice(jsonStart + 1).trim() : raw.trim();
             const data = JSON.parse(candidate);
             console.log('Dry-run package changes:', JSON.stringify({
@@ -95,7 +97,7 @@ jobs:
           TSC_STATUS=$?
           set -e
           cat "$RUNNER_TEMP/tsc.log"
-          if grep -E '^(services/adManager[.]ts|utils/hataYakala[.]ts|app/tabs/profil[.]tsx)[(]' "$RUNNER_TEMP/tsc.log"; then
+          if grep -E '^(services/adManager[.]ts|utils/hataYakala[.]ts|app/tabs/profil[.]tsx|app/tabs/yasam[.]tsx|components/OdulluReklamButonu[.]tsx)[(]' "$RUNNER_TEMP/tsc.log"; then
             echo "::error::TypeScript errors found in changed source files."
             exit 1
           fi
