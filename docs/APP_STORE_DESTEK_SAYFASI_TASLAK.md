@@ -4,6 +4,8 @@
 
 ## Beşli Patron desteği
 
+**Geliştirici:** Serhat Can Tutak (bireysel geliştirici)
+
 Beşli Patron ile ilgili teknik sorun, oyun kaydı, reklamların çalışması veya geri bildirimler için bizimle iletişime geçebilirsiniz.
 
 **E-posta:** [serhattutak2@gmail.com](mailto:serhattutak2@gmail.com)
