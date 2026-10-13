@@ -1,0 +1,139 @@
+name: Consent Change Static Checks
+
+on:
+  push:
+    branches:
+      - fix/ad-consent-gating
+    paths:
+      - "services/adManager.ts"
+      - "services/adManager.web.ts"
+      - "app/tabs/profil.tsx"
+      - "app/tabs/yasam.tsx"
+      - "components/OdulluReklamButonu.tsx"
+      - "utils/hataYakala.ts"
+      - "app.json"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/consent-static-check.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  static-checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Verify patched shell-quote version
+        run: node -e "const p = require('./node_modules/shell-quote/package.json'); console.log('shell-quote version:', p.version); if (p.version !== '1.12.0') process.exit(1)"
+      - name: Validate app.json
+        run: node -e "JSON.parse(require('fs').readFileSync('app.json', 'utf8').replace(/^\\uFEFF/, ''))"
+      - name: Validate resolved native AdMob configuration
+        shell: bash
+        run: |
+          npx expo config --type prebuild --json > "$RUNNER_TEMP/expo-config.json"
+          node <<'NODE'
+          const fs = require('fs');
+          const config = JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP + '/expo-config.json', 'utf8'));
+          const plugins = config.plugins ?? [];
+          const ads = plugins.find((entry) =>
+            Array.isArray(entry) &&
+            String(entry[0]).includes('react-native-google-mobile-ads')
+          );
+          const options = ads?.[1] ?? {};
+          const checks = {
+            androidAppId: typeof options.androidAppId === 'string' && options.androidAppId.startsWith('ca-app-pub-'),
+            iosAppId: typeof options.iosAppId === 'string' && options.iosAppId.startsWith('ca-app-pub-'),
+            delayAppMeasurementInit: options.delayAppMeasurementInit === true,
+          };
+          console.log('Resolved native AdMob configuration:', JSON.stringify(checks));
+          if (Object.values(checks).some((ok) => !ok)) {
+            console.error('::error::Resolved native AdMob configuration is incomplete.');
+            process.exit(1);
+          }
+          NODE
+      - name: Check native/web privacy API parity
+        shell: bash
+        run: |
+          grep -Fq 'export async function gizlilikTercihleriniAc' services/adManager.ts
+          grep -Fq 'export async function gizlilikTercihleriniAc' services/adManager.web.ts
+          echo 'Native and web privacy settings exports are present.'
+      - name: Report dependency audit findings (non-blocking)
+        shell: bash
+        run: |
+          npm audit --json > "$RUNNER_TEMP/audit.json" || true
+          node <<'NODE'
+          const fs = require('fs');
+          const audit = JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP + '/audit.json', 'utf8'));
+          const meta = audit.metadata?.vulnerabilities ?? {};
+          console.log('Dependency audit totals:', JSON.stringify(meta));
+          if (Object.prototype.hasOwnProperty.call(audit.vulnerabilities ?? {}, 'shell-quote')) {
+            console.error('::error::shell-quote is still reported by npm audit.');
+            process.exitCode = 1;
+          }
+          for (const [name, item] of Object.entries(audit.vulnerabilities ?? {})) {
+            const via = (item.via ?? []).map(v => typeof v === 'string' ? v : v.name + (v.title ? ': ' + v.title : ''));
+            console.log(`- ${name}: severity=${item.severity}; direct=${item.isDirect}; fixAvailable=${JSON.stringify(item.fixAvailable)}; via=${via.join('; ')}`);
+          }
+          NODE
+      - name: Trace critical dependency and preview non-mutating fixes
+        shell: bash
+        run: |
+          echo "=== Dependency chain for critical shell-quote finding ==="
+          npm explain shell-quote || true
+          echo "=== Non-mutating audit fix preview ==="
+          npm audit fix --dry-run --json > "$RUNNER_TEMP/audit-fix-preview.json" || true
+          node <<'NODE'
+          const fs = require('fs');
+          const path = process.env.RUNNER_TEMP + '/audit-fix-preview.json';
+          const raw = fs.readFileSync(path, 'utf8');
+          try {
+            // npm audit fix --dry-run prints package operations before its trailing JSON summary.
+            const jsonStart = raw.lastIndexOf(String.fromCharCode(10) + '{');
+            const candidate = jsonStart >= 0 ? raw.slice(jsonStart + 1).trim() : raw.trim();
+            const data = JSON.parse(candidate);
+            console.log('Dry-run package changes:', JSON.stringify({
+              added: data.added,
+              removed: data.removed,
+              changed: data.changed,
+              audited: data.audited
+            }));
+            console.log('Dry-run vulnerability totals:', JSON.stringify(data.audit?.metadata?.vulnerabilities ?? data.metadata?.vulnerabilities ?? {}));
+            console.log('Dry-run error:', data.error?.summary ?? 'none');
+          } catch (error) {
+            console.log('Could not parse dry-run JSON summary:', String(error));
+            console.log(raw.slice(-3000));
+          }
+          NODE
+      - name: Confirm diagnostics do not write to clipboard
+        run: |
+          if grep -n "Clipboard\\|setStringAsync" utils/hataYakala.ts; then
+            echo "::error::Automatic clipboard writes remain in diagnostics."
+            exit 1
+          fi
+      - name: Export web bundle
+        run: npx expo export --platform web
+      - name: TypeScript check (report pre-existing errors separately)
+        shell: bash
+        run: |
+          set +e
+          npx tsc --noEmit --pretty false > "$RUNNER_TEMP/tsc.log" 2>&1
+          TSC_STATUS=$?
+          set -e
+          cat "$RUNNER_TEMP/tsc.log"
+          if grep -E '^(services/adManager[.]ts|utils/hataYakala[.]ts|app/tabs/profil[.]tsx)[(]' "$RUNNER_TEMP/tsc.log"; then
+            echo "::error::TypeScript errors found in changed source files."
+            exit 1
+          fi
+          if [ "$TSC_STATUS" -ne 0 ]; then
+            echo "::warning::Existing TypeScript errors outside the consent/diagnostics changes remain."
+          fi

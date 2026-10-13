@@ -17,3 +17,8 @@ export async function gunSonuReklamKontrol(): Promise<void> {}
 export function odulluReklamIzle(): Promise<boolean> {
   return Promise.resolve(false);
 }
+
+/** Web has no native consent form or ad requests; keep the profile action safe. */
+export async function gizlilikTercihleriniAc(): Promise<boolean> {
+  return false;
+}

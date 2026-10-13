@@ -1,7 +1,6 @@
 // BELI PATRON - gecici tani modulu v2.1 (Sardur Technologies)
 // native Alert KULLANMAZ - iOS 26'da UIAlertController cokuyor.
-// Hata: panoya + AsyncStorage'a yazilir. Dev'de orijinal handler'a da zincirlenir.
-import * as Clipboard from 'expo-clipboard';
+// Hata: AsyncStorage'a yazilir. Panoya otomatik kopyalama yapilmaz.
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ANAHTAR = 'belipatron_son_js_hata';
@@ -18,21 +17,6 @@ const ORIJINAL = typeof GU.ErrorUtils?.getGlobalHandler === 'function' ? GU.Erro
 
 GU.ErrorUtils?.setGlobalHandler?.((hata: any, olumsuz?: boolean) => {
   const r = raporla(hata, !!olumsuz);
-  try { Clipboard.setStringAsync(r).catch(() => {}); } catch (e) {}
   AsyncStorage.setItem(ANAHTAR, r).catch(() => {});
   if (DEV && ORIJINAL) { try { ORIJINAL(hata, olumsuz); } catch (e) {} }
 });
-
-setTimeout(() => {
-  (async () => {
-    try {
-      const ham = await AsyncStorage.getItem(ANAHTAR);
-      if (ham) {
-        await AsyncStorage.removeItem(ANAHTAR);
-        await Clipboard.setStringAsync('ONCEKI OTURUMDAN >>> ' + ham);
-      } else {
-        await Clipboard.setStringAsync('BELIPATRON-OK ' + new Date().toISOString());
-      }
-    } catch (e) {}
-  })();
-}, 2000);

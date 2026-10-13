@@ -1,4 +1,4 @@
-﻿{
+{
   "expo": {
     "name": "Beşli Patron",
     "slug": "abacusai-mobile-apps",
@@ -10,7 +10,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.sardurtechnologies.beslipatron",
-      "buildNumber": "30",
+      "buildNumber": "31",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
@@ -56,7 +56,8 @@
         "react-native-google-mobile-ads",
         {
           "androidAppId": "ca-app-pub-4873666267587702~4040896289",
-          "iosAppId": "ca-app-pub-4873666267587702~1281504021"
+          "iosAppId": "ca-app-pub-4873666267587702~1281504021",
+          "delayAppMeasurementInit": true
         }
       ]
     ],
