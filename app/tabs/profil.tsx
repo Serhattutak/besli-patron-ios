@@ -173,7 +173,7 @@ export default function ProfilScreen() {
             </View>
 
             <View style={styles.charInfo}>
-              <Pressable onPress={handleFutbolcuTik}>
+              <Pressable onPress={__DEV__ ? handleFutbolcuTik : undefined}>
                 <Text style={[styles.charName, { fontFamily: font }]}>
                   Eski Futbolcu
                 </Text>
@@ -340,7 +340,7 @@ export default function ProfilScreen() {
       </ScrollView>
 
       <Modal
-        visible={showDevPanel}
+        visible={__DEV__ && showDevPanel}
         transparent
         animationType="fade"
         onRequestClose={() => setShowDevPanel(false)}
