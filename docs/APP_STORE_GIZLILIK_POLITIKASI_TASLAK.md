@@ -6,7 +6,7 @@
 **Uygulama:** Beşli Patron  
 **Paket kimliği:** `com.sardurtechnologies.beslipatron`  
 **Veri sorumlusu / yayıncı:** [YAYINCI ADI VE HUKUKİ BİLGİLER EKLENECEK]  
-**İletişim:** [GİZLİLİK İLETİŞİM E-POSTASI EKLENECEK]
+**İletişim:** serhattutak2@gmail.com
 
 ## 1. Kapsam
 
@@ -47,7 +47,7 @@ Uygulama içindeki yerel kayıtlar cihazın depolama ve işletim sistemi güvenl
 
 ## 8. Kullanıcı hakları ve iletişim
 
-Gizlilikle ilgili talepler, sorular veya yürürlükteki mevzuat kapsamındaki başvurular için yayıncının doğrulanmış iletişim adresi burada yayımlanmalıdır: [İLETİŞİM ADRESİ EKLENECEK].
+Gizlilikle ilgili talepler, sorular veya yürürlükteki mevzuat kapsamındaki başvurular için yayıncının doğrulanmış iletişim adresi burada yayımlanmalıdır: serhattutak2@gmail.com.
 
 ## 9. Değişiklikler
 
@@ -57,7 +57,7 @@ Bu politika güncellendiğinde yürürlük tarihi ve yapılan değişiklikler ya
 
 ## Yayından önce tamamlanması zorunlu kontroller
 
-- [ ] Yayıncı/veri sorumlusu adı ve iletişim e-postası eklenmeli.
+- [ ] Yayıncı/veri sorumlusu adı ve gerekli hukuki bilgiler eklenmeli. İletişim e-postası eklendi: serhattutak2@gmail.com.
 - [ ] Google Mobile Ads SDK veri işleme ve reklam kişiselleştirme ayarları doğrulanmalı.
 - [ ] iOS izleme/ATT izni ve varsa rıza ekranı davranışı doğrulanmalı.
 - [ ] App Store Connect “App Privacy” beyanları, SDK davranışıyla eşleştirilmeli.
