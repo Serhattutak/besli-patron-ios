@@ -1,6 +1,6 @@
 ﻿// ============================================
 // BEŞLİ PATRON — OdulluReklamButonu.tsx (v2)
-// Ödül: Jeton veya enerji — yalnızca tamamlanan ödüllü reklamdan
+// Ödül: JETON — yalnızca tamamlanan ödüllü reklamdan
 // ============================================
 import React, { useState } from 'react';
 import {
@@ -15,32 +15,17 @@ import { useGame } from '../context/GameContext';
 import { odulluReklamIzle } from '../services/adManager';
 import { sfx } from '../services/soundManager';
 
-type OdulluReklamButonuProps = {
-  odulJeton?: number;
-  odulEnerji?: number;
-};
-
-export default function OdulluReklamButonu({ odulJeton = 25, odulEnerji }: OdulluReklamButonuProps) {
-  const game = useGame();
+export default function OdulluReklamButonu({ odulJeton = 25 }: { odulJeton?: number }) {
+  const game = useGame() as any;
   const [yukleniyor, setYukleniyor] = useState(false);
   const [mesaj, setMesaj] = useState('');
   const { width } = useWindowDimensions();
   const k = Math.min(1, width / 420);
-  const enerjiOdulu = odulEnerji !== undefined;
-  const odulMiktari = enerjiOdulu ? Math.max(0, Math.round(odulEnerji)) : Math.max(0, Math.round(odulJeton));
 
-  const oduluVer = (): boolean => {
-    if (enerjiOdulu) {
-      if (typeof game.enerjiEkle !== 'function') return false;
-      game.enerjiEkle(odulMiktari);
-      return true;
-    }
-    if (typeof game.devHediye !== 'function') return false;
-    game.devHediye(0, 0, odulMiktari, false);
-    return true;
+  const jetonVer = (miktar: number): boolean => {
+    if (typeof game.devHediye === 'function') { game.devHediye(0, 0, miktar, false); return true; }
+    return false;
   };
-
-  const odulAdi = enerjiOdulu ? 'enerji' : 'jeton';
 
   const basla = async () => {
     if (yukleniyor) return;
@@ -49,11 +34,11 @@ export default function OdulluReklamButonu({ odulJeton = 25, odulEnerji }: Odull
     try {
       const odulVerildi = await odulluReklamIzle();
       if (odulVerildi) {
-        if (oduluVer()) {
+        if (jetonVer(odulJeton)) {
           sfx('alkis');
-          setMesaj(`+${odulMiktari} ${odulAdi} kazandın!`);
+          setMesaj(`+${odulJeton} jeton kazandın!`);
         } else {
-          setMesaj(`Reklam tamamlandı ama ${odulAdi} eklenemedi.`);
+          setMesaj('Reklam tamamlandı ama jeton eklenemedi.');
         }
       } else {
         setMesaj('Reklam tamamlanmadan ödül verilmez.');
@@ -70,12 +55,12 @@ export default function OdulluReklamButonu({ odulJeton = 25, odulEnerji }: Odull
     <View style={[st.blok, { padding: 14 * k }]}>
       <Text style={[st.baslik, { fontSize: 15 * k }]}>Ödüllü Reklam</Text>
       <Text style={[st.aciklama, { fontSize: 12.5 * k }]}>
-        Kısa bir reklam izle, {odulMiktari} {odulAdi} kazan. Ödül yalnızca reklam tamamlanınca verilir.
+        Kısa bir reklam izle, {odulJeton} jeton kazan. Jeton yalnızca reklam tamamlanınca verilir.
       </Text>
       <TouchableOpacity style={[st.buton, { paddingVertical: 12 * k }]} onPress={basla} disabled={yukleniyor}>
         {yukleniyor
           ? <ActivityIndicator color="#132A13" />
-          : <Text style={[st.butonYazi, { fontSize: 14 * k }]}>Reklam izle, {odulMiktari} {odulAdi} kazan</Text>}
+          : <Text style={[st.butonYazi, { fontSize: 14 * k }]}>Reklam izle, {odulJeton} jeton kazan</Text>}
       </TouchableOpacity>
       {mesaj !== '' && <Text style={[st.mesaj, { fontSize: 12.5 * k }]}>{mesaj}</Text>}
     </View>
