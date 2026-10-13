@@ -6,6 +6,7 @@ on:
       - fix/ad-consent-gating
     paths:
       - "services/adManager.ts"
+      - "app/tabs/profil.tsx"
       - "utils/hataYakala.ts"
       - "app.json"
       - "package.json"
