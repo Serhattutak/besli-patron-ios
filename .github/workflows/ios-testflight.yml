@@ -226,7 +226,7 @@ jobs:
           test -n "$APP_STORE_CONNECT_KEY_ID"
           test -n "$APP_STORE_CONNECT_ISSUER_ID"
 
-          KEY_DIR="$RUNNER_TEMP/private_keys"
+          KEY_DIR="$HOME/.appstoreconnect/private_keys"
           KEY_FILE="$KEY_DIR/AuthKey_${APP_STORE_CONNECT_KEY_ID}.p8"
 
           mkdir -p "$KEY_DIR"
