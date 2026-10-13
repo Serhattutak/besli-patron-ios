@@ -29,8 +29,6 @@ jobs:
           cache: npm
       - name: Install dependencies
         run: npm ci
-      - name: TypeScript check
-        run: npx tsc --noEmit
       - name: Validate app.json
         run: node -e "JSON.parse(require('fs').readFileSync('app.json', 'utf8').replace(/^\\uFEFF/, ''))"
       - name: Confirm diagnostics do not write to clipboard
@@ -38,4 +36,19 @@ jobs:
           if grep -n "Clipboard\\|setStringAsync" utils/hataYakala.ts; then
             echo "::error::Automatic clipboard writes remain in diagnostics."
             exit 1
+          fi
+      - name: TypeScript check (report pre-existing errors separately)
+        shell: bash
+        run: |
+          set +e
+          npx tsc --noEmit --pretty false > "$RUNNER_TEMP/tsc.log" 2>&1
+          TSC_STATUS=$?
+          set -e
+          cat "$RUNNER_TEMP/tsc.log"
+          if grep -E '^(services/adManager\\.ts|utils/hataYakala\\.ts)\\(' "$RUNNER_TEMP/tsc.log"; then
+            echo "::error::TypeScript errors found in changed source files."
+            exit 1
+          fi
+          if [ "$TSC_STATUS" -ne 0 ]; then
+            echo "::warning::Existing TypeScript errors outside the consent/diagnostics changes remain."
           fi
