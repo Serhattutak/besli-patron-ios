@@ -94,7 +94,7 @@ export default function ProfilScreen() {
     showMsg('Gizlilik tercihleri kontrol ediliyor...');
     const canRequestAds = await gizlilikTercihleriniAc();
     showMsg(canRequestAds
-      ? 'Gizlilik tercihin kaydedildi.'
+      ? 'Reklam izin durumu yeniden kontrol edildi.'
       : 'Reklam izni verilmedi veya gizlilik formu şu anda kullanılamıyor.');
   };
 
