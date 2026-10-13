@@ -59,7 +59,7 @@ jobs:
           const raw = fs.readFileSync(path, 'utf8');
           try {
             // npm audit fix --dry-run prints package operations before its trailing JSON summary.
-            const jsonStart = raw.lastIndexOf('\\n{');
+          const jsonStart = raw.lastIndexOf(String.fromCharCode(10) + '{');
             const candidate = jsonStart >= 0 ? raw.slice(jsonStart + 1).trim() : raw.trim();
             const data = JSON.parse(candidate);
             console.log('Dry-run package changes:', JSON.stringify({
