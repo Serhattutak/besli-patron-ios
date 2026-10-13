@@ -46,7 +46,7 @@ jobs:
           TSC_STATUS=$?
           set -e
           cat "$RUNNER_TEMP/tsc.log"
-          if grep -E '^(services/adManager[.]ts|utils/hataYakala[.]ts)[(]' "$RUNNER_TEMP/tsc.log"; then
+          if grep -E '^(services/adManager[.]ts|utils/hataYakala[.]ts|app/tabs/profil[.]tsx)[(]' "$RUNNER_TEMP/tsc.log"; then
             echo "::error::TypeScript errors found in changed source files."
             exit 1
           fi
