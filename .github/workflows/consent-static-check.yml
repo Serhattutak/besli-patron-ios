@@ -1,0 +1,41 @@
+name: Consent Change Static Checks
+
+on:
+  push:
+    branches:
+      - fix/ad-consent-gating
+    paths:
+      - "services/adManager.ts"
+      - "utils/hataYakala.ts"
+      - "app.json"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/consent-static-check.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  static-checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: TypeScript check
+        run: npx tsc --noEmit
+      - name: Validate app.json
+        run: node -e "JSON.parse(require('fs').readFileSync('app.json', 'utf8').replace(/^\\uFEFF/, ''))"
+      - name: Confirm diagnostics do not write to clipboard
+        run: |
+          if grep -n "Clipboard\\|setStringAsync" utils/hataYakala.ts; then
+            echo "::error::Automatic clipboard writes remain in diagnostics."
+            exit 1
+          fi
