@@ -1,4 +1,5 @@
 import mobileAds, {
+  AdsConsent,
   AdEventType,
   InterstitialAd,
   RewardedAd,
@@ -14,25 +15,49 @@ const REWARDED_AD_UNIT_ID = __DEV__
   ? TestIds.REWARDED
   : 'ca-app-pub-4873666267587702/1435662670';
 
-let adsInitialization: Promise<unknown> | null = null;
+let adsInitialization: Promise<boolean> | null = null;
 const GECIS_REKLAM_ARALIGI_MS = 4 * 60 * 1000;
 let sonGecisReklamiZamani = Date.now();
 let gecisReklamiDevamEdiyor = false;
 
 /**
- * Initialize Google Mobile Ads once before requesting any ad.
- * Keep this explicit: having the SDK installed alone does not start it.
+ * Refresh UMP consent on launch and initialize Mobile Ads only when
+ * the current consent state permits ad requests. The result is shared
+ * so concurrent ad actions cannot race the consent flow.
  */
-export async function reklamlariBaslat(): Promise<void> {
+export async function reklamlariBaslat(): Promise<boolean> {
   if (!adsInitialization) {
-    adsInitialization = mobileAds().initialize().catch((error) => {
+    adsInitialization = (async (): Promise<boolean> => {
+      try {
+        const consentInfo = await AdsConsent.gatherConsent();
+        if (!consentInfo.canRequestAds) {
+          console.log('Reklam isteği yapılmadı: UMP izin vermiyor.');
+          return false;
+        }
+        await mobileAds().initialize();
+        return true;
+      } catch (error) {
+        console.log('Reklam rızası kontrolü başarısız:', error);
+        // UMP may still have a valid decision from the previous session.
+        try {
+          const consentInfo = await AdsConsent.getConsentInfo();
+          if (!consentInfo.canRequestAds) return false;
+          await mobileAds().initialize();
+          return true;
+        } catch (fallbackError) {
+          console.log('Reklam rızası doğrulanamadı:', fallbackError);
+          return false;
+        }
+      }
+    })();
+    adsInitialization = adsInitialization.catch((error) => {
       adsInitialization = null;
-      console.log('Google Mobile Ads baslatilamadi:', error);
-      throw error;
+      console.log('Google Mobile Ads başlatılamadı:', error);
+      return false;
     });
   }
 
-  await adsInitialization;
+  return adsInitialization;
 }
 
 /**
@@ -47,7 +72,7 @@ export async function gecisReklamGoster(): Promise<boolean> {
 
   gecisReklamiDevamEdiyor = true;
   try {
-    await reklamlariBaslat();
+    if (!(await reklamlariBaslat())) return false;
     return await new Promise<boolean>((resolve) => {
       const ad = InterstitialAd.createForAdRequest(INTERSTITIAL_AD_UNIT_ID);
       let tamamlandi = false;
@@ -101,7 +126,7 @@ export async function gunSonuReklamKontrol(): Promise<void> {
 
 export async function odulluReklamIzle(): Promise<boolean> {
   try {
-    await reklamlariBaslat();
+    if (!(await reklamlariBaslat())) return false;
 
     return await new Promise<boolean>((resolve) => {
       const ad = RewardedAd.createForAdRequest(REWARDED_AD_UNIT_ID);
