@@ -293,7 +293,7 @@ export default function ProfilScreen() {
           <Text style={[styles.cardTitle, { fontFamily: font }]}> 
             🔐 Gizlilik ve Reklam Tercihleri
           </Text>
-          <Text style={[styles.statLabel, { fontFamily: font, marginBottom: 10 }]}>Google'ın sunduğu gizlilik seçeneklerini açabilir ve reklam izinlerini yönetebilirsin.</Text>
+          <Text style={[styles.statLabel, { fontFamily: font, marginBottom: 10 }]}>Bölgen için gizlilik seçenekleri gerekiyorsa burada açılır; ayrıca reklam izin durumu yeniden kontrol edilir.</Text>
           <Pressable style={styles.actionButton} onPress={handlePrivacyOptions}>
             <Text style={[styles.buttonText, { fontFamily: font }]}>Gizlilik Tercihlerini Yönet</Text>
           </Pressable>
