@@ -1,4 +1,4 @@
-﻿{
+{
   "expo": {
     "name": "Beşli Patron",
     "slug": "abacusai-mobile-apps",
@@ -10,7 +10,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.sardurtechnologies.beslipatron",
-      "buildNumber": "30",
+      "buildNumber": "31",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
