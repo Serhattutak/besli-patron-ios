@@ -2,6 +2,29 @@ name: iOS Simulator Smoke Test
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - ios-appstore-release
+    paths:
+      - 'app/**'
+      - 'components/**'
+      - 'constants/**'
+      - 'context/**'
+      - 'services/**'
+      - 'utils/**'
+      - 'types/**'
+      - 'assets/**'
+      - 'scripts/**'
+      - '.maestro/**'
+      - '.github/workflows/ios-simulator-smoke.yml'
+      - 'app.json'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'tsconfig.json'
+
+concurrency:
+  group: ios-simulator-smoke-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   simulator-smoke:
