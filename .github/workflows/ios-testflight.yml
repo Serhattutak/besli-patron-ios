@@ -119,6 +119,17 @@ jobs:
             exit 1
           fi
 
+          PROFILE_GAME_CENTER=$(
+            /usr/libexec/PlistBuddy \
+              -c "Print:Entitlements:com.apple.developer.game-center" \
+              "$RUNNER_TEMP/signing/profile.plist" 2>/dev/null || true
+          )
+
+          if [ "$PROFILE_GAME_CENTER" != "true" ]; then
+            echo "::error::Provisioning profile does not include Game Center entitlement."
+            exit 1
+          fi
+
           if /usr/libexec/PlistBuddy \
             -c "Print:ProvisionedDevices" \
             "$RUNNER_TEMP/signing/profile.plist" >/dev/null 2>&1; then
