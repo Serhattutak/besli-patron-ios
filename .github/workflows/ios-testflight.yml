@@ -2,6 +2,9 @@ name: iOS TestFlight Upload
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - ios-appstore-release
 
 permissions:
   contents: read
